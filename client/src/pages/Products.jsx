@@ -1,0 +1,147 @@
+import { useState, useEffect } from 'react';
+import { api } from '../api';
+
+export default function Products({ addToast }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name: '', presentation: '', laboratory: '', description: '' });
+
+  const load = () => {
+    setLoading(true);
+    api.getProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const resetForm = () => {
+    setForm({ name: '', presentation: '', laboratory: '', description: '' });
+    setEditing(null);
+  };
+
+  const openCreate = () => { resetForm(); setShowModal(true); };
+
+  const openEdit = (prod) => {
+    setForm({ name: prod.name, presentation: prod.presentation || '', laboratory: prod.laboratory || '', description: prod.description || '' });
+    setEditing(prod.id);
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editing) {
+        await api.updateProduct(editing, form);
+        addToast('Producto actualizado');
+      } else {
+        await api.createProduct(form);
+        addToast('Producto creado');
+      }
+      setShowModal(false);
+      resetForm();
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!confirm(`¿Eliminar el producto ${name}?`)) return;
+    try {
+      await api.deleteProduct(id);
+      addToast('Producto eliminado');
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h1 className="page-title">Productos</h1>
+        <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h2 className="card-title">💊 Lista de Productos ({products.length})</h2>
+          <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
+        </div>
+
+        {loading ? (
+          <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
+        ) : products.length > 0 ? (
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Presentación</th>
+                  <th>Laboratorio</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(prod => (
+                  <tr key={prod.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</td>
+                    <td><span className="badge badge-info">{prod.presentation || '—'}</span></td>
+                    <td>{prod.laboratory || '—'}</td>
+                    <td>{prod.description || '—'}</td>
+                    <td>
+                      <div className="btn-group">
+                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️ Editar</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">💊</div>
+            <p className="empty-state-text">No hay productos registrados</p>
+            <p className="empty-state-hint">Haz clic en "Nuevo Producto" para agregar uno</p>
+          </div>
+        )}
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">{editing ? '✏️ Editar Producto' : '➕ Nuevo Producto'}</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Nombre *</label>
+                  <input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="FARMAPRAM" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Presentación</label>
+                  <input className="form-input" value={form.presentation} onChange={e => setForm({ ...form, presentation: e.target.value })} placeholder="0.50 MG" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Laboratorio</label>
+                <input className="form-input" value={form.laboratory} onChange={e => setForm({ ...form, laboratory: e.target.value })} placeholder="Productos Medix" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Descripción</label>
+                <textarea className="form-textarea" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Descripción del producto..."></textarea>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                <button type="submit" className="btn btn-primary">{editing ? 'Guardar Cambios' : 'Crear Producto'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
