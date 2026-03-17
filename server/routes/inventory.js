@@ -1,6 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const xlsx = require('xlsx');
 const db = require('../db');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `inv-${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.xlsx' || ext === '.xls') {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de Excel (.xlsx, .xls)'), false);
+    }
+  },
+});
 
 // GET /api/inventory - List all stock assignments with doctor and product names
 router.get('/', async (req, res) => {
@@ -81,6 +109,82 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/inventory/upload-excel - Upload Excel and update inventory
+router.post('/upload-excel', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se proporcionó archivo' });
+    }
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const results = {
+      processed: 0,
+      errors: [],
+    };
+
+    for (const row of data) {
+      // Normalize row keys to handle different header names
+      const doctorName = row.Doctor || row.DOCTOR || row.doctor;
+      const productName = row.Producto || row.PRODUCTO || row.producto || row.Producto || row.Product;
+      const targetStock = parseInt(row['Stock Objetivo'] || row.STOCK || row.stock || row.Target || 0);
+      const currentStock = parseInt(row.Existencias || row.EXISTENCIAS || row.existencias || row.Current || row.current_stock || 0);
+
+      if (!doctorName || !productName) {
+        results.errors.push(`Fila omitida por falta de Doctor o Producto: ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      try {
+        // Find or create doctor
+        let doctorId;
+        const { rows: docRows } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [doctorName.toUpperCase()]);
+        if (docRows.length > 0) {
+          doctorId = docRows[0].id;
+        } else {
+          const { rows: newDoc } = await db.query('INSERT INTO doctors (name) VALUES ($1) RETURNING id', [doctorName]);
+          doctorId = newDoc[0].id;
+        }
+
+        // Find or create product
+        let productId;
+        const { rows: prodRows } = await db.query('SELECT id FROM products WHERE UPPER(name) = $1', [productName.toUpperCase()]);
+        if (prodRows.length > 0) {
+          productId = prodRows[0].id;
+        } else {
+          const { rows: newProd } = await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName]);
+          productId = newProd[0].id;
+        }
+
+        // Upsert inventory
+        await db.query(
+          `INSERT INTO inventory_stocks (doctor_id, product_id, target_stock, current_stock)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (doctor_id, product_id) 
+           DO UPDATE SET target_stock = $3, current_stock = $4, updated_at = NOW()`,
+          [doctorId, productId, targetStock, currentStock]
+        );
+        results.processed++;
+      } catch (err) {
+        results.errors.push(`Error procesando fila (${doctorName} - ${productName}): ${err.message}`);
+      }
+    }
+
+    // Clean up
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      message: `Se procesaron ${results.processed} registros exitosamente`,
+      results,
+    });
+  } catch (err) {
+    console.error('Error processing Excel upload:', err);
+    res.status(500).json({ error: 'Error al procesar archivo de Excel' });
+  }
+});
+
 // PUT /api/inventory/:id - Update stock assignment
 router.put('/:id', async (req, res) => {
   try {
@@ -111,3 +215,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+

@@ -97,7 +97,7 @@ export default function App() {
         <Sidebar />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard addToast={addToast} />} />
             <Route path="/doctors" element={<Doctors addToast={addToast} />} />
             <Route path="/products" element={<Products addToast={addToast} />} />
             <Route path="/inventory" element={<Inventory addToast={addToast} />} />

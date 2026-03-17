@@ -1,6 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const xlsx = require('xlsx');
 const db = require('../db');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `prods-${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.xlsx' || ext === '.xls') {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de Excel (.xlsx, .xls)'), false);
+    }
+  },
+});
 
 // GET /api/products - List all products
 router.get('/', async (req, res) => {
@@ -41,6 +69,62 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/products/upload-excel - Upload Excel and update products
+router.post('/upload-excel', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se proporcionó archivo' });
+    }
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const results = { processed: 0, errors: [] };
+
+    for (const row of data) {
+      const name = row.Nombre || row.NOMBRE || row.nombre || row.Producto || row.Product || row.Name;
+      const presentation = row.Presentacion || row.PRESENTACION || row.presentacion || row.Presentation || '';
+      const laboratory = row.Laboratorio || row.LABORATORIO || row.laboratorio || row.Laboratory || '';
+      const description = row.Descripcion || row.DESCRIPCION || row.descripcion || row.Description || '';
+
+      if (!name) {
+        results.errors.push(`Fila omitida por falta de Nombre: ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      try {
+        // Check if product with same name and presentation exists
+        const { rows: existing } = await db.query(
+          'SELECT id FROM products WHERE UPPER(name) = $1 AND UPPER(presentation) = $2',
+          [name.toUpperCase(), presentation.toUpperCase()]
+        );
+
+        if (existing.length > 0) {
+          await db.query(
+            `UPDATE products SET laboratory=$1, description=$2, updated_at=NOW() WHERE id=$3`,
+            [laboratory, description, existing[0].id]
+          );
+        } else {
+          await db.query(
+            `INSERT INTO products (name, presentation, laboratory, description) VALUES ($1, $2, $3, $4)`,
+            [name, presentation, laboratory, description]
+          );
+        }
+        results.processed++;
+      } catch (err) {
+        results.errors.push(`Error procesando producto ${name}: ${err.message}`);
+      }
+    }
+
+    fs.unlinkSync(req.file.path);
+    res.json({ message: `Se procesaron ${results.processed} productos exitosamente`, results });
+  } catch (err) {
+    console.error('Error processing products Excel:', err);
+    res.status(500).json({ error: 'Error al procesar archivo de Excel' });
+  }
+});
+
 // PUT /api/products/:id - Update product
 router.put('/:id', async (req, res) => {
   try {
@@ -71,3 +155,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+

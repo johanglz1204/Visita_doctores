@@ -46,7 +46,7 @@ export default function Sales() {
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sale.doctor_name || '—'}</td>
                     <td>{sale.product_name || '—'} {sale.product_presentation ? <span className="badge badge-info" style={{ marginLeft: 4 }}>{sale.product_presentation}</span> : ''}</td>
                     <td>{sale.quantity} Pza</td>
-                    <td>{new Date(sale.sale_date).toLocaleDateString('es-MX')}</td>
+                    <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{new Date(sale.created_at).toLocaleString('es-MX')}</td>
                   </tr>
                 ))}

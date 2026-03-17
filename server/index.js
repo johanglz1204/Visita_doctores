@@ -17,6 +17,8 @@ app.use('/api/doctors', require('./routes/doctors'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/inventory', require('./routes/inventory'));
 app.use('/api/sales', require('./routes/sales'));
+app.use('/api/sync', require('./routes/sync'));
+
 
 // Dashboard stats endpoint
 app.get('/api/dashboard', async (req, res) => {
@@ -36,7 +38,7 @@ app.get('/api/dashboard', async (req, res) => {
         FROM sales_history s
         LEFT JOIN doctors d ON s.doctor_id = d.id
         LEFT JOIN products p ON s.product_id = p.id
-        ORDER BY s.created_at DESC LIMIT 5
+        ORDER BY s.sale_date DESC, s.created_at DESC LIMIT 5
       `),
     ]);
 

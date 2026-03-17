@@ -86,6 +86,33 @@ export default function Inventory({ addToast }) {
     }
   };
 
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check extension
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'xlsx' && ext !== 'xls') {
+      addToast('Solo se permiten archivos de Excel (.xlsx, .xls)', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.uploadInventoryExcel(formData);
+      addToast(res.message);
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setLoading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -96,12 +123,25 @@ export default function Inventory({ addToast }) {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">📦 Asignaciones de Stock ({inventory.length})</h2>
-          <button className="btn btn-primary" onClick={openCreate}>+ Asignar Stock</button>
+          <div className="btn-group">
+            <input 
+              type="file" 
+              accept=".xlsx, .xls" 
+              style={{ display: 'none' }} 
+              id="excel-upload" 
+              onChange={handleExcelUpload} 
+            />
+            <label htmlFor="excel-upload" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+              📊 Cargar Excel
+            </label>
+            <button className="btn btn-primary" onClick={openCreate}>+ Asignar Stock</button>
+          </div>
         </div>
 
         {loading ? (
           <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
         ) : inventory.length > 0 ? (
+
           <div className="table-wrapper">
             <table>
               <thead>

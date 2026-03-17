@@ -1,6 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const xlsx = require('xlsx');
 const db = require('../db');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `docs-${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.xlsx' || ext === '.xls') {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de Excel (.xlsx, .xls)'), false);
+    }
+  },
+});
 
 // GET /api/doctors - List all doctors
 router.get('/', async (req, res) => {
@@ -43,6 +71,78 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/doctors/upload-excel - Upload Excel and update doctors
+router.post('/upload-excel', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se proporcionó archivo' });
+    }
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const results = { processed: 0, errors: [] };
+
+    for (const row of data) {
+      const name = row.Nombre || row.NOMBRE || row.nombre || row.Doctor || row.Name;
+      const specialty = row.Especialidad || row.ESPECIALIDAD || row.especialidad || row.Specialty || '';
+      const phone = row.Telefono || row.TELEFONO || row.telefono || row.Phone || '';
+      const email = row.Email || row.EMAIL || row.email || '';
+      const address = row.Direccion || row.DIRECCION || row.direccion || row.Address || '';
+      const notes = row.Notas || row.NOTAS || row.notas || row.Notes || '';
+
+      if (!name) {
+        results.errors.push(`Fila omitida por falta de Nombre: ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      try {
+        await db.query(
+          `INSERT INTO doctors (name, specialty, phone, email, address, notes)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id) DO UPDATE SET 
+             name = EXCLUDED.name, 
+             specialty = EXCLUDED.specialty, 
+             phone = EXCLUDED.phone, 
+             email = EXCLUDED.email, 
+             address = EXCLUDED.address, 
+             notes = EXCLUDED.notes, 
+             updated_at = NOW()`,
+          [name, specialty, phone, email, address, notes]
+        );
+        results.processed++;
+      } catch (err) {
+        // Fallback for when there's no ID but name might match or just insert
+        try {
+          // Check if doctor with same name exists
+          const { rows: existing } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [name.toUpperCase()]);
+          if (existing.length > 0) {
+            await db.query(
+              `UPDATE doctors SET specialty=$1, phone=$2, email=$3, address=$4, notes=$5, updated_at=NOW() WHERE id=$6`,
+              [specialty, phone, email, address, notes, existing[0].id]
+            );
+          } else {
+            await db.query(
+              `INSERT INTO doctors (name, specialty, phone, email, address, notes) VALUES ($1, $2, $3, $4, $5, $6)`,
+              [name, specialty, phone, email, address, notes]
+            );
+          }
+          results.processed++;
+        } catch (innerErr) {
+          results.errors.push(`Error procesando doctor ${name}: ${innerErr.message}`);
+        }
+      }
+    }
+
+    fs.unlinkSync(req.file.path);
+    res.json({ message: `Se procesaron ${results.processed} doctores exitosamente`, results });
+  } catch (err) {
+    console.error('Error processing doctors Excel:', err);
+    res.status(500).json({ error: 'Error al procesar archivo de Excel' });
+  }
+});
+
 // PUT /api/doctors/:id - Update doctor
 router.put('/:id', async (req, res) => {
   try {
@@ -73,3 +173,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+

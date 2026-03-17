@@ -44,14 +44,14 @@ router.get('/', async (req, res) => {
         p.name AS product_name,
         p.presentation AS product_presentation,
         s.quantity,
-        s.sale_date,
+        s.sale_date + INTERVAL '12 hours' as sale_date,
         s.raw_text,
         s.parsed_at,
         s.created_at
       FROM sales_history s
       LEFT JOIN doctors d ON s.doctor_id = d.id
       LEFT JOIN products p ON s.product_id = p.id
-      ORDER BY s.created_at DESC
+      ORDER BY s.sale_date DESC, s.created_at DESC
       LIMIT $1 OFFSET $2
     `, [limit, offset]);
     res.json(rows);

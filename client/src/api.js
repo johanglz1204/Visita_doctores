@@ -33,6 +33,7 @@ export const api = {
   createDoctor: (data) => request('/doctors', { method: 'POST', body: data }),
   updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
   deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
+  uploadDoctorsExcel: (formData) => request('/doctors/upload-excel', { method: 'POST', body: formData }),
 
   // Products
   getProducts: () => request('/products'),
@@ -40,6 +41,8 @@ export const api = {
   createProduct: (data) => request('/products', { method: 'POST', body: data }),
   updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
   deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
+  uploadProductsExcel: (formData) => request('/products/upload-excel', { method: 'POST', body: formData }),
+
 
   // Inventory
   getInventory: () => request('/inventory'),
@@ -47,9 +50,16 @@ export const api = {
   createInventory: (data) => request('/inventory', { method: 'POST', body: data }),
   updateInventory: (id, data) => request(`/inventory/${id}`, { method: 'PUT', body: data }),
   deleteInventory: (id) => request(`/inventory/${id}`, { method: 'DELETE' }),
+  uploadInventoryExcel: (formData) => request('/inventory/upload-excel', { method: 'POST', body: formData }),
 
   // Sales
   getSales: (limit, offset) => request(`/sales?limit=${limit || 100}&offset=${offset || 0}`),
   uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
   parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
+
+  // Sync
+  syncEmails: () => request('/sync/emails', { method: 'POST' }),
 };
+
+
+

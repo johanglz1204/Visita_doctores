@@ -57,6 +57,31 @@ export default function Products({ addToast }) {
     }
   };
 
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'xlsx' && ext !== 'xls') {
+      addToast('Solo se permiten archivos de Excel (.xlsx, .xls)', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.uploadProductsExcel(formData);
+      addToast(res.message);
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setLoading(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -67,7 +92,19 @@ export default function Products({ addToast }) {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">💊 Lista de Productos ({products.length})</h2>
-          <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
+          <div className="btn-group">
+            <input 
+              type="file" 
+              accept=".xlsx, .xls" 
+              style={{ display: 'none' }} 
+              id="excel-upload-products" 
+              onChange={handleExcelUpload} 
+            />
+            <label htmlFor="excel-upload-products" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+              📊 Cargar Excel
+            </label>
+            <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
+          </div>
         </div>
 
         {loading ? (

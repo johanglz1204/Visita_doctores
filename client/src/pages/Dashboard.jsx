@@ -1,18 +1,37 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
 
-export default function Dashboard() {
+export default function Dashboard({ addToast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
     api.getDashboard()
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
-  if (loading) {
+  const handleSyncEmail = async () => {
+    setSyncing(true);
+    try {
+      const res = await api.syncEmails();
+      addToast(res.message);
+      loadData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  if (loading && !data) {
     return (
       <div className="loading-container">
         <div className="spinner"></div>
@@ -24,8 +43,17 @@ export default function Dashboard() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
-        <p className="page-subtitle">Resumen general del sistema de gestión médica</p>
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Resumen general del sistema de gestión médica</p>
+        </div>
+        <button 
+          className="btn btn-secondary" 
+          onClick={handleSyncEmail}
+          disabled={syncing}
+        >
+          {syncing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Sincronizando...</> : '📧 Sincronizar Correo'}
+        </button>
       </div>
 
       <div className="stats-grid">
@@ -72,7 +100,7 @@ export default function Dashboard() {
                     <td>{sale.doctor_name || '—'}</td>
                     <td>{sale.product_name} {sale.presentation}</td>
                     <td>{sale.quantity} Pza</td>
-                    <td>{new Date(sale.sale_date).toLocaleDateString('es-MX')}</td>
+                    <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                   </tr>
                 ))}
               </tbody>
