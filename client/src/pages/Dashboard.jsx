@@ -5,17 +5,25 @@ export default function Dashboard({ addToast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
 
   const loadData = () => {
     setLoading(true);
     api.getDashboard()
-      .then(setData)
+      .then(d => {
+        setData(d);
+        // Update lastSync only if server reports a sync has run
+        if (d.lastSyncTime) setLastSync(new Date(d.lastSyncTime));
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadData();
+    // Auto-refresh dashboard data every 30 min to capture backend auto-sync results
+    const interval = setInterval(loadData, 30 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSyncEmail = async () => {
@@ -23,6 +31,7 @@ export default function Dashboard({ addToast }) {
     try {
       const res = await api.syncEmails();
       addToast(res.message);
+      if (res.lastSyncTime) setLastSync(new Date(res.lastSyncTime));
       loadData();
     } catch (err) {
       addToast(err.message, 'error');
@@ -30,6 +39,10 @@ export default function Dashboard({ addToast }) {
       setSyncing(false);
     }
   };
+
+  const formatTime = (date) => date
+    ? date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : '—';
 
   if (loading && !data) {
     return (
@@ -47,13 +60,25 @@ export default function Dashboard({ addToast }) {
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Resumen general del sistema de gestión médica</p>
         </div>
-        <button 
-          className="btn btn-secondary" 
-          onClick={handleSyncEmail}
-          disabled={syncing}
-        >
-          {syncing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Sincronizando...</> : '📧 Sincronizar Correo'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleSyncEmail}
+            disabled={syncing}
+          >
+            {syncing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Sincronizando...</> : '📧 Sincronizar Correo'}
+          </button>
+          <span style={{
+            fontSize: '12px',
+            color: 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span>🕐</span>
+            <span>Última actualización: <strong style={{ color: 'var(--text-secondary)' }}>{formatTime(lastSync)}</strong></span>
+          </span>
+        </div>
       </div>
 
       <div className="stats-grid">

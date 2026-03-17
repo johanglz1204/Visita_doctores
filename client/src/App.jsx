@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ThemeProvider, useTheme } from './ThemeContext';
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { api } from './api';
 import Dashboard from './pages/Dashboard';
@@ -10,6 +11,7 @@ import Alerts from './pages/Alerts';
 import Sales from './pages/Sales';
 
 function Sidebar() {
+  const { theme, toggleTheme } = useTheme();
   const [criticalCount, setCriticalCount] = useState(0);
   const location = useLocation();
 
@@ -26,7 +28,6 @@ function Sidebar() {
     { to: '/doctors', icon: '👨‍⚕️', label: 'Doctores' },
     { to: '/products', icon: '💊', label: 'Productos' },
     { to: '/inventory', icon: '📦', label: 'Inventario' },
-    { to: '/upload', icon: '📄', label: 'Cargar TXT' },
     { to: '/sales', icon: '🧾', label: 'Historial' },
     { to: '/alerts', icon: '🚨', label: 'Alertas', badge: criticalCount },
   ];
@@ -56,6 +57,20 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className="sidebar-footer" style={{ padding: '16px', borderTop: '1px solid var(--border-color)' }}>
+        <button 
+          className="nav-link" 
+          onClick={toggleTheme}
+          style={{ 
+            justifyContent: 'flex-start',
+            background: 'var(--bg-glass)',
+            border: '1px solid var(--border-color)'
+          }}
+        >
+          <span className="nav-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
+        </button>
+      </div>
     </aside>
   );
 }
@@ -92,22 +107,23 @@ export default function App() {
   };
 
   return (
-    <BrowserRouter>
-      <div className="app-layout">
-        <Sidebar />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Dashboard addToast={addToast} />} />
-            <Route path="/doctors" element={<Doctors addToast={addToast} />} />
-            <Route path="/products" element={<Products addToast={addToast} />} />
-            <Route path="/inventory" element={<Inventory addToast={addToast} />} />
-            <Route path="/upload" element={<Upload addToast={addToast} />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/alerts" element={<Alerts />} />
-          </Routes>
-        </main>
-        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-      </div>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Dashboard addToast={addToast} />} />
+              <Route path="/doctors" element={<Doctors addToast={addToast} />} />
+              <Route path="/products" element={<Products addToast={addToast} />} />
+              <Route path="/inventory" element={<Inventory addToast={addToast} />} />
+              <Route path="/sales" element={<Sales />} />
+              <Route path="/alerts" element={<Alerts />} />
+            </Routes>
+          </main>
+          <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+        </div>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

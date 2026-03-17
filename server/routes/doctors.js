@@ -58,11 +58,11 @@ router.get('/:id', async (req, res) => {
 // POST /api/doctors - Create doctor
 router.post('/', async (req, res) => {
   try {
-    const { name, specialty, phone, email, address, notes } = req.body;
+    const { name, specialty, phone, email, address, notes, license } = req.body;
     const { rows } = await db.query(
-      `INSERT INTO doctors (name, specialty, phone, email, address, notes)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [name, specialty || '', phone || '', email || '', address || '', notes || '']
+      `INSERT INTO doctors (name, specialty, phone, email, address, notes, license)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [name, specialty || '', phone || '', email || '', address || '', notes || '', license || '']
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -89,6 +89,7 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
       const specialty = row.Especialidad || row.ESPECIALIDAD || row.especialidad || row.Specialty || '';
       const phone = row.Telefono || row.TELEFONO || row.telefono || row.Phone || '';
       const email = row.Email || row.EMAIL || row.email || '';
+      const license = row.Cedula || row.CEDULA || row.cedula || row.License || row.LICENSE || '';
       const address = row.Direccion || row.DIRECCION || row.direccion || row.Address || '';
       const notes = row.Notas || row.NOTAS || row.notas || row.Notes || '';
 
@@ -99,8 +100,8 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 
       try {
         await db.query(
-          `INSERT INTO doctors (name, specialty, phone, email, address, notes)
-           VALUES ($1, $2, $3, $4, $5, $6)
+          `INSERT INTO doctors (name, specialty, phone, email, address, notes, license)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
            ON CONFLICT (id) DO UPDATE SET 
              name = EXCLUDED.name, 
              specialty = EXCLUDED.specialty, 
@@ -108,8 +109,9 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
              email = EXCLUDED.email, 
              address = EXCLUDED.address, 
              notes = EXCLUDED.notes, 
+             license = EXCLUDED.license,
              updated_at = NOW()`,
-          [name, specialty, phone, email, address, notes]
+          [name, specialty, phone, email, address, notes, license]
         );
         results.processed++;
       } catch (err) {
@@ -119,13 +121,13 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
           const { rows: existing } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [name.toUpperCase()]);
           if (existing.length > 0) {
             await db.query(
-              `UPDATE doctors SET specialty=$1, phone=$2, email=$3, address=$4, notes=$5, updated_at=NOW() WHERE id=$6`,
-              [specialty, phone, email, address, notes, existing[0].id]
+              `UPDATE doctors SET specialty=$1, phone=$2, email=$3, address=$4, notes=$5, license=$6, updated_at=NOW() WHERE id=$7`,
+              [specialty, phone, email, address, notes, license, existing[0].id]
             );
           } else {
             await db.query(
-              `INSERT INTO doctors (name, specialty, phone, email, address, notes) VALUES ($1, $2, $3, $4, $5, $6)`,
-              [name, specialty, phone, email, address, notes]
+              `INSERT INTO doctors (name, specialty, phone, email, address, notes, license) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [name, specialty, phone, email, address, notes, license]
             );
           }
           results.processed++;
@@ -146,11 +148,11 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 // PUT /api/doctors/:id - Update doctor
 router.put('/:id', async (req, res) => {
   try {
-    const { name, specialty, phone, email, address, notes } = req.body;
+    const { name, specialty, phone, email, address, notes, license } = req.body;
     const { rows } = await db.query(
-      `UPDATE doctors SET name=$1, specialty=$2, phone=$3, email=$4, address=$5, notes=$6, updated_at=NOW()
-       WHERE id=$7 RETURNING *`,
-      [name, specialty || '', phone || '', email || '', address || '', notes || '', req.params.id]
+      `UPDATE doctors SET name=$1, specialty=$2, phone=$3, email=$4, address=$5, notes=$6, license=$7, updated_at=NOW()
+       WHERE id=$8 RETURNING *`,
+      [name, specialty || '', phone || '', email || '', address || '', notes || '', license || '', req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Doctor no encontrado' });
     res.json(rows[0]);

@@ -6,7 +6,8 @@ export default function Doctors({ addToast }) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: '', specialty: '', phone: '', email: '', address: '', notes: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [form, setForm] = useState({ name: '', specialty: '', phone: '', email: '', license: '', address: '', notes: '' });
 
   const load = () => {
     setLoading(true);
@@ -16,14 +17,22 @@ export default function Doctors({ addToast }) {
   useEffect(() => { load(); }, []);
 
   const resetForm = () => {
-    setForm({ name: '', specialty: '', phone: '', email: '', address: '', notes: '' });
+    setForm({ name: '', specialty: '', phone: '', email: '', license: '', address: '', notes: '' });
     setEditing(null);
   };
 
   const openCreate = () => { resetForm(); setShowModal(true); };
 
   const openEdit = (doc) => {
-    setForm({ name: doc.name, specialty: doc.specialty || '', phone: doc.phone || '', email: doc.email || '', address: doc.address || '', notes: doc.notes || '' });
+    setForm({ 
+      name: doc.name, 
+      specialty: doc.specialty || '', 
+      phone: doc.phone || '', 
+      email: doc.email || '', 
+      license: doc.license || '',
+      address: doc.address || '', 
+      notes: doc.notes || '' 
+    });
     setEditing(doc.id);
     setShowModal(true);
   };
@@ -81,6 +90,10 @@ export default function Doctors({ addToast }) {
       e.target.value = '';
     }
   };
+  
+  const filteredDoctors = doctors.filter(doc => 
+    doc.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -90,8 +103,21 @@ export default function Doctors({ addToast }) {
       </div>
 
       <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">👨‍⚕️ Lista de Doctores ({doctors.length})</h2>
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+          <h2 className="card-title" style={{ flex: '1 1 auto' }}>👨‍⚕️ Lista de Doctores ({filteredDoctors.length})</h2>
+          
+          <div className="search-bar" style={{ flex: '1 1 300px', display: 'flex', position: 'relative' }}>
+             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+             <input 
+               type="text" 
+               className="form-input" 
+               placeholder="Buscar doctor por nombre..." 
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+               style={{ paddingLeft: '35px', margin: 0, width: '100%' }}
+             />
+          </div>
+
           <div className="btn-group">
             <input 
               type="file" 
@@ -118,17 +144,17 @@ export default function Doctors({ addToast }) {
                   <th>Nombre</th>
                   <th>Especialidad</th>
                   <th>Teléfono</th>
-                  <th>Email</th>
+                  <th>Cédula Profesional</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {doctors.map(doc => (
+                {filteredDoctors.map(doc => (
                   <tr key={doc.id}>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{doc.name}</td>
                     <td>{doc.specialty || '—'}</td>
                     <td>{doc.phone || '—'}</td>
-                    <td>{doc.email || '—'}</td>
+                    <td>{doc.license || '—'}</td>
                     <td>
                       <div className="btn-group">
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(doc)}>✏️ Editar</button>
@@ -140,11 +166,16 @@ export default function Doctors({ addToast }) {
               </tbody>
             </table>
           </div>
+        ) : doctors.length > 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">🔍</div>
+            <p className="empty-state-text">No se encontraron doctores que coincidan con "{searchTerm}"</p>
+          </div>
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">👨‍⚕️</div>
             <p className="empty-state-text">No hay doctores registrados</p>
-            <p className="empty-state-hint">Haz clic en "Nuevo Doctor" o sube un archivo TXT para auto-registrar</p>
+            <p className="empty-state-hint">Haz clic en "Nuevo Doctor" o sube un archivo Excel</p>
           </div>
         )}
       </div>
@@ -169,7 +200,11 @@ export default function Doctors({ addToast }) {
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Email</label>
+                <label className="form-label">Cédula Profesional</label>
+                <input className="form-input" value={form.license} onChange={e => setForm({ ...form, license: e.target.value })} placeholder="12345678" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email (Opcional)</label>
                 <input className="form-input" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="doctor@correo.com" />
               </div>
               <div className="form-group">

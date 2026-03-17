@@ -56,11 +56,21 @@ router.get('/:id', async (req, res) => {
 // POST /api/products - Create product
 router.post('/', async (req, res) => {
   try {
-    const { name, presentation, laboratory, description } = req.body;
+    const { name, presentation, laboratory, description, barcode, ranking, price } = req.body;
+    
+    // Check for duplicates
+    const { rows: existing } = await db.query(
+      'SELECT id FROM products WHERE UPPER(name) = $1 AND UPPER(presentation) = $2',
+      [name.toUpperCase(), (presentation || '').toUpperCase()]
+    );
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Ya existe un producto con ese nombre y presentación' });
+    }
+
     const { rows } = await db.query(
-      `INSERT INTO products (name, presentation, laboratory, description)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [name, presentation || '', laboratory || '', description || '']
+      `INSERT INTO products (name, presentation, laboratory, description, barcode, ranking, price)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [name, presentation || '', laboratory || '', description || '', barcode || '', ranking || '', price || 0]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -83,7 +93,19 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     const results = { processed: 0, errors: [] };
 
     for (const row of data) {
-      const name = row.Nombre || row.NOMBRE || row.nombre || row.Producto || row.Product || row.Name;
+      const barcode = row['CODIGO DE BARRAS'] || row.Barcode || row.barcode || '';
+      const name = row['NOMBRE/DESCRIPCION'] || row.Nombre || row.NOMBRE || row.nombre || row.Producto || row.Product || row.Name;
+      const ranking = row.RANKING || row.Ranking || row.ranking || '';
+      const rawPrice = row['PRECIO VALE'] || row.Precio || row.Price || 0;
+      
+      // Clean price (remove $ and commas if string)
+      let price = 0;
+      if (typeof rawPrice === 'string') {
+        price = parseFloat(rawPrice.replace(/[$,]/g, '')) || 0;
+      } else {
+        price = parseFloat(rawPrice) || 0;
+      }
+
       const presentation = row.Presentacion || row.PRESENTACION || row.presentacion || row.Presentation || '';
       const laboratory = row.Laboratorio || row.LABORATORIO || row.laboratorio || row.Laboratory || '';
       const description = row.Descripcion || row.DESCRIPCION || row.descripcion || row.Description || '';
@@ -94,21 +116,24 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
       }
 
       try {
-        // Check if product with same name and presentation exists
+        // Check for duplicates using name and presentation (case insensitive)
+        const nameUpper = (name || '').trim().toUpperCase();
+        const presentationUpper = (presentation || '').trim().toUpperCase();
+
         const { rows: existing } = await db.query(
           'SELECT id FROM products WHERE UPPER(name) = $1 AND UPPER(presentation) = $2',
-          [name.toUpperCase(), presentation.toUpperCase()]
+          [nameUpper, presentationUpper]
         );
 
         if (existing.length > 0) {
           await db.query(
-            `UPDATE products SET laboratory=$1, description=$2, updated_at=NOW() WHERE id=$3`,
-            [laboratory, description, existing[0].id]
+            `UPDATE products SET laboratory=$1, description=$2, barcode=$3, ranking=$4, price=$5, updated_at=NOW() WHERE id=$6`,
+            [laboratory, description, barcode, ranking, price, existing[0].id]
           );
         } else {
           await db.query(
-            `INSERT INTO products (name, presentation, laboratory, description) VALUES ($1, $2, $3, $4)`,
-            [name, presentation, laboratory, description]
+            `INSERT INTO products (name, presentation, laboratory, description, barcode, ranking, price) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [name, presentation, laboratory, description, barcode, ranking, price]
           );
         }
         results.processed++;
@@ -128,11 +153,11 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 // PUT /api/products/:id - Update product
 router.put('/:id', async (req, res) => {
   try {
-    const { name, presentation, laboratory, description } = req.body;
+    const { name, presentation, laboratory, description, barcode, ranking, price } = req.body;
     const { rows } = await db.query(
-      `UPDATE products SET name=$1, presentation=$2, laboratory=$3, description=$4, updated_at=NOW()
-       WHERE id=$5 RETURNING *`,
-      [name, presentation || '', laboratory || '', description || '', req.params.id]
+      `UPDATE products SET name=$1, presentation=$2, laboratory=$3, description=$4, barcode=$5, ranking=$6, price=$7, updated_at=NOW()
+       WHERE id=$8 RETURNING *`,
+      [name, presentation || '', laboratory || '', description || '', barcode || '', ranking || '', price || 0, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json(rows[0]);

@@ -6,7 +6,9 @@ export default function Products({ addToast }) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: '', presentation: '', laboratory: '', description: '' });
+  const [form, setForm] = useState({ name: '', presentation: '', laboratory: '', description: '', barcode: '', ranking: '', price: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -15,15 +17,35 @@ export default function Products({ addToast }) {
 
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const resetForm = () => {
-    setForm({ name: '', presentation: '', laboratory: '', description: '' });
+    setForm({ name: '', presentation: '', laboratory: '', description: '', barcode: '', ranking: '', price: '' });
     setEditing(null);
   };
 
   const openCreate = () => { resetForm(); setShowModal(true); };
 
   const openEdit = (prod) => {
-    setForm({ name: prod.name, presentation: prod.presentation || '', laboratory: prod.laboratory || '', description: prod.description || '' });
+    setForm({ 
+      name: prod.name, 
+      presentation: prod.presentation || '', 
+      laboratory: prod.laboratory || '', 
+      description: prod.description || '',
+      barcode: prod.barcode || '',
+      ranking: prod.ranking || '',
+      price: prod.price || ''
+    });
     setEditing(prod.id);
     setShowModal(true);
   };
@@ -85,8 +107,23 @@ export default function Products({ addToast }) {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Productos</h1>
-        <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
+        <div>
+          <h1 className="page-title">Productos</h1>
+          <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
+        </div>
+        <div className="search-container" style={{ flex: 1, maxWidth: '400px', margin: '0 20px' }}>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+            <input 
+              type="text" 
+              className="form-input" 
+              placeholder="Buscar por nombre..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ paddingLeft: '35px', borderRadius: '20px', background: 'var(--bg-card)' }}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="card">
@@ -114,20 +151,26 @@ export default function Products({ addToast }) {
             <table>
               <thead>
                 <tr>
+                  <th>Código Barras</th>
                   <th>Producto</th>
                   <th>Presentación</th>
                   <th>Laboratorio</th>
-                  <th>Descripción</th>
+                  <th>Ranking</th>
+                  <th>Precio</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map(prod => (
+                {products
+                  .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map(prod => (
                   <tr key={prod.id}>
+                    <td style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{prod.barcode || '—'}</td>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</td>
                     <td><span className="badge badge-info">{prod.presentation || '—'}</span></td>
                     <td>{prod.laboratory || '—'}</td>
-                    <td>{prod.description || '—'}</td>
+                    <td><span className={`badge ${prod.ranking === 'AA' || prod.ranking === 'A' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
+                    <td style={{ fontWeight: 600 }}>${parseFloat(prod.price).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                     <td>
                       <div className="btn-group">
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️ Editar</button>
@@ -155,17 +198,33 @@ export default function Products({ addToast }) {
             <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
+                  <label className="form-label">Código de Barras</label>
+                  <input className="form-input" value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="750123456789" />
+                </div>
+                <div className="form-group">
                   <label className="form-label">Nombre *</label>
                   <input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="FARMAPRAM" />
                 </div>
+              </div>
+              <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Presentación</label>
                   <input className="form-input" value={form.presentation} onChange={e => setForm({ ...form, presentation: e.target.value })} placeholder="0.50 MG" />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Laboratorio</label>
+                  <input className="form-input" value={form.laboratory} onChange={e => setForm({ ...form, laboratory: e.target.value })} placeholder="Productos Medix" />
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Laboratorio</label>
-                <input className="form-input" value={form.laboratory} onChange={e => setForm({ ...form, laboratory: e.target.value })} placeholder="Productos Medix" />
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Ranking</label>
+                  <input className="form-input" value={form.ranking} onChange={e => setForm({ ...form, ranking: e.target.value })} placeholder="AA, A, B, C" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Precio Vale</label>
+                  <input type="number" step="0.01" className="form-input" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
@@ -178,6 +237,25 @@ export default function Products({ addToast }) {
             </form>
           </div>
         </div>
+      )}
+
+      {showScrollTop && (
+        <button 
+          className="btn btn-primary btn-icon" 
+          onClick={scrollToTop}
+          style={{
+            position: 'fixed',
+            bottom: '30px',
+            right: '30px',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 90
+          }}
+        >
+          ↑
+        </button>
       )}
     </div>
   );
