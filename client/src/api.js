@@ -59,6 +59,10 @@ export const api = {
 
   // Sync
   syncEmails: () => request('/sync/emails', { method: 'POST' }),
+
+  // Backup
+  backupToGithub: () => request('/backup/github', { method: 'POST' }),
+  downloadBackup: () => `${API_BASE}/backup/download`,
 };
 
 

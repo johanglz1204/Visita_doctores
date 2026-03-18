@@ -170,7 +170,7 @@ export default function Products({ addToast }) {
                     <td><span className="badge badge-info">{prod.presentation || '—'}</span></td>
                     <td>{prod.laboratory || '—'}</td>
                     <td><span className={`badge ${prod.ranking === 'AA' || prod.ranking === 'A' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
-                    <td style={{ fontWeight: 600 }}>${parseFloat(prod.price).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                    <td style={{ fontWeight: 600 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                     <td>
                       <div className="btn-group">
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️ Editar</button>

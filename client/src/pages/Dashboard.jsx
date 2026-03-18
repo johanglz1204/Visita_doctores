@@ -5,6 +5,7 @@ export default function Dashboard({ addToast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [backing, setBacking] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
   const loadData = () => {
@@ -40,6 +41,20 @@ export default function Dashboard({ addToast }) {
     }
   };
 
+  const handleBackup = async () => {
+    setBacking(true);
+    try {
+      const res = await api.backupToGithub();
+      addToast(`✅ ${res.message}`);
+      // Also trigger download so user has the file
+      window.location.href = api.downloadBackup();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setBacking(false);
+    }
+  };
+
   const formatTime = (date) => date
     ? date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     : '—';
@@ -61,13 +76,23 @@ export default function Dashboard({ addToast }) {
           <p className="page-subtitle">Resumen general del sistema de gestión médica</p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={handleSyncEmail}
-            disabled={syncing}
-          >
-            {syncing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Sincronizando...</> : '📧 Sincronizar Correo'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleSyncEmail}
+              disabled={syncing}
+            >
+              {syncing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Sincronizando...</> : '📧 Sincronizar Correo'}
+            </button>
+            <button 
+              className="btn btn-primary" 
+              onClick={handleBackup}
+              disabled={backing}
+              title="Genera un respaldo de la base de datos y lo descarga"
+            >
+              {backing ? <><div className="spinner" style={{width: 16, height: 16}}></div> Respaldando...</> : '💾 Respaldar Datos'}
+            </button>
+          </div>
           <span style={{
             fontSize: '12px',
             color: 'var(--text-muted)',

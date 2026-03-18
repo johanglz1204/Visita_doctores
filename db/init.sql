@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS products (
     name          VARCHAR(255) NOT NULL,
     presentation  VARCHAR(255) DEFAULT '',
     laboratory    VARCHAR(255) DEFAULT '',
+    barcode       VARCHAR(255) DEFAULT '',
+    ranking       VARCHAR(50) DEFAULT '',
+    price         NUMERIC(10, 2) DEFAULT 0,
     description   TEXT DEFAULT '',
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW()

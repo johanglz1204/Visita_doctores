@@ -18,6 +18,7 @@ app.use('/api/doctors', require('./routes/doctors'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/inventory', require('./routes/inventory'));
 app.use('/api/sales', require('./routes/sales'));
+app.use('/api/backup', require('./routes/backup'));
 const syncRouter = require('./routes/sync');
 syncRouter.setLastSyncSetter((t) => { lastSyncTime = t; });
 app.use('/api/sync', syncRouter);
@@ -92,4 +93,28 @@ app.listen(PORT, '0.0.0.0', () => {
   }, 60 * 1000);
 
   console.log(`⏱️  Sincronización automática programada cada 30 minutos.`);
+
+  // --- Auto Backup every 24 hours ---
+  const { generateSQLDump } = require('./routes/backup');
+  const fs = require('fs');
+  const path = require('path');
+  const BACKUP_PATH = path.join(__dirname, '..', 'backup_auto.sql');
+
+  const runAutoBackup = async () => {
+    try {
+      const sql = await generateSQLDump();
+      fs.writeFileSync(BACKUP_PATH, sql, 'utf8');
+      console.log(`💾 [Auto-Backup] Respaldo guardado en ${BACKUP_PATH}`);
+    } catch (err) {
+      console.error('❌ [Auto-Backup] Error:', err.message);
+    }
+  };
+
+  // Run 5 min after startup, then every 24 hours
+  setTimeout(() => {
+    runAutoBackup();
+    setInterval(runAutoBackup, 24 * 60 * 60 * 1000);
+  }, 5 * 60 * 1000);
+
+  console.log(`💾 Respaldo automático programado cada 24 horas.`);
 });
