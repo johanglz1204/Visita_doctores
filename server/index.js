@@ -38,7 +38,7 @@ app.get('/api/dashboard', async (req, res) => {
            OR (target_stock > 0 AND (current_stock::numeric / target_stock) <= 0.2)
       `),
       db.query(`
-        SELECT s.*, d.name AS doctor_name, p.name AS product_name, p.presentation
+        SELECT s.*, d.name AS doctor_name, p.name AS product_name
         FROM sales_history s
         LEFT JOIN doctors d ON s.doctor_id = d.id
         LEFT JOIN products p ON s.product_id = p.id

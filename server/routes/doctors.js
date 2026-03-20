@@ -82,58 +82,75 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+    console.log(`[EXCEL UPLOAD] Processing ${data.length} rows from ${sheetName}`);
+    if (data.length > 0) {
+      console.log(`[EXCEL UPLOAD] Columns found: ${Object.keys(data[0]).join(', ')}`);
+    }
+
     const results = { processed: 0, errors: [] };
 
     for (const row of data) {
-      const name = row.Nombre || row.NOMBRE || row.nombre || row.Doctor || row.Name;
-      const specialty = row.Especialidad || row.ESPECIALIDAD || row.especialidad || row.Specialty || '';
-      const phone = row.Telefono || row.TELEFONO || row.telefono || row.Phone || '';
-      const email = row.Email || row.EMAIL || row.email || '';
-      const license = row.Cedula || row.CEDULA || row.cedula || row.License || row.LICENSE || '';
-      const address = row.Direccion || row.DIRECCION || row.direccion || row.Address || '';
-      const notes = row.Notas || row.NOTAS || row.notas || row.Notes || '';
+      // Helper function to find a property by matching possible header names
+      const findValue = (row, names) => {
+        const key = Object.keys(row).find(k => 
+          names.some(name => k.trim().toLowerCase() === name.toLowerCase())
+        );
+        return key ? row[key] : undefined;
+      };
+
+      const name = findValue(row, ['Nombre', 'médico', 'medico', 'Doctor', 'Name', 'Nombre del Doctor', 'Medico']);
+      const specialty = findValue(row, ['Especialidad', 'Specialty', 'Área', 'Rama']) || '';
+      const phone = findValue(row, ['Telefono', 'Teléfono', 'Phone', 'Celular']) || '';
+      const email = findValue(row, ['Email', 'Correo', 'Correo Electrónico', 'e-mail']) || '';
+      const license = findValue(row, ['Cedula', 'Cédula', 'License', 'Cedula Profesional', 'ID', 'Matrícula']) || '';
+      const address = findValue(row, ['Direccion', 'Dirección', 'Address', 'Consultorio']) || '';
+      const notes = findValue(row, ['Notas', 'Notitas', 'Notes', 'Observaciones']) || '';
 
       if (!name) {
-        results.errors.push(`Fila omitida por falta de Nombre: ${JSON.stringify(row)}`);
+        results.errors.push(`Fila omitida por falta de Nombre (visto como: ${JSON.stringify(row)})`);
+        console.warn(`[EXCEL UPLOAD SKIP] Row missing Name:`, row);
         continue;
       }
 
       try {
-        await db.query(
-          `INSERT INTO doctors (name, specialty, phone, email, address, notes, license)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           ON CONFLICT (id) DO UPDATE SET 
-             name = EXCLUDED.name, 
-             specialty = EXCLUDED.specialty, 
-             phone = EXCLUDED.phone, 
-             email = EXCLUDED.email, 
-             address = EXCLUDED.address, 
-             notes = EXCLUDED.notes, 
-             license = EXCLUDED.license,
-             updated_at = NOW()`,
-          [name, specialty, phone, email, address, notes, license]
-        );
+        // First try to check if it exists by license if license is provided
+        let existingId = null;
+        if (license && license.toString().trim()) {
+           const { rows: byLicense } = await db.query('SELECT id FROM doctors WHERE license = $1', [license.toString().trim()]);
+           if (byLicense.length > 0) existingId = byLicense[0].id;
+        }
+
+        // If not found by license, try by name
+        if (!existingId) {
+           const { rows: byName } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [name.toString().trim().toUpperCase()]);
+           if (byName.length > 0) existingId = byName[0].id;
+        }
+
+        if (existingId) {
+          await db.query(
+            `UPDATE doctors SET 
+               name = $1, 
+               specialty = $2, 
+               phone = $3, 
+               email = $4, 
+               address = $5, 
+               notes = $6, 
+               license = $7,
+               updated_at = NOW()
+             WHERE id = $8`,
+            [name.toString().trim(), specialty, phone, email, address, notes, license, existingId]
+          );
+        } else {
+          await db.query(
+            `INSERT INTO doctors (name, specialty, phone, email, address, notes, license)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [name.toString().trim(), specialty, phone, email, address, notes, license]
+          );
+        }
         results.processed++;
       } catch (err) {
-        // Fallback for when there's no ID but name might match or just insert
-        try {
-          // Check if doctor with same name exists
-          const { rows: existing } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [name.toUpperCase()]);
-          if (existing.length > 0) {
-            await db.query(
-              `UPDATE doctors SET specialty=$1, phone=$2, email=$3, address=$4, notes=$5, license=$6, updated_at=NOW() WHERE id=$7`,
-              [specialty, phone, email, address, notes, license, existing[0].id]
-            );
-          } else {
-            await db.query(
-              `INSERT INTO doctors (name, specialty, phone, email, address, notes, license) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-              [name, specialty, phone, email, address, notes, license]
-            );
-          }
-          results.processed++;
-        } catch (innerErr) {
-          results.errors.push(`Error procesando doctor ${name}: ${innerErr.message}`);
-        }
+        results.errors.push(`Error procesando doctor ${name}: ${err.message}`);
+        console.error(`[EXCEL UPLOAD ERROR] Row ${JSON.stringify(row)}:`, err);
       }
     }
 

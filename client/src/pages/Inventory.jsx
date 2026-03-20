@@ -160,7 +160,7 @@ export default function Inventory({ addToast }) {
                   return (
                     <tr key={item.id}>
                       <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.doctor_name}</td>
-                      <td>{item.product_name} <span className="badge badge-info" style={{ marginLeft: 4 }}>{item.product_presentation}</span></td>
+                      <td>{item.product_name}</td>
                       <td>{item.target_stock} Pza</td>
                       <td>
                         <strong>{item.current_stock}</strong> Pza
@@ -212,7 +212,7 @@ export default function Inventory({ addToast }) {
                     <label className="form-label">Producto *</label>
                     <select className="form-select" required value={form.product_id} onChange={e => setForm({ ...form, product_id: e.target.value })}>
                       <option value="">Seleccionar producto...</option>
-                      {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.presentation}</option>)}
+                      {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                 </>

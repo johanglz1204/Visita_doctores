@@ -34,6 +34,7 @@ export const api = {
   updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
   deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
   uploadDoctorsExcel: (formData) => request('/doctors/upload-excel', { method: 'POST', body: formData }),
+  exportProductsExcel: () => `${API_BASE}/products/export-excel`,
 
   // Products
   getProducts: () => request('/products'),
@@ -56,6 +57,7 @@ export const api = {
   getSales: (limit, offset) => request(`/sales?limit=${limit || 100}&offset=${offset || 0}`),
   uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
   parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
+  exportSalesExcel: () => `${API_BASE}/sales/export-excel`,
 
   // Sync
   syncEmails: () => request('/sync/emails', { method: 'POST' }),

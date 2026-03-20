@@ -6,7 +6,7 @@ export default function Products({ addToast }) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: '', presentation: '', laboratory: '', description: '', barcode: '', ranking: '', price: '' });
+  const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -30,7 +30,7 @@ export default function Products({ addToast }) {
   };
 
   const resetForm = () => {
-    setForm({ name: '', presentation: '', laboratory: '', description: '', barcode: '', ranking: '', price: '' });
+    setForm({ name: '', barcode: '', ranking: '', price: '' });
     setEditing(null);
   };
 
@@ -39,9 +39,6 @@ export default function Products({ addToast }) {
   const openEdit = (prod) => {
     setForm({ 
       name: prod.name, 
-      presentation: prod.presentation || '', 
-      laboratory: prod.laboratory || '', 
-      description: prod.description || '',
       barcode: prod.barcode || '',
       ranking: prod.ranking || '',
       price: prod.price || ''
@@ -104,6 +101,11 @@ export default function Products({ addToast }) {
     }
   };
 
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <div>
       <div className="page-header">
@@ -117,7 +119,7 @@ export default function Products({ addToast }) {
             <input 
               type="text" 
               className="form-input" 
-              placeholder="Buscar por nombre..." 
+              placeholder="Buscar por nombre o código..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ paddingLeft: '35px', borderRadius: '20px', background: 'var(--bg-card)' }}
@@ -128,7 +130,7 @@ export default function Products({ addToast }) {
 
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">💊 Lista de Productos ({products.length})</h2>
+          <h2 className="card-title">💊 Lista de Productos ({filteredProducts.length})</h2>
           <div className="btn-group">
             <input 
               type="file" 
@@ -140,35 +142,30 @@ export default function Products({ addToast }) {
             <label htmlFor="excel-upload-products" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
               📊 Cargar Excel
             </label>
+            <button className="btn btn-secondary" onClick={() => window.location.href = api.exportProductsExcel()}>📥 Exportar Excel</button>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
           </div>
         </div>
 
         {loading ? (
           <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
-        ) : products.length > 0 ? (
+        ) : filteredProducts.length > 0 ? (
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Código Barras</th>
                   <th>Producto</th>
-                  <th>Presentación</th>
-                  <th>Laboratorio</th>
                   <th>Ranking</th>
-                  <th>Precio</th>
+                  <th>Precio Vale</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {products
-                  .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map(prod => (
+                {filteredProducts.map(prod => (
                   <tr key={prod.id}>
                     <td style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{prod.barcode || '—'}</td>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</td>
-                    <td><span className="badge badge-info">{prod.presentation || '—'}</span></td>
-                    <td>{prod.laboratory || '—'}</td>
                     <td><span className={`badge ${prod.ranking === 'AA' || prod.ranking === 'A' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
                     <td style={{ fontWeight: 600 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                     <td>
@@ -185,8 +182,8 @@ export default function Products({ addToast }) {
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">💊</div>
-            <p className="empty-state-text">No hay productos registrados</p>
-            <p className="empty-state-hint">Haz clic en "Nuevo Producto" para agregar uno</p>
+            <p className="empty-state-text">No se encontraron productos</p>
+            <p className="empty-state-hint">Asegúrate de que el catálogo tenga información cargada</p>
           </div>
         )}
       </div>
@@ -196,39 +193,23 @@ export default function Products({ addToast }) {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2 className="modal-title">{editing ? '✏️ Editar Producto' : '➕ Nuevo Producto'}</h2>
             <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Nombre *</label>
+                <input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. FARMAPRAM" />
+              </div>
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Código de Barras</label>
                   <input className="form-input" value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="750123456789" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Nombre *</label>
-                  <input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="FARMAPRAM" />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Presentación</label>
-                  <input className="form-input" value={form.presentation} onChange={e => setForm({ ...form, presentation: e.target.value })} placeholder="0.50 MG" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Laboratorio</label>
-                  <input className="form-input" value={form.laboratory} onChange={e => setForm({ ...form, laboratory: e.target.value })} placeholder="Productos Medix" />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
                   <label className="form-label">Ranking</label>
                   <input className="form-input" value={form.ranking} onChange={e => setForm({ ...form, ranking: e.target.value })} placeholder="AA, A, B, C" />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Precio Vale</label>
-                  <input type="number" step="0.01" className="form-input" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
-                </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Descripción</label>
-                <textarea className="form-textarea" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Descripción del producto..."></textarea>
+                <label className="form-label">Precio Vale</label>
+                <input type="number" step="0.01" className="form-input" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>

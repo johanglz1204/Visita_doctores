@@ -148,7 +148,7 @@ export default function Dashboard({ addToast }) {
                 {data.recentSales.map(sale => (
                   <tr key={sale.id}>
                     <td>{sale.doctor_name || '—'}</td>
-                    <td>{sale.product_name} {sale.presentation}</td>
+                    <td>{sale.product_name}</td>
                     <td>{sale.quantity} Pza</td>
                     <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                   </tr>

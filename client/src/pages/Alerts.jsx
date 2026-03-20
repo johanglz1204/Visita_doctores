@@ -57,7 +57,7 @@ export default function Alerts() {
                       👨‍⚕️ {alert.doctor_name}
                     </div>
                     <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-                      💊 {alert.product_name} <span className="badge badge-info">{alert.product_presentation}</span>
+                      💊 {alert.product_name}
                     </div>
                     {alert.doctor_phone && (
                       <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>

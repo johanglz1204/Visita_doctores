@@ -6,7 +6,7 @@ export default function Sales() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getSales(100, 0)
+    api.getSales(500, 0)
       .then(setSales)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -15,8 +15,13 @@ export default function Sales() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Historial de Ventas</h1>
-        <p className="page-subtitle">Registro completo de ventas procesadas desde archivos TXT</p>
+        <div>
+          <h1 className="page-title">Historial de Ventas</h1>
+          <p className="page-subtitle">Registro completo de ventas procesadas desde archivos TXT</p>
+        </div>
+        <div>
+           <button className="btn btn-secondary" onClick={() => window.location.href = api.exportSalesExcel()}>📥 Exportar a Excel</button>
+        </div>
       </div>
 
       <div className="card">
@@ -36,7 +41,7 @@ export default function Sales() {
                   <th>Producto</th>
                   <th>Cantidad</th>
                   <th>Fecha Venta</th>
-                  <th>Procesado</th>
+                  <th>Procesado el</th>
                 </tr>
               </thead>
               <tbody>
@@ -44,7 +49,7 @@ export default function Sales() {
                   <tr key={sale.id}>
                     <td style={{ color: 'var(--text-muted)' }}>{sale.id}</td>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sale.doctor_name || '—'}</td>
-                    <td>{sale.product_name || '—'} {sale.product_presentation ? <span className="badge badge-info" style={{ marginLeft: 4 }}>{sale.product_presentation}</span> : ''}</td>
+                    <td>{sale.product_name || '—'}</td>
                     <td>{sale.quantity} Pza</td>
                     <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{new Date(sale.created_at).toLocaleString('es-MX')}</td>

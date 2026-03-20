@@ -41,6 +41,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/products/export-excel - Export products to Excel (MUST BE ABOVE :id)
+router.get('/export-excel', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT name, barcode, ranking, price FROM products ORDER BY name ASC');
+    
+    // Map data to pretty headers
+    const data = rows.map(r => ({
+      'Producto': r.name,
+      'Código de Barras': r.barcode || '',
+      'Ranking': r.ranking || '',
+      'Precio Vale': parseFloat(r.price) || 0
+    }));
+
+    const worksheet = xlsx.utils.json_to_sheet(data);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Productos');
+    
+    const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Productos.xlsx');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Error exporting products:', err);
+    res.status(500).json({ error: 'Error al exportar productos' });
+  }
+});
+
 // GET /api/products/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -56,21 +84,21 @@ router.get('/:id', async (req, res) => {
 // POST /api/products - Create product
 router.post('/', async (req, res) => {
   try {
-    const { name, presentation, laboratory, description, barcode, ranking, price } = req.body;
+    const { name, barcode, ranking, price } = req.body;
     
     // Check for duplicates
     const { rows: existing } = await db.query(
-      'SELECT id FROM products WHERE UPPER(name) = $1 AND UPPER(presentation) = $2',
-      [name.toUpperCase(), (presentation || '').toUpperCase()]
+      'SELECT id FROM products WHERE UPPER(trim(name)) = $1',
+      [name.trim().toUpperCase()]
     );
     if (existing.length > 0) {
-      return res.status(400).json({ error: 'Ya existe un producto con ese nombre y presentación' });
+      return res.status(400).json({ error: 'Ya existe un producto con ese nombre' });
     }
 
     const { rows } = await db.query(
-      `INSERT INTO products (name, presentation, laboratory, description, barcode, ranking, price)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [name, presentation || '', laboratory || '', description || '', barcode || '', ranking || '', price || 0]
+      `INSERT INTO products (name, barcode, ranking, price)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name.trim(), barcode || '', ranking || '', price || 0]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -87,63 +115,117 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     }
 
     const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
     const results = { processed: 0, errors: [] };
 
+    // Function to normalize strings by removing accents
+    const normalize = (str) => {
+      if (!str) return '';
+      return str.toString().trim()
+        .toLowerCase()
+        .normalize('NFD') // Split base char and accents
+        .replace(/[\u0300-\u036f]/g, ''); // Remove accents
+    };
+
+    // Find the right sheet (look for one that has 'Producto' or 'Nombre')
+    let data = [];
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      const testData = xlsx.utils.sheet_to_json(sheet);
+      if (testData.length > 0) {
+        const firstRow = testData[0];
+        const hasProductCol = Object.keys(firstRow).some(k => 
+          ['producto', 'nombre', 'product', 'name'].includes(normalize(k))
+        );
+        if (hasProductCol) {
+          data = testData;
+          console.log(`[PRODUCT EXCEL UPLOAD] Correct sheet found: ${sheetName} (${data.length} rows)`);
+          break;
+        }
+      }
+    }
+
+    if (data.length === 0) {
+      data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+      console.log(`[PRODUCT EXCEL UPLOAD] No sheet with product column found, falling back to first sheet: ${workbook.SheetNames[0]}`);
+    }
+
+    if (data.length > 0) {
+      console.log(`[PRODUCT EXCEL UPLOAD] Columns found: ${Object.keys(data[0]).join(', ')}`);
+    } else {
+      console.log(`[PRODUCT EXCEL UPLOAD] Empty file or sheet`);
+      results.errors.push('El archivo de Excel parece estar vacío o no contiene hojas válidas.');
+    }
+
     for (const row of data) {
-      const barcode = row['CODIGO DE BARRAS'] || row.Barcode || row.barcode || '';
-      const name = row['NOMBRE/DESCRIPCION'] || row.Nombre || row.NOMBRE || row.nombre || row.Producto || row.Product || row.Name;
-      const ranking = row.RANKING || row.Ranking || row.ranking || '';
-      const rawPrice = row['PRECIO VALE'] || row.Precio || row.Price || 0;
-      
-      // Clean price (remove $ and commas if string)
+      const findValue = (row, names) => {
+        const normalizedNames = names.map(n => normalize(n));
+        const key = Object.keys(row).find(k => 
+          normalizedNames.includes(normalize(k))
+        );
+        return key ? row[key] : undefined;
+      };
+
+      const name = findValue(row, ['NOMBRE/DESCRIPCION', 'Nombre', 'Producto', 'Product', 'Name', 'Descripción', 'Descripcion']);
+      const barcode = findValue(row, ['CODIGO DE BARRAS', 'Barcode', 'Código', 'Codigo', 'UPC', 'EAN', 'Código de Barras']) || '';
+      const ranking = findValue(row, ['RANKING', 'Ranking', 'Nivel', 'Categoría', 'Categoria']) || '';
+      const rawPrice = findValue(row, ['PRECIO VALE', 'Precio', 'Price', 'Cost', 'Coste', 'Costo', 'Importe', 'Precio Vale']) || 0;
+
+      console.log(`[ROW] Name: ${name}, Barcode: ${barcode}, Ranking: ${ranking}, Price: ${rawPrice}`);
+
       let price = 0;
-      if (typeof rawPrice === 'string') {
-        price = parseFloat(rawPrice.replace(/[$,]/g, '')) || 0;
+      if (typeof rawPrice === 'string' && rawPrice) {
+        const cleaned = rawPrice.replace(/[$,\s]/g, '');
+        price = parseFloat(cleaned) || 0;
       } else {
         price = parseFloat(rawPrice) || 0;
       }
 
-      const presentation = row.Presentacion || row.PRESENTACION || row.presentacion || row.Presentation || '';
-      const laboratory = row.Laboratorio || row.LABORATORIO || row.laboratorio || row.Laboratory || '';
-      const description = row.Descripcion || row.DESCRIPCION || row.descripcion || row.Description || '';
-
       if (!name) {
-        results.errors.push(`Fila omitida por falta de Nombre: ${JSON.stringify(row)}`);
+        const rowKeys = Object.keys(row).join(', ');
+        results.errors.push(`Fila ${results.processed + results.errors.length + 1}: No se detectó 'Nombre' o 'Producto'. Columnas: [${rowKeys}]`);
         continue;
       }
 
       try {
-        // Check for duplicates using name and presentation (case insensitive)
-        const nameUpper = (name || '').trim().toUpperCase();
-        const presentationUpper = (presentation || '').trim().toUpperCase();
+        const nameUpper = name.toString().trim().toUpperCase();
 
         const { rows: existing } = await db.query(
-          'SELECT id FROM products WHERE UPPER(name) = $1 AND UPPER(presentation) = $2',
-          [nameUpper, presentationUpper]
+          'SELECT id FROM products WHERE UPPER(trim(name)) = $1',
+          [nameUpper]
         );
 
         if (existing.length > 0) {
           await db.query(
-            `UPDATE products SET laboratory=$1, description=$2, barcode=$3, ranking=$4, price=$5, updated_at=NOW() WHERE id=$6`,
-            [laboratory, description, barcode, ranking, price, existing[0].id]
+            `UPDATE products SET 
+               barcode=$1, 
+               ranking=$2, 
+               price=$3, 
+               updated_at=NOW() 
+             WHERE id=$4`,
+            [barcode.toString(), ranking.toString(), price, existing[0].id]
           );
         } else {
           await db.query(
-            `INSERT INTO products (name, presentation, laboratory, description, barcode, ranking, price) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [name, presentation, laboratory, description, barcode, ranking, price]
+            `INSERT INTO products (name, barcode, ranking, price) 
+             VALUES ($1, $2, $3, $4)`,
+            [name.toString().trim(), barcode.toString(), ranking.toString(), price]
           );
         }
         results.processed++;
       } catch (err) {
-        results.errors.push(`Error procesando producto ${name}: ${err.message}`);
+        console.error(`[ERROR ROW] ${name}:`, err.message);
+        results.errors.push(`Error en producto ${name}: ${err.message}`);
       }
     }
 
     fs.unlinkSync(req.file.path);
-    res.json({ message: `Se procesaron ${results.processed} productos exitosamente`, results });
+    
+    let finalMessage = `Se procesaron ${results.processed} productos exitosamente.`;
+    if (results.errors.length > 0) {
+      finalMessage += ` (${results.errors.length} filas fallidas)`;
+    }
+    
+    res.json({ message: finalMessage, results });
   } catch (err) {
     console.error('Error processing products Excel:', err);
     res.status(500).json({ error: 'Error al procesar archivo de Excel' });
@@ -153,11 +235,11 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 // PUT /api/products/:id - Update product
 router.put('/:id', async (req, res) => {
   try {
-    const { name, presentation, laboratory, description, barcode, ranking, price } = req.body;
+    const { name, barcode, ranking, price } = req.body;
     const { rows } = await db.query(
-      `UPDATE products SET name=$1, presentation=$2, laboratory=$3, description=$4, barcode=$5, ranking=$6, price=$7, updated_at=NOW()
-       WHERE id=$8 RETURNING *`,
-      [name, presentation || '', laboratory || '', description || '', barcode || '', ranking || '', price || 0, req.params.id]
+      `UPDATE products SET name=$1, barcode=$2, ranking=$3, price=$4, updated_at=NOW()
+       WHERE id=$5 RETURNING *`,
+      [name.trim(), barcode || '', ranking || '', price || 0, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json(rows[0]);
@@ -180,4 +262,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-

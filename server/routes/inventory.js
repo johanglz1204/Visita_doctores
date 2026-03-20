@@ -40,7 +40,6 @@ router.get('/', async (req, res) => {
         d.name AS doctor_name,
         i.product_id,
         p.name AS product_name,
-        p.presentation AS product_presentation,
         i.target_stock,
         i.current_stock,
         i.created_at,
@@ -69,7 +68,6 @@ router.get('/critical', async (req, res) => {
         d.phone AS doctor_phone,
         i.product_id,
         p.name AS product_name,
-        p.presentation AS product_presentation,
         i.target_stock,
         i.current_stock,
         CASE 
@@ -117,44 +115,78 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     }
 
     const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const results = { processed: 0, errors: [] };
 
-    const results = {
-      processed: 0,
-      errors: [],
+    // Function to normalize strings by removing accents
+    const normalize = (str) => {
+      if (!str) return '';
+      return str.toString().trim()
+        .toLowerCase()
+        .normalize('NFD') // Split base char and accents
+        .replace(/[\u0300-\u036f]/g, ''); // Remove accents
     };
 
+    // Find the right sheet (look for one that has 'Producto' or 'Nombre')
+    let data = [];
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      const testData = xlsx.utils.sheet_to_json(sheet);
+      if (testData.length > 0) {
+        const firstRow = testData[0];
+        const hasProductCol = Object.keys(firstRow).some(k => 
+          ['producto', 'nombre', 'product', 'name'].includes(normalize(k))
+        );
+        if (hasProductCol) {
+          data = testData;
+          console.log(`[INVENTORY EXCEL UPLOAD] Correct sheet found: ${sheetName} (${data.length} rows)`);
+          break;
+        }
+      }
+    }
+
+    if (data.length === 0) {
+      data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+      console.log(`[INVENTORY EXCEL UPLOAD] Falling back to first sheet`);
+    }
+
     for (const row of data) {
-      // Normalize row keys to handle different header names
-      const doctorName = row.Doctor || row.DOCTOR || row.doctor;
-      const productName = row.Producto || row.PRODUCTO || row.producto || row.Producto || row.Product;
-      const targetStock = parseInt(row['Stock Objetivo'] || row.STOCK || row.stock || row.Target || 0);
-      const currentStock = parseInt(row.Existencias || row.EXISTENCIAS || row.existencias || row.Current || row.current_stock || 0);
+      const findValue = (row, names) => {
+        const normalizedNames = names.map(n => normalize(n));
+        const key = Object.keys(row).find(k => 
+          normalizedNames.includes(normalize(k))
+        );
+        return key ? row[key] : undefined;
+      };
+
+      const doctorName = findValue(row, ['Doctor', 'Médico', 'Medico', 'Doc', 'Name']);
+      const productName = findValue(row, ['Producto', 'Nombre', 'Product', 'Name']);
+      const targetStock = parseInt(findValue(row, ['Stock Objetivo', 'Objetivo', 'Meta', 'Target', 'STOCK', 'Stock']) || 0);
+      const currentStock = parseInt(findValue(row, ['Existencias', 'Stock Actual', 'Actual', 'Current', 'Existencia Cadena', 'Existencia']) || 0);
 
       if (!doctorName || !productName) {
-        results.errors.push(`Fila omitida por falta de Doctor o Producto: ${JSON.stringify(row)}`);
+        const rowKeys = Object.keys(row).join(', ');
+        results.errors.push(`Fila ${results.processed + results.errors.length + 1}: Faltan 'Doctor' o 'Producto'. Columnas: [${rowKeys}]`);
         continue;
       }
 
       try {
         // Find or create doctor
         let doctorId;
-        const { rows: docRows } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [doctorName.toUpperCase()]);
+        const { rows: docRows } = await db.query('SELECT id FROM doctors WHERE UPPER(trim(name)) = $1', [doctorName.toString().trim().toUpperCase()]);
         if (docRows.length > 0) {
           doctorId = docRows[0].id;
         } else {
-          const { rows: newDoc } = await db.query('INSERT INTO doctors (name) VALUES ($1) RETURNING id', [doctorName]);
+          const { rows: newDoc } = await db.query('INSERT INTO doctors (name) VALUES ($1) RETURNING id', [doctorName.toString().trim()]);
           doctorId = newDoc[0].id;
         }
 
         // Find or create product
         let productId;
-        const { rows: prodRows } = await db.query('SELECT id FROM products WHERE UPPER(name) = $1', [productName.toUpperCase()]);
+        const { rows: prodRows } = await db.query('SELECT id FROM products WHERE UPPER(trim(name)) = $1', [productName.toString().trim().toUpperCase()]);
         if (prodRows.length > 0) {
           productId = prodRows[0].id;
         } else {
-          const { rows: newProd } = await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName]);
+          const { rows: newProd } = await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName.toString().trim()]);
           productId = newProd[0].id;
         }
 
@@ -168,19 +200,20 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
         );
         results.processed++;
       } catch (err) {
-        results.errors.push(`Error procesando fila (${doctorName} - ${productName}): ${err.message}`);
+        results.errors.push(`Error en (${doctorName} - ${productName}): ${err.message}`);
       }
     }
 
-    // Clean up
     fs.unlinkSync(req.file.path);
-
-    res.json({
-      message: `Se procesaron ${results.processed} registros exitosamente`,
-      results,
-    });
+    
+    let finalMessage = `Se procesaron ${results.processed} registros de inventario.`;
+    if (results.errors.length > 0) {
+      finalMessage += ` (${results.errors.length} filas omitidas/fallidas)`;
+    }
+    
+    res.json({ message: finalMessage, results });
   } catch (err) {
-    console.error('Error processing Excel upload:', err);
+    console.error('Error processing inventory Excel:', err);
     res.status(500).json({ error: 'Error al procesar archivo de Excel' });
   }
 });
@@ -215,4 +248,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-

@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const xlsx = require('xlsx');
 const db = require('../db');
 const { parseTicket } = require('../parser');
 
@@ -42,7 +43,6 @@ router.get('/', async (req, res) => {
         d.name AS doctor_name,
         s.product_id,
         p.name AS product_name,
-        p.presentation AS product_presentation,
         s.quantity,
         s.sale_date + INTERVAL '12 hours' as sale_date,
         s.raw_text,
@@ -100,24 +100,19 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         }
       }
 
-      // Find or create product
+          // Find or create product
       let productId = null;
       if (record.product) {
-        const presentationFilter = record.presentation ? ' AND UPPER(presentation) = $2' : '';
-        const params = record.presentation
-          ? [record.product.toUpperCase(), record.presentation.toUpperCase()]
-          : [record.product.toUpperCase()];
-
         let { rows: existingProds } = await db.query(
-          `SELECT id FROM products WHERE UPPER(name) = $1${presentationFilter}`,
-          params
+          `SELECT id FROM products WHERE UPPER(trim(name)) = $1`,
+          [record.product.toUpperCase()]
         );
         if (existingProds.length > 0) {
           productId = existingProds[0].id;
         } else {
           const { rows: newProd } = await db.query(
-            'INSERT INTO products (name, presentation) VALUES ($1, $2) RETURNING id',
-            [record.product, record.presentation || '']
+            'INSERT INTO products (name) VALUES ($1) RETURNING id',
+            [record.product]
           );
           productId = newProd[0].id;
         }
@@ -159,6 +154,48 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('Error processing upload:', err);
     res.status(500).json({ error: 'Error al procesar archivo' });
+  }
+});
+
+// GET /api/sales/export-excel - Export sales history to Excel
+router.get('/export-excel', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT 
+        s.id,
+        d.name AS doctor_name,
+        p.name AS product_name,
+        s.quantity,
+        s.sale_date,
+        s.created_at as processed_at
+      FROM sales_history s
+      LEFT JOIN doctors d ON s.doctor_id = d.id
+      LEFT JOIN products p ON s.product_id = p.id
+      ORDER BY s.sale_date DESC, s.created_at DESC
+    `);
+    
+    // Map data to pretty headers
+    const data = rows.map(r => ({
+      'ID': r.id,
+      'Doctor': r.doctor_name || 'Desconocido',
+      'Producto': r.product_name || 'Desconocido',
+      'Cantidad': r.quantity,
+      'Fecha de Venta': r.sale_date ? new Date(r.sale_date).toLocaleDateString('es-MX') : '—',
+      'Procesado el': r.processed_at ? new Date(r.processed_at).toLocaleString('es-MX') : '—'
+    }));
+
+    const worksheet = xlsx.utils.json_to_sheet(data);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Historial de Ventas');
+    
+    const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Historial_Ventas.xlsx');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Error exporting sales:', err);
+    res.status(500).json({ error: 'Error al exportar historial de ventas' });
   }
 });
 
