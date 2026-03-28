@@ -54,13 +54,24 @@ export const api = {
   uploadInventoryExcel: (formData) => request('/inventory/upload-excel', { method: 'POST', body: formData }),
 
   // Sales
-  getSales: (limit, offset) => request(`/sales?limit=${limit || 100}&offset=${offset || 0}`),
+  getSales: (limit, offset, sucursal) => {
+    let url = `/sales?limit=${limit || 100}&offset=${offset || 0}`;
+    if (sucursal) url += `&sucursal=${encodeURIComponent(sucursal)}`;
+    return request(url);
+  },
   uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
   parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
-  exportSalesExcel: () => `${API_BASE}/sales/export-excel`,
+  exportSalesExcel: (sucursal) => {
+    let url = `${API_BASE}/sales/export-excel`;
+    if (sucursal) url += `?sucursal=${encodeURIComponent(sucursal)}`;
+    return url;
+  },
 
   // Sync
   syncEmails: () => request('/sync/emails', { method: 'POST' }),
+
+  // Branches
+  getBranches: () => request('/sales/branches'),
 
   // Backup
   backupToGithub: () => request('/backup/github', { method: 'POST' }),

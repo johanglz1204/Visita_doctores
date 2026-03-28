@@ -4,23 +4,44 @@ import { api } from '../api';
 export default function Sales() {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [branches, setBranches] = useState([]);
+  const [selectedBranch, setSelectedBranch] = useState('TAMPICO');
 
   useEffect(() => {
-    api.getSales(500, 0)
+    api.getBranches()
+      .then(setBranches)
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    api.getSales(500, 0, selectedBranch)
       .then(setSales)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedBranch]);
 
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">Historial de Ventas</h1>
-          <p className="page-subtitle">Registro completo de ventas procesadas desde archivos TXT</p>
+          <p className="page-subtitle">Registro de ventas por sucursal</p>
         </div>
-        <div>
-           <button className="btn btn-secondary" onClick={() => window.location.href = api.exportSalesExcel()}>📥 Exportar a Excel</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <select 
+            className="btn btn-secondary" 
+            style={{ padding: '8px 12px', cursor: 'pointer' }}
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+          >
+            <option value="TODAS">🌍 Todas las Sucursales</option>
+            <option value="TAMPICO">🏥 TAMPICO</option>
+            {branches.filter(b => b !== 'TAMPICO').map(b => (
+              <option key={b} value={b}>📍 {b}</option>
+            ))}
+          </select>
+          <button className="btn btn-secondary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch)}>📥 Exportar a Excel</button>
         </div>
       </div>
 
@@ -39,6 +60,7 @@ export default function Sales() {
                   <th>#</th>
                   <th>Doctor</th>
                   <th>Producto</th>
+                  <th>Sucursal</th>
                   <th>Cantidad</th>
                   <th>Fecha Venta</th>
                   <th>Procesado el</th>
@@ -50,6 +72,7 @@ export default function Sales() {
                     <td style={{ color: 'var(--text-muted)' }}>{sale.id}</td>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sale.doctor_name || '—'}</td>
                     <td>{sale.product_name || '—'}</td>
+                    <td style={{ fontSize: 13 }}>{sale.sucursal || '—'}</td>
                     <td>{sale.quantity} Pza</td>
                     <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{new Date(sale.created_at).toLocaleString('es-MX')}</td>

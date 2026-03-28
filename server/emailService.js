@@ -68,6 +68,10 @@ async function syncEmails() {
             // Clean up weird spaces and HTML entities
             const content = rawContent.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
+          // Try to find Sucursal for the whole email
+          const sucursalMatch = content.match(/Sucursal:\s*([^;\|\r\n]+?)(?=\s+Ticket:|\s+Nombre:|$)/i);
+          const emailSucursal = sucursalMatch ? sucursalMatch[1].trim().toUpperCase() : '';
+
           // SICOFA splits: Usually "Sucursal:", "Ticket:" or "Nombre:" starts a new record
           // We'll look for all occurrences of "Nombre:" which is the mandatory part of a sale
           const salesMatch = content.matchAll(/Ticket:\s*(\d+).*?Nombre:\s*([^;\|\r\n]+?)\s*Piezas:\s*(\d+)\s*Doctor:\s*([^;\|\r\n]+?)\s*Fecha:\s*([\d\-\:\s]{10,20})/gi);
@@ -113,9 +117,9 @@ async function syncEmails() {
 
               if (existingSale.length === 0) {
                 await db.query(
-                  `INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, raw_text)
-                   VALUES ($1, $2, $3, $4, $5)`,
-                  [doctorId, productId, quantity, saleDate, rawTextStr]
+                  `INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, sucursal, raw_text)
+                   VALUES ($1, $2, $3, $4, $5, $6)`,
+                  [doctorId, productId, quantity, saleDate, emailSucursal, rawTextStr]
                 );
 
                 // 4. Update Inventory
@@ -159,8 +163,8 @@ async function syncEmails() {
                 );
 
                 if (existingFbSale.length === 0) {
-                  await db.query(`INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, raw_text) VALUES ($1, $2, $3, $4, $5)`,
-                    [docId, prodId, quantity, saleDate, rawTextFallback]);
+                  await db.query(`INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, sucursal, raw_text) VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [docId, prodId, quantity, saleDate, emailSucursal, rawTextFallback]);
                   
                   await db.query(`UPDATE inventory_stocks SET current_stock = GREATEST(current_stock - $1, 0), updated_at = NOW() WHERE doctor_id = $2 AND product_id = $3`,
                     [quantity, docId, prodId]);

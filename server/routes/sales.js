@@ -36,7 +36,9 @@ router.get('/', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
-    const { rows } = await db.query(`
+    const sucursal = req.query.sucursal;
+
+    let query = `
       SELECT 
         s.id,
         s.doctor_id,
@@ -45,15 +47,24 @@ router.get('/', async (req, res) => {
         p.name AS product_name,
         s.quantity,
         s.sale_date + INTERVAL '12 hours' as sale_date,
+        s.sucursal,
         s.raw_text,
         s.parsed_at,
         s.created_at
       FROM sales_history s
       LEFT JOIN doctors d ON s.doctor_id = d.id
       LEFT JOIN products p ON s.product_id = p.id
-      ORDER BY s.sale_date DESC, s.created_at DESC
-      LIMIT $1 OFFSET $2
-    `, [limit, offset]);
+    `;
+    
+    const params = [limit, offset];
+    if (sucursal && sucursal.toUpperCase() !== 'TODAS') {
+      query += ` WHERE UPPER(s.sucursal) = $3 `;
+      params.push(sucursal.toUpperCase());
+    }
+
+    query += ` ORDER BY s.sale_date DESC, s.created_at DESC LIMIT $1 OFFSET $2`;
+
+    const { rows } = await db.query(query, params);
     res.json(rows);
   } catch (err) {
     console.error('Error fetching sales:', err);
@@ -120,9 +131,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
       // Record sale
       const { rows: sale } = await db.query(
-        `INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, raw_text)
-         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [doctorId, productId, record.quantity, record.date, record.rawText]
+        `INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, sucursal, raw_text)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [doctorId, productId, record.quantity, record.date, record.sucursal || '', record.rawText]
       );
 
       // Decrement inventory stock if assignment exists
@@ -160,38 +171,49 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 // GET /api/sales/export-excel - Export sales history to Excel
 router.get('/export-excel', async (req, res) => {
   try {
-    const { rows } = await db.query(`
+    const sucursal = req.query.sucursal;
+    let query = `
       SELECT 
-        s.id,
         d.name AS doctor_name,
-        p.name AS product_name,
-        s.quantity,
         s.sale_date,
-        s.created_at as processed_at
+        s.sucursal,
+        SUM(s.quantity) AS total_quantity,
+        SUM(s.quantity * COALESCE(p.price, 0)) AS total_amount
       FROM sales_history s
       LEFT JOIN doctors d ON s.doctor_id = d.id
       LEFT JOIN products p ON s.product_id = p.id
-      ORDER BY s.sale_date DESC, s.created_at DESC
-    `);
+    `;
+    
+    const params = [];
+    if (sucursal) {
+      query += ` WHERE UPPER(s.sucursal) = $1 `;
+      params.push(sucursal.toUpperCase());
+    }
+
+    query += `
+      GROUP BY d.name, s.sale_date, s.sucursal
+      ORDER BY s.sale_date DESC, d.name ASC
+    `;
+
+    const { rows } = await db.query(query, params);
     
     // Map data to pretty headers
     const data = rows.map(r => ({
-      'ID': r.id,
       'Doctor': r.doctor_name || 'Desconocido',
-      'Producto': r.product_name || 'Desconocido',
-      'Cantidad': r.quantity,
-      'Fecha de Venta': r.sale_date ? new Date(r.sale_date).toLocaleDateString('es-MX') : '—',
-      'Procesado el': r.processed_at ? new Date(r.processed_at).toLocaleString('es-MX') : '—'
+      'Sucursal': r.sucursal || '—',
+      'Fecha de Venta': r.sale_date ? new Date(r.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—',
+      'Cantidad Total': parseInt(r.total_quantity) || 0,
+      'Monto Total ($)': parseFloat(r.total_amount) || 0
     }));
 
     const worksheet = xlsx.utils.json_to_sheet(data);
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Historial de Ventas');
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Resumen de Ventas');
     
     const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
     
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Historial_Ventas.xlsx');
+    res.setHeader('Content-Disposition', 'attachment; filename=Resumen_Ventas_Agrupado.xlsx');
     res.send(buffer);
   } catch (err) {
     console.error('Error exporting sales:', err);
@@ -220,6 +242,22 @@ router.post('/parse-preview', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('Error parsing preview:', err);
     res.status(500).json({ error: 'Error al previsualizar archivo' });
+  }
+});
+
+// GET /api/sales/branches - Get unique branches
+router.get('/branches', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT DISTINCT sucursal 
+      FROM sales_history 
+      WHERE sucursal IS NOT NULL AND sucursal != ''
+      ORDER BY sucursal ASC
+    `);
+    res.json(rows.map(r => r.sucursal));
+  } catch (err) {
+    console.error('Error fetching branches:', err);
+    res.status(500).json({ error: 'Error al obtener sucursales' });
   }
 });
 

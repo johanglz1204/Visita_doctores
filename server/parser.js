@@ -11,7 +11,6 @@ const IGNORE_PATTERNS = [
   /VISITENOS EN FACEBOOK/i,
   /FARMACEUTICA ESPECIALIZADA/i,
   /REGIMEN GENERAL DE LEY/i,
-  /SUCURSAL:/i,
   /DIRECCION:/i,
   /ZONA CENTRO/i,
   /RFC:/i,
@@ -34,6 +33,7 @@ function parseTicket(text) {
 
   let currentDoctor = null;
   let currentDate = null;
+  let currentSucursal = '';
   let currentProduct = null;
   let currentPresentation = null;
   let inProductTable = false;
@@ -66,6 +66,13 @@ function parseTicket(text) {
       continue;
     }
 
+    // 4. Match Sucursal
+    const sucursalMatch = line.match(/SUCURSAL:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ\s\.]+)/i);
+    if (sucursalMatch) {
+      currentSucursal = sucursalMatch[1].trim().toUpperCase();
+      continue;
+    }
+
     // 4. Match Table Header
     if (line.match(/Nombre\s+Pzas?\./i)) {
       inProductTable = true;
@@ -84,6 +91,7 @@ function parseTicket(text) {
         presentation: tableLineMatch[2] ? tableLineMatch[2].trim().toUpperCase() : '',
         quantity: parseInt(tableLineMatch[3], 10),
         date: currentDate || new Date().toISOString().split('T')[0],
+        sucursal: currentSucursal,
         rawText: line
       });
       continue;
@@ -98,6 +106,7 @@ function parseTicket(text) {
         presentation: simpleLineMatch[2] ? simpleLineMatch[2].trim().toUpperCase() : '',
         quantity: parseInt(simpleLineMatch[3], 10),
         date: currentDate || new Date().toISOString().split('T')[0],
+        sucursal: currentSucursal,
         rawText: line
       });
       continue;
@@ -121,6 +130,7 @@ function parseTicket(text) {
         presentation: currentPresentation || '',
         quantity: parseInt(qtyOnlyMatch[1], 10),
         date: currentDate || new Date().toISOString().split('T')[0],
+        sucursal: currentSucursal,
         rawText: `${currentProduct} ${currentPresentation} | ${line}`
       });
       // Don't reset currentProduct yet? (Maybe multiple same items?)
