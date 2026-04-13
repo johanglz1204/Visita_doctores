@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api';
 
 export default function Doctors({ addToast }) {
@@ -157,7 +158,23 @@ export default function Doctors({ addToast }) {
                     <td>{doc.license || '—'}</td>
                     <td>
                       <div className="btn-group">
-                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(doc)}>✏️ Editar</button>
+                        {doc.phone && (
+                          <button 
+                            className="btn btn-sm" 
+                            style={{ background: '#25D366', color: 'white', border: 'none', padding: '5px 10px' }}
+                            title="Contactar por WhatsApp"
+                            onClick={() => {
+                              const cleanPhone = doc.phone.replace(/\D/g, '');
+                              const finalPhone = cleanPhone.length === 10 ? '52' + cleanPhone : cleanPhone;
+                              const message = encodeURIComponent(`Hola Dr. ${doc.name}, le saludo de VisitaDoctores. Quedo a sus órdenes para darle seguimiento a su clínica.`);
+                              window.open(`https://api.whatsapp.com/send?phone=${finalPhone}&text=${message}`, '_blank');
+                            }}
+                          >
+                            💬
+                          </button>
+                        )}
+                        <Link to={`/doctors/${doc.id}`} className="btn btn-primary btn-sm" style={{textDecoration: 'none'}}>Ver Perfil</Link>
+                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(doc)}>✏️</button>
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(doc.id, doc.name)}>🗑️</button>
                       </div>
                     </td>

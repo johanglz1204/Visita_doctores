@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
+import toast from 'react-hot-toast';
 
 export default function Sales() {
   const [sales, setSales] = useState([]);
+  const [totalSales, setTotalSales] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [branches, setBranches] = useState([]);
-  const [selectedBranch, setSelectedBranch] = useState('TAMPICO');
+  const [selectedBranch, setSelectedBranch] = useState('todas');
+  
+  const defaultStart = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
+  const defaultEnd = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState(defaultStart);
+  const [endDate, setEndDate] = useState(defaultEnd);
 
   useEffect(() => {
     api.getBranches()
@@ -15,11 +23,25 @@ export default function Sales() {
 
   useEffect(() => {
     setLoading(true);
-    api.getSales(500, 0, selectedBranch)
-      .then(setSales)
-      .catch(console.error)
+    const limit = 50;
+    const offset = (currentPage - 1) * limit;
+    api.getSales(limit, offset, selectedBranch, startDate, endDate)
+      .then(res => {
+        // Soporte temporal si el backend aún devuelve Array en vez de {data, total}
+        if (Array.isArray(res)) {
+           setSales(res);
+           setTotalSales(res.length);
+        } else {
+           setSales(res.data || []);
+           setTotalSales(res.total || 0);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error('Error al cargar historial de ventas');
+      })
       .finally(() => setLoading(false));
-  }, [selectedBranch]);
+  }, [selectedBranch, currentPage, startDate, endDate]);
 
   return (
     <div>
@@ -28,7 +50,15 @@ export default function Sales() {
           <h1 className="page-title">Historial de Ventas</h1>
           <p className="page-subtitle">Registro de ventas por sucursal</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--bg-glass)', padding: '5px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Desde:</label>
+              <input type="date" className="btn btn-secondary" style={{ padding: '4px', margin: 0, border: 'none' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
+              
+              <label style={{ fontSize: '13px', fontWeight: 'bold', marginLeft: '10px' }}>Hasta:</label>
+              <input type="date" className="btn btn-secondary" style={{ padding: '4px', margin: 0, border: 'none' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+          </div>
+
           <select 
             className="btn btn-secondary" 
             style={{ padding: '8px 12px', cursor: 'pointer' }}
@@ -41,13 +71,32 @@ export default function Sales() {
               <option key={b} value={b}>📍 {b}</option>
             ))}
           </select>
-          <button className="btn btn-secondary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch)}>📥 Exportar a Excel</button>
+          <button className="btn btn-primary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch, startDate, endDate)}>📥 Exportar a Excel</button>
         </div>
       </div>
 
       <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">🧾 Ventas ({sales.length})</h2>
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="card-title">🧾 Ventas ({totalSales})</h2>
+          {totalSales > 0 && (
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button 
+                className="btn btn-secondary" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              >
+                Anterior
+              </button>
+              <span style={{ fontSize: '14px', fontWeight: '500' }}>Página {currentPage}</span>
+              <button 
+                className="btn btn-secondary" 
+                disabled={currentPage * 50 >= totalSales}
+                onClick={() => setCurrentPage(prev => prev + 1)}
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </div>
 
         {loading ? (

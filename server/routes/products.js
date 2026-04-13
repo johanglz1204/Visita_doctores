@@ -5,6 +5,17 @@ const path = require('path');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const db = require('../db');
+const { z } = require('zod');
+const { validateRequest } = require('../middlewares/validate');
+
+const productSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "El nombre del producto debe tener al menos 2 caracteres"),
+    barcode: z.string().optional(),
+    ranking: z.string().optional(),
+    price: z.number().nonnegative("El precio no puede ser negativo").optional().or(z.string().transform(v => parseFloat(v) || 0))
+  })
+});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -82,7 +93,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/products - Create product
-router.post('/', async (req, res) => {
+router.post('/', validateRequest(productSchema), async (req, res) => {
   try {
     const { name, barcode, ranking, price } = req.body;
     
@@ -233,7 +244,7 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 });
 
 // PUT /api/products/:id - Update product
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateRequest(productSchema), async (req, res) => {
   try {
     const { name, barcode, ranking, price } = req.body;
     const { rows } = await db.query(

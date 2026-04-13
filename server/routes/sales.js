@@ -37,35 +37,48 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
     const sucursal = req.query.sucursal;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
 
-    let query = `
-      SELECT 
-        s.id,
-        s.doctor_id,
-        d.name AS doctor_name,
-        s.product_id,
-        p.name AS product_name,
-        s.quantity,
-        s.sale_date + INTERVAL '12 hours' as sale_date,
-        s.sucursal,
-        s.raw_text,
-        s.parsed_at,
-        s.created_at
-      FROM sales_history s
-      LEFT JOIN doctors d ON s.doctor_id = d.id
-      LEFT JOIN products p ON s.product_id = p.id
-    `;
+    const knex = db.knex;
     
-    const params = [limit, offset];
+    let baseQuery = knex('sales_history as s')
+      .leftJoin('doctors as d', 's.doctor_id', 'd.id')
+      .leftJoin('products as p', 's.product_id', 'p.id')
+      .select(
+        's.id', 's.doctor_id', 'd.name as doctor_name',
+        's.product_id', 'p.name as product_name',
+        's.quantity', 's.sale_date', 's.sucursal',
+        's.raw_text', 's.parsed_at', 's.created_at'
+      );
+
+    let countQ = knex('sales_history as s').count('* as total');
+
     if (sucursal && sucursal.toUpperCase() !== 'TODAS') {
-      query += ` WHERE UPPER(s.sucursal) = $3 `;
-      params.push(sucursal.toUpperCase());
+      baseQuery.whereRaw('UPPER(s.sucursal) = ?', [sucursal.toUpperCase()]);
+      countQ.whereRaw('UPPER(s.sucursal) = ?', [sucursal.toUpperCase()]);
     }
 
-    query += ` ORDER BY s.sale_date DESC, s.created_at DESC LIMIT $1 OFFSET $2`;
+    if (startDate) {
+      baseQuery.where('s.sale_date', '>=', startDate);
+      countQ.where('s.sale_date', '>=', startDate);
+    }
+    if (endDate) {
+      baseQuery.where('s.sale_date', '<=', endDate);
+      countQ.where('s.sale_date', '<=', endDate);
+    }
 
-    const { rows } = await db.query(query, params);
-    res.json(rows);
+    baseQuery.orderBy('s.sale_date', 'desc').orderBy('s.created_at', 'desc').limit(limit).offset(offset);
+
+    const [dataRows, countRows] = await Promise.all([
+      baseQuery,
+      countQ
+    ]);
+
+    res.json({
+      data: dataRows,
+      total: parseInt(countRows[0].total)
+    });
   } catch (err) {
     console.error('Error fetching sales:', err);
     res.status(500).json({ error: 'Error al obtener historial de ventas' });
@@ -172,30 +185,37 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 router.get('/export-excel', async (req, res) => {
   try {
     const sucursal = req.query.sucursal;
-    let query = `
-      SELECT 
-        d.name AS doctor_name,
-        s.sale_date,
-        s.sucursal,
-        SUM(s.quantity) AS total_quantity,
-        SUM(s.quantity * COALESCE(p.price, 0)) AS total_amount
-      FROM sales_history s
-      LEFT JOIN doctors d ON s.doctor_id = d.id
-      LEFT JOIN products p ON s.product_id = p.id
-    `;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const knex = db.knex;
     
-    const params = [];
-    if (sucursal) {
-      query += ` WHERE UPPER(s.sucursal) = $1 `;
-      params.push(sucursal.toUpperCase());
+    let baseQuery = knex('sales_history as s')
+      .leftJoin('doctors as d', 's.doctor_id', 'd.id')
+      .leftJoin('products as p', 's.product_id', 'p.id')
+      .select(
+        'd.name as doctor_name',
+        's.sale_date',
+        's.sucursal'
+      )
+      .sum('s.quantity as total_quantity')
+      .select(knex.raw('SUM(s.quantity * COALESCE(p.price, 0)) AS total_amount'));
+
+    if (sucursal && sucursal.toUpperCase() !== 'TODAS') {
+      baseQuery.whereRaw('UPPER(s.sucursal) = ?', [sucursal.toUpperCase()]);
+    }
+    
+    if (startDate) {
+      baseQuery.where('s.sale_date', '>=', startDate);
+    }
+    if (endDate) {
+      baseQuery.where('s.sale_date', '<=', endDate);
     }
 
-    query += `
-      GROUP BY d.name, s.sale_date, s.sucursal
-      ORDER BY s.sale_date DESC, d.name ASC
-    `;
+    baseQuery.groupBy('d.name', 's.sale_date', 's.sucursal')
+             .orderBy('s.sale_date', 'desc')
+             .orderBy('d.name', 'asc');
 
-    const { rows } = await db.query(query, params);
+    const rows = await baseQuery;
     
     // Map data to pretty headers
     const data = rows.map(r => ({

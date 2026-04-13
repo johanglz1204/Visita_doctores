@@ -7,6 +7,11 @@ async function request(path, options = {}) {
     ...options,
   };
 
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+
   if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
     config.body = JSON.stringify(config.body);
   }
@@ -24,12 +29,16 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  // Auth
+  login: (username, password) => request('/auth/login', { method: 'POST', body: { username, password } }),
+
   // Dashboard
   getDashboard: () => request('/dashboard'),
 
   // Doctors
   getDoctors: () => request('/doctors'),
   getDoctor: (id) => request(`/doctors/${id}`),
+  getDoctorStats: (id) => request(`/doctors/${id}/stats`),
   createDoctor: (data) => request('/doctors', { method: 'POST', body: data }),
   updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
   deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
@@ -54,16 +63,25 @@ export const api = {
   uploadInventoryExcel: (formData) => request('/inventory/upload-excel', { method: 'POST', body: formData }),
 
   // Sales
-  getSales: (limit, offset, sucursal) => {
+  getSales: (limit, offset, sucursal, startDate, endDate) => {
     let url = `/sales?limit=${limit || 100}&offset=${offset || 0}`;
     if (sucursal) url += `&sucursal=${encodeURIComponent(sucursal)}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
     return request(url);
   },
   uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
   parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
-  exportSalesExcel: (sucursal) => {
+  exportSalesExcel: (sucursal, startDate, endDate) => {
     let url = `${API_BASE}/sales/export-excel`;
-    if (sucursal) url += `?sucursal=${encodeURIComponent(sucursal)}`;
+    const params = [];
+    if (sucursal) params.push(`sucursal=${encodeURIComponent(sucursal)}`);
+    if (startDate) params.push(`startDate=${startDate}`);
+    if (endDate) params.push(`endDate=${endDate}`);
+    
+    if (params.length > 0) {
+       url += `?${params.join('&')}`;
+    }
     return url;
   },
 

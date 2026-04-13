@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from './ThemeContext';
-import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 import { api } from './api';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Doctors from './pages/Doctors';
+import DoctorProfile from './pages/DoctorProfile';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import Upload from './pages/Upload';
 import Alerts from './pages/Alerts';
 import Sales from './pages/Sales';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function Sidebar() {
   const { theme, toggleTheme } = useTheme();
@@ -92,18 +96,32 @@ function ToastContainer({ toasts, onDismiss }) {
 }
 
 export default function App() {
-  const [toasts, setToasts] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
 
-  const addToast = (message, type = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
+  const handleLogin = (newToken) => {
+    setToken(newToken);
   };
 
-  const dismissToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  };
+
+  if (!token) {
+    return (
+       <ThemeProvider>
+         <Toaster position="top-right" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
+         <Login onLogin={handleLogin} />
+       </ThemeProvider>
+    );
+  }
+
+  const addToast = (message, type = 'success') => {
+    if (type === 'error') {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
   };
 
   return (
@@ -112,16 +130,27 @@ export default function App() {
         <div className="app-layout">
           <Sidebar />
           <main className="main-content">
-            <Routes>
-              <Route path="/" element={<Dashboard addToast={addToast} />} />
-              <Route path="/doctors" element={<Doctors addToast={addToast} />} />
-              <Route path="/products" element={<Products addToast={addToast} />} />
-              <Route path="/inventory" element={<Inventory addToast={addToast} />} />
-              <Route path="/sales" element={<Sales />} />
-              <Route path="/alerts" element={<Alerts />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Dashboard addToast={addToast} />} />
+                <Route path="/doctors" element={<Doctors addToast={addToast} />} />
+                <Route path="/doctors/:id" element={<DoctorProfile addToast={addToast} />} />
+                <Route path="/products" element={<Products addToast={addToast} />} />
+                <Route path="/inventory" element={<Inventory addToast={addToast} />} />
+                <Route path="/sales" element={<Sales />} />
+                <Route path="/alerts" element={<Alerts />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </ErrorBoundary>
           </main>
-          <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+          <Toaster position="top-right" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
+          
+          <button 
+             onClick={handleLogout}
+             style={{ position: 'fixed', bottom: '20px', right: '20px', padding: '10px 15px', borderRadius: '8px', background: 'var(--danger-color)', color: 'white', border: 'none', cursor: 'pointer', zIndex: 1000 }}
+          >
+             Cerrar Sesión
+          </button>
         </div>
       </BrowserRouter>
     </ThemeProvider>

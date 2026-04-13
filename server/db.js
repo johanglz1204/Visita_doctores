@@ -9,7 +9,13 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
+const knex = require('knex')({
+  client: 'pg',
+  connection: process.env.DATABASE_URL
+});
+
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
+  knex,
 };

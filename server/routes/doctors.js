@@ -5,6 +5,20 @@ const path = require('path');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const db = require('../db');
+const { z } = require('zod');
+const { validateRequest } = require('../middlewares/validate');
+
+const doctorSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+    specialty: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email("Correo inválido").optional().or(z.literal('')),
+    address: z.string().optional(),
+    notes: z.string().optional(),
+    license: z.string().optional()
+  })
+});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -55,8 +69,50 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// GET /api/doctors/:id/stats - Get clinical profile stats
+router.get('/:id/stats', async (req, res) => {
+  try {
+    const knex = db.knex;
+    const doctorId = req.params.id;
+
+    const [totalPrescriptionsRow, preferredProducts, recentHistory] = await Promise.all([
+      // Total Life-time prescriptions
+      knex('sales_history').sum('quantity as total').where('doctor_id', doctorId),
+      
+      // Top 3 preferred products
+      knex('sales_history as s')
+        .join('products as p', 's.product_id', 'p.id')
+        .select('p.name')
+        .sum('s.quantity as quantity')
+        .where('s.doctor_id', doctorId)
+        .groupBy('p.name')
+        .orderBy('quantity', 'desc')
+        .limit(3),
+        
+      // Recent prescription timeline (last 6 months grouped by month-year)
+      knex('sales_history as s')
+        .select(knex.raw("TO_CHAR(s.sale_date, 'YYYY-MM') as month"))
+        .sum('s.quantity as quantity')
+        .where('s.doctor_id', doctorId)
+        .whereRaw("s.sale_date >= NOW() - INTERVAL '6 months'")
+        .groupByRaw("TO_CHAR(s.sale_date, 'YYYY-MM')")
+        .orderBy('month', 'asc')
+    ]);
+
+    res.json({
+      totalPrescriptions: parseInt(totalPrescriptionsRow[0]?.total || 0),
+      preferredProducts,
+      recentHistory
+    });
+
+  } catch (err) {
+    console.error('Error fetching doctor stats:', err);
+    res.status(500).json({ error: 'Error al obtener estadísticas del doctor' });
+  }
+});
+
 // POST /api/doctors - Create doctor
-router.post('/', async (req, res) => {
+router.post('/', validateRequest(doctorSchema), async (req, res) => {
   try {
     const { name, specialty, phone, email, address, notes, license } = req.body;
     const { rows } = await db.query(
@@ -163,7 +219,7 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 });
 
 // PUT /api/doctors/:id - Update doctor
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateRequest(doctorSchema), async (req, res) => {
   try {
     const { name, specialty, phone, email, address, notes, license } = req.body;
     const { rows } = await db.query(
