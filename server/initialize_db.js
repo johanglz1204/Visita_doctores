@@ -24,6 +24,10 @@ async function initializeDatabase() {
     } catch (migErr) {
         console.warn('⚠️ Could not run migrations:', migErr.message);
     }
+
+    // Restore seed data if tables are empty
+    await restoreSeedData();
+
   } catch (err) {
     console.error('❌ Error during automated database initialization:', err.message);
     if (err.detail) console.error('Detail:', err.detail);
@@ -68,7 +72,44 @@ async function ensureAdminUser() {
   }
 }
 
-module.exports = { initializeDatabase, ensureAdminUser };
+async function restoreSeedData() {
+  try {
+    // Check if doctors table is already populated
+    const { rows } = await db.query('SELECT COUNT(*) as count FROM doctors');
+    const count = parseInt(rows[0].count);
+    
+    if (count > 0) {
+      console.log(`ℹ️  Data already exists (${count} doctors). Skipping seed restore.`);
+      return;
+    }
+
+    const seedFile = path.join(__dirname, '..', 'db', 'seed_data.sql');
+    if (!fs.existsSync(seedFile)) {
+      console.log('ℹ️  No seed_data.sql found. Skipping data restore.');
+      return;
+    }
+
+    console.log('🌱 Restoring seed data from seed_data.sql...');
+    const seedSql = fs.readFileSync(seedFile, 'utf8');
+    
+    // Execute each INSERT statement individually to handle errors gracefully
+    const statements = seedSql.split('\n').filter(l => l.trim().startsWith('INSERT') || l.trim().startsWith('SELECT setval'));
+    let success = 0, errors = 0;
+    for (const stmt of statements) {
+      try {
+        await db.query(stmt.trim());
+        success++;
+      } catch (e) {
+        errors++;
+      }
+    }
+    console.log(`✅ Seed data restored: ${success} statements OK, ${errors} skipped.`);
+  } catch (err) {
+    console.error('❌ Error restoring seed data:', err.message);
+  }
+}
+
+module.exports = { initializeDatabase, ensureAdminUser, restoreSeedData };
 
 // If run directly via node initialize_db.js
 if (require.main === module) {
