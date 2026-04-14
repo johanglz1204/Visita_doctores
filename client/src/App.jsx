@@ -14,7 +14,7 @@ import Alerts from './pages/Alerts';
 import Sales from './pages/Sales';
 import ErrorBoundary from './components/ErrorBoundary';
 
-function Sidebar() {
+function Sidebar({ onLogout }) {
   const { theme, toggleTheme } = useTheme();
   const [criticalCount, setCriticalCount] = useState(0);
   const location = useLocation();
@@ -61,7 +61,7 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="sidebar-footer" style={{ padding: '16px', borderTop: '1px solid var(--border-color)' }}>
+      <div className="sidebar-footer" style={{ padding: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <button 
           className="nav-link" 
           onClick={toggleTheme}
@@ -73,6 +73,19 @@ function Sidebar() {
         >
           <span className="nav-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
           <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
+        </button>
+        <button
+          className="nav-link"
+          onClick={onLogout}
+          style={{
+            justifyContent: 'flex-start',
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            color: '#ef4444'
+          }}
+        >
+          <span className="nav-icon">🚪</span>
+          <span>Cerrar Sesión</span>
         </button>
       </div>
     </aside>
@@ -124,7 +137,7 @@ export default function App() {
         ) : (
           <BrowserRouter>
             <div className="app-layout">
-              <Sidebar />
+              <Sidebar onLogout={handleLogout} />
               <main className="main-content">
                 <Routes>
                   <Route path="/" element={<Dashboard addToast={addToast} />} />
@@ -137,19 +150,6 @@ export default function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
-              
-              <button 
-                onClick={handleLogout}
-                style={{ 
-                  position: 'fixed', bottom: '20px', right: '20px', 
-                  padding: '10px 15px', borderRadius: '8px', 
-                  background: 'var(--danger-color)', color: 'white', 
-                  border: 'none', cursor: 'pointer', zIndex: 1000,
-                  boxShadow: 'var(--shadow-lg)'
-                }}
-              >
-                Cerrar Sesión
-              </button>
             </div>
           </BrowserRouter>
         )}
