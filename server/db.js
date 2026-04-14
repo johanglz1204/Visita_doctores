@@ -1,8 +1,17 @@
 const { Pool } = require('pg');
 
-const pool = new Pool({
+const poolConfig = {
   connectionString: process.env.DATABASE_URL,
-});
+};
+
+// Render require SSL para conexiones externas
+if (process.env.NODE_ENV === 'production') {
+  poolConfig.ssl = {
+    rejectUnauthorized: false
+  };
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
@@ -11,8 +20,10 @@ pool.on('error', (err) => {
 
 const knex = require('knex')({
   client: 'pg',
-  connection: process.env.DATABASE_URL + (process.env.NODE_ENV === 'production' ? '?ssl=true' : ''),
-  // Para db locales con SSL auto-firmado o nubes que lo requieran:
+  connection: {
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  },
   pool: { min: 2, max: 10 }
 });
 

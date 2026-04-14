@@ -3,6 +3,7 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env'
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { initializeDatabase } = require('./initialize_db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -111,7 +112,9 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Automated DB Initialization on startup
+initializeDatabase().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
   console.log(`🏥 VisitaDoctores server running on port ${PORT}`);
   console.log(`   Dashboard: http://localhost:${PORT}`);
 
@@ -155,5 +158,5 @@ app.listen(PORT, '0.0.0.0', () => {
 
   // Ejecutar todos los días a las 03:00 AM
   cron.schedule('0 3 * * *', runAutoBackup);
-  console.log(`💾 Respaldo automático programado con Cron a las 03:00 AM.`);
+  });
 });
