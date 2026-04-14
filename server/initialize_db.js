@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const db = require('./db');
 
 async function initializeDatabase() {
@@ -13,7 +14,6 @@ async function initializeDatabase() {
   
   console.log('Starting automated database initialization...');
   try {
-    // pg driver supports multiple semicolons-separated queries in one string
     await db.query(sql);
     console.log('✅ Database schema and seed data verified/created successfully.');
     
@@ -28,9 +28,47 @@ async function initializeDatabase() {
     console.error('❌ Error during automated database initialization:', err.message);
     if (err.detail) console.error('Detail:', err.detail);
   }
+
+  // Always ensure the admin user exists with the correct password
+  await ensureAdminUser();
 }
 
-module.exports = { initializeDatabase };
+async function ensureAdminUser() {
+  try {
+    // Ensure users table exists (in case init.sql failed partially)
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id         SERIAL PRIMARY KEY,
+        username   VARCHAR(255) UNIQUE NOT NULL,
+        password   VARCHAR(255) NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // Generate a fresh bcrypt hash for "admin"
+    const hashedPassword = await bcrypt.hash('admin', 10);
+
+    // Upsert: create admin if not exists, otherwise do nothing
+    const result = await db.query(
+      `INSERT INTO users (username, password)
+       VALUES ($1, $2)
+       ON CONFLICT (username) DO NOTHING
+       RETURNING id`,
+      ['admin', hashedPassword]
+    );
+
+    if (result.rows.length > 0) {
+      console.log('✅ Admin user created successfully (usuario: admin / contraseña: admin)');
+    } else {
+      console.log('ℹ️  Admin user already exists.');
+    }
+  } catch (err) {
+    console.error('❌ Error ensuring admin user:', err.message);
+  }
+}
+
+module.exports = { initializeDatabase, ensureAdminUser };
 
 // If run directly via node initialize_db.js
 if (require.main === module) {
