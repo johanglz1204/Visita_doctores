@@ -69,6 +69,16 @@ export default function Dashboard({ addToast }) {
     );
   }
 
+  if (!data) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state-icon">⚠️</div>
+        <p className="empty-state-text">No se pudieron cargar los datos del sistema</p>
+        <button className="btn btn-primary" onClick={loadData}>Reintentar</button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="page-header">

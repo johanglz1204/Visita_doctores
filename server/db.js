@@ -11,7 +11,9 @@ pool.on('error', (err) => {
 
 const knex = require('knex')({
   client: 'pg',
-  connection: process.env.DATABASE_URL
+  connection: process.env.DATABASE_URL + (process.env.NODE_ENV === 'production' ? '?ssl=true' : ''),
+  // Para db locales con SSL auto-firmado o nubes que lo requieran:
+  pool: { min: 2, max: 10 }
 });
 
 module.exports = {

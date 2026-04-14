@@ -96,9 +96,10 @@ function ToastContainer({ toasts, onDismiss }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
   const handleLogin = (newToken) => {
+    localStorage.setItem('token', newToken);
     setToken(newToken);
   };
 
@@ -106,15 +107,6 @@ export default function App() {
     localStorage.removeItem('token');
     setToken(null);
   };
-
-  if (!token) {
-    return (
-       <ThemeProvider>
-         <Toaster position="top-right" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
-         <Login onLogin={handleLogin} />
-       </ThemeProvider>
-    );
-  }
 
   const addToast = (message, type = 'success') => {
     if (type === 'error') {
@@ -125,34 +117,54 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
-            <ErrorBoundary>
-              <Routes>
-                <Route path="/" element={<Dashboard addToast={addToast} />} />
-                <Route path="/doctors" element={<Doctors addToast={addToast} />} />
-                <Route path="/doctors/:id" element={<DoctorProfile addToast={addToast} />} />
-                <Route path="/products" element={<Products addToast={addToast} />} />
-                <Route path="/inventory" element={<Inventory addToast={addToast} />} />
-                <Route path="/sales" element={<Sales />} />
-                <Route path="/alerts" element={<Alerts />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </ErrorBoundary>
-          </main>
-          <Toaster position="top-right" toastOptions={{ style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
-          
-          <button 
-             onClick={handleLogout}
-             style={{ position: 'fixed', bottom: '20px', right: '20px', padding: '10px 15px', borderRadius: '8px', background: 'var(--danger-color)', color: 'white', border: 'none', cursor: 'pointer', zIndex: 1000 }}
-          >
-             Cerrar Sesión
-          </button>
-        </div>
-      </BrowserRouter>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        {!token ? (
+          <Login onLogin={handleLogin} />
+        ) : (
+          <BrowserRouter>
+            <div className="app-layout">
+              <Sidebar />
+              <main className="main-content">
+                <Routes>
+                  <Route path="/" element={<Dashboard addToast={addToast} />} />
+                  <Route path="/doctors" element={<Doctors addToast={addToast} />} />
+                  <Route path="/doctors/:id" element={<DoctorProfile addToast={addToast} />} />
+                  <Route path="/products" element={<Products addToast={addToast} />} />
+                  <Route path="/inventory" element={<Inventory addToast={addToast} />} />
+                  <Route path="/sales" element={<Sales />} />
+                  <Route path="/alerts" element={<Alerts />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              
+              <button 
+                onClick={handleLogout}
+                style={{ 
+                  position: 'fixed', bottom: '20px', right: '20px', 
+                  padding: '10px 15px', borderRadius: '8px', 
+                  background: 'var(--danger-color)', color: 'white', 
+                  border: 'none', cursor: 'pointer', zIndex: 1000,
+                  boxShadow: 'var(--shadow-lg)'
+                }}
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          </BrowserRouter>
+        )}
+        <Toaster 
+          position="top-right" 
+          toastOptions={{ 
+            style: { 
+              background: 'var(--bg-card)', 
+              color: 'var(--text-primary)', 
+              border: '1px solid var(--border-color)',
+              backdropFilter: 'blur(10px)'
+            } 
+          }} 
+        />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

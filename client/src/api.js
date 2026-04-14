@@ -20,12 +20,27 @@ async function request(path, options = {}) {
     delete config.headers['Content-Type'];
   }
 
-  const res = await fetch(url, config);
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Error de red' }));
-    throw new Error(error.error || `HTTP ${res.status}`);
+  try {
+    const res = await fetch(url, config);
+    
+    // Si la sesión ha expirado o el token es inválido
+    if (res.status === 401 || res.status === 403) {
+      if (localStorage.getItem('token')) {
+        console.warn('Sesión inválida o expirada. Limpiando token...');
+        localStorage.removeItem('token');
+        window.location.reload(); // Forzar recarga a la pantalla de login
+      }
+    }
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ error: 'Error de red' }));
+      throw new Error(error.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  } catch (error) {
+    console.error(`Error en API Request (${path}):`, error);
+    throw error;
   }
-  return res.json();
 }
 
 export const api = {
