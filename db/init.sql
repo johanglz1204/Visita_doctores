@@ -85,7 +85,8 @@ CREATE TABLE IF NOT EXISTS sales_history (
     sale_date   DATE NOT NULL,
     raw_text    TEXT DEFAULT '',
     parsed_at   TIMESTAMPTZ DEFAULT NOW(),
-    created_at  TIMESTAMPTZ DEFAULT NOW()
+    created_at  TIMESTAMPTZ DEFAULT NOW(),
+    sucursal    VARCHAR(100) DEFAULT ''
 );
 
 CREATE INDEX IF NOT EXISTS idx_sales_doctor ON sales_history(doctor_id);
