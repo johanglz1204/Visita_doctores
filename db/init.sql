@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS doctors (
     updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_doctors_name ON doctors(name);
+CREATE INDEX IF NOT EXISTS idx_doctors_name ON doctors(name);
 
 -- ============================================
 -- Table: products
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_products_name ON products(name);
+CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
 
 -- ============================================
 -- Table: inventory_stocks
@@ -70,9 +70,9 @@ CREATE TABLE IF NOT EXISTS inventory_stocks (
     UNIQUE(doctor_id, product_id)
 );
 
-CREATE INDEX idx_inventory_doctor ON inventory_stocks(doctor_id);
-CREATE INDEX idx_inventory_product ON inventory_stocks(product_id);
-CREATE INDEX idx_inventory_critical ON inventory_stocks(current_stock);
+CREATE INDEX IF NOT EXISTS idx_inventory_doctor ON inventory_stocks(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_product ON inventory_stocks(product_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_critical ON inventory_stocks(current_stock);
 
 -- ============================================
 -- Table: sales_history
@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS sales_history (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_sales_doctor ON sales_history(doctor_id);
-CREATE INDEX idx_sales_product ON sales_history(product_id);
-CREATE INDEX idx_sales_date ON sales_history(sale_date);
+CREATE INDEX IF NOT EXISTS idx_sales_doctor ON sales_history(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_sales_product ON sales_history(product_id);
+CREATE INDEX IF NOT EXISTS idx_sales_date ON sales_history(sale_date);
 
 -- ============================================
 -- Seed: common products

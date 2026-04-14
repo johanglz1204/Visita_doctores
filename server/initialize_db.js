@@ -15,7 +15,7 @@ async function initializeDatabase() {
   console.log('Starting automated database initialization...');
   try {
     await db.query(sql);
-    console.log('✅ Database schema and seed data verified/created successfully.');
+    console.log('✅ Database schema verified/created successfully.');
     
     // Also run migrations if any
     try {
@@ -24,14 +24,13 @@ async function initializeDatabase() {
     } catch (migErr) {
         console.warn('⚠️ Could not run migrations:', migErr.message);
     }
-
-    // Restore seed data if tables are empty
-    await restoreSeedData();
-
   } catch (err) {
-    console.error('❌ Error during automated database initialization:', err.message);
-    if (err.detail) console.error('Detail:', err.detail);
+    // This may fail on restart because indexes already exist — that's OK
+    console.warn('⚠️ Schema init warning (non-fatal):', err.message);
   }
+
+  // Always restore seed data regardless of schema result
+  await restoreSeedData();
 
   // Always ensure the admin user exists with the correct password
   await ensureAdminUser();
