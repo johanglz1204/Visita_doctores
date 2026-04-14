@@ -19,9 +19,8 @@ async function initializeDatabase() {
     
     // Also run migrations if any
     try {
-        // We require it here so it doesn't run twice if not needed
-        // but migrate.js is designed to run on require, so it's fine.
-        require('./migrate'); 
+        const { runMigrations } = require('./migrate'); 
+        await runMigrations();
     } catch (migErr) {
         console.warn('⚠️ Could not run migrations:', migErr.message);
     }
