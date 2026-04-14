@@ -66,13 +66,13 @@ app.get('/api/dashboard', authenticate, async (req, res) => {
         .groupBy('sale_date')
         .orderBy('sale_date', 'asc'),
       
-      // Top 5 doctors dynamically calculated
+      // Top 5 doctors dynamically calculated (últimos 30 días)
       knex('sales_history as s')
         .leftJoin('doctors as d', 's.doctor_id', 'd.id')
         .select('d.name as doctor')
         .select(knex.raw("CAST(SUM(s.quantity) AS INT) as total_prescriptions"))
         .whereNotNull('d.name')
-        .whereRaw('EXTRACT(MONTH FROM s.sale_date) = EXTRACT(MONTH FROM NOW())')
+        .where('s.sale_date', '>=', thirtyDaysAgoStr)
         .groupBy('d.name')
         .orderBy('total_prescriptions', 'desc')
         .limit(5),
