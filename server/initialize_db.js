@@ -74,26 +74,24 @@ async function ensureAdminUser() {
 
 async function restoreSeedData() {
   try {
-    // Check if doctors table is already populated
-    const { rows } = await db.query('SELECT COUNT(*) as count FROM doctors');
-    const count = parseInt(rows[0].count);
-    
-    if (count > 0) {
-      console.log(`ℹ️  Data already exists (${count} doctors). Skipping seed restore.`);
-      return;
-    }
-
     const seedFile = path.join(__dirname, '..', 'db', 'seed_data.sql');
     if (!fs.existsSync(seedFile)) {
       console.log('ℹ️  No seed_data.sql found. Skipping data restore.');
       return;
     }
 
-    console.log('🌱 Restoring seed data from seed_data.sql...');
+    // Check current counts
+    const { rows } = await db.query('SELECT COUNT(*) as count FROM doctors');
+    const doctorCount = parseInt(rows[0].count);
+
     const seedSql = fs.readFileSync(seedFile, 'utf8');
-    
-    // Execute each INSERT statement individually to handle errors gracefully
-    const statements = seedSql.split('\n').filter(l => l.trim().startsWith('INSERT') || l.trim().startsWith('SELECT setval'));
+    const statements = seedSql.split('\n').filter(l => {
+      const t = l.trim();
+      return t.startsWith('INSERT') || t.startsWith('SELECT setval');
+    });
+
+    // Always run seed (ON CONFLICT DO NOTHING makes it safe to re-run)
+    console.log(`🌱 Running seed restore (DB has ${doctorCount} doctors, seed has ${statements.length} statements)...`);
     let success = 0, errors = 0;
     for (const stmt of statements) {
       try {
@@ -103,7 +101,9 @@ async function restoreSeedData() {
         errors++;
       }
     }
-    console.log(`✅ Seed data restored: ${success} statements OK, ${errors} skipped.`);
+
+    const { rows: after } = await db.query('SELECT COUNT(*) as count FROM doctors');
+    console.log(`✅ Seed complete: ${success} OK, ${errors} skipped. Doctors in DB: ${after[0].count}`);
   } catch (err) {
     console.error('❌ Error restoring seed data:', err.message);
   }
