@@ -72,12 +72,12 @@ async function syncMySQLInventory(externalData = null) {
     stats.total_mysql = mysqlRows.length;
 
     // 2. Cargar todos los productos de PostgreSQL en memoria para matching rápido
-    const { rows: pgProducts } = await db.query('SELECT id, name, code FROM products');
-    const pgCodeMap = new Map();   // code -> product
+    const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
+    const pgCodeMap = new Map();   // barcode -> product
     const pgNameMap = new Map();   // normalized(name) -> product
     
     for (const p of pgProducts) {
-      if (p.code) pgCodeMap.set(p.code.trim(), p);
+      if (p.barcode) pgCodeMap.set(p.barcode.trim(), p);
       pgNameMap.set(normalize(p.name), p);
     }
 
@@ -97,11 +97,11 @@ async function syncMySQLInventory(externalData = null) {
       if (!product) {
         product = pgNameMap.get(nombreNorm);
         
-        // AUTO-LEARN: Si lo encontramos por nombre y no tiene código en PG, guardamos el código
-        if (product && !product.code && rowCode) {
+        // AUTO-LEARN: Si lo encontramos por nombre y no tiene barcode en PG, guardamos el código
+        if (product && !product.barcode && rowCode) {
           try {
-            await db.query('UPDATE products SET code = $1 WHERE id = $2', [rowCode, product.id]);
-            product.code = rowCode; // Actualizar objeto en memoria
+            await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [rowCode, product.id]);
+            product.barcode = rowCode; // Actualizar objeto en memoria
             console.log(`✨ [MySQL Sync] Código ${rowCode} vinculado a "${product.name}"`);
           } catch (codeErr) {
             console.warn(`⚠️ Error vinculando código a ${product.name}:`, codeErr.message);

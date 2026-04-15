@@ -50,13 +50,12 @@ CREATE TABLE IF NOT EXISTS products (
     ranking       VARCHAR(50) DEFAULT '',
     price         NUMERIC(10, 2) DEFAULT 0,
     description   TEXT DEFAULT '',
-    code          VARCHAR(255) UNIQUE,
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
-CREATE INDEX IF NOT EXISTS idx_products_code ON products(code);
+CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
 
 -- ============================================
 -- Table: inventory_stocks

@@ -37,20 +37,6 @@ async function initializeDatabase() {
 
   // Ensure MySQL sync log table exists
   await ensureMySQLSyncLogsTable();
-
-  // Migration: Add code column to products if missing
-  await migrateProductsTable();
-}
-
-async function migrateProductsTable() {
-  try {
-    console.log('🔄 Checking products table for "code" column...');
-    await db.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS code VARCHAR(255) UNIQUE');
-    await db.query('CREATE INDEX IF NOT EXISTS idx_products_code ON products(code)');
-    console.log('✅ "code" column verified/added to products.');
-  } catch (err) {
-    console.warn('⚠️ Product migration warning:', err.message);
-  }
 }
 
 async function ensureAdminUser() {
