@@ -8,7 +8,7 @@
 const CONFIG = {
   // Datos de tu MySQL local
   mysql: {
-    host: 'localhost', // O la IP 25.x.x.x si es otra máquina en la red
+    host: '25.45.167.83', // IP de Hamachi
     port: 3306,
     user: 'visitadoc_reader',
     password: 'VDReader2026!',
@@ -17,7 +17,7 @@ const CONFIG = {
   // Datos de tu APP en Render
   render: {
     url: 'https://visita-doctores.onrender.com/api/mysql-sync/push',
-    apiKey: 'CAMBIA_ESTO_POR_UNA_CLAVE_SECRETA_LARGA' // Debe coincidir con SYNC_API_KEY en Render
+    apiKey: 'VD_Secret_Sync_2026_!$#' // Debe coincidir con SYNC_API_KEY en Render
   },
   intervalMinutes: 5
 };
@@ -45,7 +45,7 @@ async function runSync() {
         AND INTIDSUCURSAL = 2
     `);
 
-    console.log(`   → Leídos ${rows.length} productos de MySQL.`);
+    console.log(`   → Leidos ${rows.length} productos de MySQL.`);
 
     // 3. Enviar a Render
     const response = await fetch(CONFIG.render.url, {
@@ -60,7 +60,7 @@ async function runSync() {
     const result = await response.json();
     
     if (response.ok) {
-      console.log(`   ✅ Éxito: ${result.updated} productos actualizados en Render.`);
+      console.log(`   ✅ Exito: ${result.updated} productos actualizados en Render.`);
     } else {
       console.error(`   ❌ Error de Render: ${result.error}`);
     }
@@ -72,7 +72,7 @@ async function runSync() {
   }
 }
 
-// Bucle de ejecución
+// Bucle de ejecucion
 console.log('🚀 Sincronizador Local de VisitaDoctores Iniciado');
 console.log(`⏱️ Programado cada ${CONFIG.intervalMinutes} minutos.`);
 

@@ -11,12 +11,13 @@ const router = express.Router();
 const { syncMySQLInventory } = require('../services/inventorySyncService');
 const { testConnection } = require('../mysqlDb');
 const db = require('../db');
+const authenticate = require('../middlewares/authMiddleware');
 
 // Prevenir ejecuciones simultáneas
 let syncInProgress = false;
 
 // GET /api/mysql-sync/status
-router.get('/status', async (req, res) => {
+router.get('/status', authenticate, async (req, res) => {
   try {
     // Último sync
     const { rows: lastSync } = await db.query(`
@@ -56,7 +57,7 @@ router.get('/status', async (req, res) => {
 });
 
 // POST /api/mysql-sync/trigger — Sync manual
-router.post('/trigger', async (req, res) => {
+router.post('/trigger', authenticate, async (req, res) => {
   if (syncInProgress) {
     return res.status(409).json({ error: 'Ya hay una sincronización en progreso. Intenta en unos segundos.' });
   }
@@ -108,7 +109,7 @@ router.post('/push', async (req, res) => {
 });
 
 // GET /api/mysql-sync/test — Probar conexión a MySQL
-router.get('/test', async (req, res) => {
+router.get('/test', authenticate, async (req, res) => {
   try {
     const ok = await testConnection();
     if (ok) {

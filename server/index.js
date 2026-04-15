@@ -42,8 +42,8 @@ syncRouter.setLastSyncSetter((t) => {
 });
 app.use('/api/sync', authenticate, syncRouter);
 
-// MySQL Inventory Sync routes (protected)
-app.use('/api/mysql-sync', authenticate, require('./routes/mysqlSync'));
+// MySQL Inventory Sync routes
+app.use('/api/mysql-sync', require('./routes/mysqlSync'));
 
 
 // Dashboard stats endpoint (Protected)
