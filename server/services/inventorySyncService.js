@@ -24,6 +24,23 @@ const normalize = (str) => {
     .replace(/[\u0300-\u036f]/g, '');
 };
 
+// Normalización agresiva: SOLO letras y números (para comparar nombres muy distintos en formato)
+const hardClean = (str) => {
+  return normalize(str).replace(/[^a-z0-9]/g, '');
+};
+
+// Limpiar códigos: quitar ceros iniciales y espacios
+const cleanCode = (code) => {
+  if (!code) return '';
+  let c = code.toString().trim();
+  // Quitar ceros iniciales si son más de 3 (ej. 0000123 -> 123)
+  // Pero mantenemos ceros si el código es corto (ej. 001)
+  if (c.length > 5) {
+    c = c.replace(/^0+/, '');
+  }
+  return c;
+};
+
 /**
  * Query principal que el usuario usa para extraer existencias de Tampico (INTIDSUCURSAL=2)
  */
