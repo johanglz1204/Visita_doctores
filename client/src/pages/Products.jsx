@@ -127,7 +127,43 @@ export default function Products({ addToast }) {
               📊 Importar
             </label>
             <button className="btn btn-secondary" onClick={() => window.location.href = api.exportProductsExcel()}>📥 Exportar</button>
+            <button 
+              className="btn btn-secondary" 
+              style={{ color: '#d97706', borderColor: '#fbbf24' }} 
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  // Primero ver cuántos duplicados hay
+                  const preview = await api.getDuplicatesPreview();
+                  setLoading(false);
+                  
+                  if (preview.duplicates_to_delete === 0) {
+                    addToast('✅ No hay productos duplicados. El catálogo está limpio.');
+                    return;
+                  }
+                  
+                  if (!confirm(
+                    `Se encontraron ${preview.duplicates_to_delete} producto(s) duplicados en ${preview.duplicate_groups} grupo(s).\n\n` +
+                    `¿Deseas eliminar los duplicados? Los registros de inventario y ventas serán migrados al producto original.`
+                  )) return;
+                  
+                  setLoading(true);
+                  const res = await api.cleanupProducts();
+                  addToast(res.message);
+                  load();
+                } catch (err) {
+                  addToast(err.message, 'error');
+                  setLoading(false);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              ✨ Limpiar Duplicados
+            </button>
+
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
+
           </div>
         </div>
 

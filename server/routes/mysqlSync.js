@@ -1,9 +1,11 @@
 /**
  * mysqlSync.js — Rutas para controlar la sincronización MySQL → PostgreSQL
  *
- * GET  /api/mysql-sync/status   → Última sync, estadísticas históricas
- * POST /api/mysql-sync/trigger  → Ejecutar sync manual desde el panel
- * GET  /api/mysql-sync/test     → Probar conexión a MySQL
+ * GET  /api/mysql-sync/status              → Última sync, estadísticas históricas
+ * POST /api/mysql-sync/trigger             → Ejecutar sync manual desde el panel
+ * GET  /api/mysql-sync/test                → Probar conexión a MySQL
+ * GET  /api/mysql-sync/duplicates-preview  → Ver duplicados sin eliminar
+ * POST /api/mysql-sync/cleanup-duplicates  → Eliminar duplicados
  */
 
 const express = require('express');
@@ -132,47 +134,79 @@ router.get('/test', authenticate, async (req, res) => {
 router.setSyncInProgress = (val) => { syncInProgress = val; };
 router.isSyncInProgress = () => syncInProgress;
 
-// POST /api/mysql-sync/cleanup-duplicates - Eliminar productos repetidos del catálogo
-router.post('/cleanup-duplicates', async (req, res) => {
-  const apiKey = req.headers['x-api-key'];
-  const serverKey = process.env.SYNC_API_KEY;
-
-  if (!serverKey || apiKey !== serverKey) {
-    return res.status(403).json({ error: 'Acceso denegado. API Key inválida.' });
-  }
-
+// GET /api/mysql-sync/duplicates-preview — Ver cuántos hay sin borrar (requiere JWT)
+router.get('/duplicates-preview', authenticate, async (req, res) => {
   try {
-    console.log('🧹 [Cleanup] Iniciando limpieza de duplicados desde mysqlSync...');
-    
-    // 1. Identificar nombres duplicados (mismo nombre normalizado)
     const { rows: dupes } = await db.query(`
-      SELECT LOWER(TRIM(name)) as norm_name, COUNT(*), ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
+      SELECT 
+        LOWER(TRIM(name)) as norm_name,
+        COUNT(*) as count,
+        ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
+      FROM products
+      GROUP BY LOWER(TRIM(name))
+      HAVING COUNT(*) > 1
+      ORDER BY COUNT(*) DESC
+    `);
+    
+    const totalDupes = dupes.reduce((acc, g) => acc + (parseInt(g.count) - 1), 0);
+    res.json({ duplicate_groups: dupes.length, duplicates_to_delete: totalDupes, groups: dupes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/mysql-sync/cleanup-duplicates — Eliminar productos repetidos (requiere JWT)
+router.post('/cleanup-duplicates', authenticate, async (req, res) => {
+  try {
+    console.log('🧹 [Cleanup] Iniciando limpieza profunda de duplicados...');
+    
+    // Agrupar duplicados por nombre normalizado
+    const { rows: dupes } = await db.query(`
+      SELECT 
+        LOWER(TRIM(name)) as norm_name,
+        ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
       FROM products
       GROUP BY LOWER(TRIM(name))
       HAVING COUNT(*) > 1
     `);
 
     let deletedCount = 0;
+    let recordsMigrated = 0;
+
     for (const group of dupes) {
       const [keepId, ...toDelete] = group.id_list;
       
       for (const oldId of toDelete) {
-        // Mover dependencias para no perder integridad referencial
-        await db.query('UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2', [keepId, oldId]);
+        // Migrar dependencias antes de eliminar
+        const invUpdate = await db.query(
+          'UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2',
+          [keepId, oldId]
+        );
+        const salesUpdate = await db.query(
+          'UPDATE sales_history SET product_id = $1 WHERE product_id = $2',
+          [keepId, oldId]
+        );
         await db.query('DELETE FROM products WHERE id = $1', [oldId]);
+        
+        recordsMigrated += (parseInt(invUpdate.rowCount) || 0) + (parseInt(salesUpdate.rowCount) || 0);
         deletedCount++;
       }
     }
 
+    console.log(`🧹 [Cleanup] Eliminados: ${deletedCount}, Registros migrados: ${recordsMigrated}`);
+
     res.json({ 
       success: true, 
-      message: `Limpieza completada. Se eliminaron ${deletedCount} productos duplicados.`,
-      groups_cleaned: dupes.length
+      message: `Limpieza completada. Se eliminaron ${deletedCount} productos duplicados y se migraron ${recordsMigrated} registros relacionados.`,
+      groups_cleaned: dupes.length,
+      deleted_count: deletedCount,
+      records_migrated: recordsMigrated
     });
   } catch (err) {
     console.error('Error cleanup:', err);
     res.status(500).json({ error: 'Fallo en la limpieza', detail: err.message });
   }
 });
+
 
 module.exports = router;
