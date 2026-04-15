@@ -183,10 +183,3 @@ export default function Dashboard({ addToast }) {
     </div>
   );
 }
-s de 30 días.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
