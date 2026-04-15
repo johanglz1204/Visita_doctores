@@ -71,19 +71,45 @@ async function syncMySQLInventory(externalData = null) {
 
     stats.total_mysql = mysqlRows.length;
 
-    // 2. Cargar todos los productos de PostgreSQL en memoria
-    const { rows: pgProducts } = await db.query('SELECT id, name FROM products');
-    const pgProductMap = new Map();
+    // 2. Cargar todos los productos de PostgreSQL en memoria para matching rápido
+    const { rows: pgProducts } = await db.query('SELECT id, name, code FROM products');
+    const pgCodeMap = new Map();   // code -> product
+    const pgNameMap = new Map();   // normalized(name) -> product
+    
     for (const p of pgProducts) {
-      pgProductMap.set(normalize(p.name), p.id);
+      if (p.code) pgCodeMap.set(p.code.trim(), p);
+      pgNameMap.set(normalize(p.name), p);
     }
 
     // 3. Procesar cada artículo
     for (const row of mysqlRows) {
       const nombreNorm = normalize(row.nombre);
-      const productId = pgProductMap.get(nombreNorm);
+      const rowCode = row.codigo ? row.codigo.toString().trim() : null;
+      
+      let product = null;
 
-      if (!productId) {
+      // Prioridad 1: Match por Código
+      if (rowCode) {
+        product = pgCodeMap.get(rowCode);
+      }
+
+      // Prioridad 2: Match por Nombre (si no hubo match por código)
+      if (!product) {
+        product = pgNameMap.get(nombreNorm);
+        
+        // AUTO-LEARN: Si lo encontramos por nombre y no tiene código en PG, guardamos el código
+        if (product && !product.code && rowCode) {
+          try {
+            await db.query('UPDATE products SET code = $1 WHERE id = $2', [rowCode, product.id]);
+            product.code = rowCode; // Actualizar objeto en memoria
+            console.log(`✨ [MySQL Sync] Código ${rowCode} vinculado a "${product.name}"`);
+          } catch (codeErr) {
+            console.warn(`⚠️ Error vinculando código a ${product.name}:`, codeErr.message);
+          }
+        }
+      }
+
+      if (!product) {
         stats.unmatched++;
         stats.unmatched_list.push({
           codigo: row.codigo,
@@ -93,6 +119,7 @@ async function syncMySQLInventory(externalData = null) {
         continue;
       }
 
+      const productId = product.id;
       stats.matched++;
 
       try {

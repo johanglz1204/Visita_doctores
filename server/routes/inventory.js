@@ -160,6 +160,7 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 
       const doctorName = findValue(row, ['Doctor', 'Médico', 'Medico', 'Doc', 'Name']);
       const productName = findValue(row, ['Producto', 'Nombre', 'Product', 'Name']);
+      const productCode = findValue(row, ['Código', 'Codigo', 'SKU', 'ID', 'stramecop', 'Code']);
       const targetStock = parseInt(findValue(row, ['Stock Objetivo', 'Objetivo', 'Meta', 'Target', 'STOCK', 'Stock']) || 0);
       const currentStock = parseInt(findValue(row, ['Existencias', 'Stock Actual', 'Actual', 'Current', 'Existencia Cadena', 'Existencia']) || 0);
 
@@ -180,13 +181,30 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
           doctorId = newDoc[0].id;
         }
 
-        // Find or create product
+        // Find or create product (first try by code if available, then by name)
         let productId;
-        const { rows: prodRows } = await db.query('SELECT id FROM products WHERE UPPER(trim(name)) = $1', [productName.toString().trim().toUpperCase()]);
-        if (prodRows.length > 0) {
-          productId = prodRows[0].id;
+        let existingProduct = null;
+
+        if (productCode) {
+          const { rows: codeRows } = await db.query('SELECT id FROM products WHERE code = $1', [productCode.toString().trim()]);
+          if (codeRows.length > 0) existingProduct = codeRows[0];
+        }
+
+        if (!existingProduct) {
+          const { rows: nameRows } = await db.query('SELECT id FROM products WHERE UPPER(trim(name)) = $1', [productName.toString().trim().toUpperCase()]);
+          if (nameRows.length > 0) {
+            existingProduct = nameRows[0];
+            // Update code if it was missing
+            if (productCode) {
+              await db.query('UPDATE products SET code = $1 WHERE id = $2', [productCode.toString().trim(), existingProduct.id]);
+            }
+          }
+        }
+
+        if (existingProduct) {
+          productId = existingProduct.id;
         } else {
-          const { rows: newProd } = await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName.toString().trim()]);
+          const { rows: newProd } = await db.query('INSERT INTO products (name, code) VALUES ($1, $2) RETURNING id', [productName.toString().trim(), productCode ? productCode.toString().trim() : null]);
           productId = newProd[0].id;
         }
 
