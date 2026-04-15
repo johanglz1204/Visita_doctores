@@ -40,9 +40,10 @@ const MYSQL_INVENTORY_QUERY = `
 
 /**
  * Ejecuta la sincronización completa.
+ * @param {any[]} externalData - (Opcional) Datos enviados desde un agente externo (Push Sync)
  * @returns {Promise<object>} Estadísticas del sync
  */
-async function syncMySQLInventory() {
+async function syncMySQLInventory(externalData = null) {
   const startTime = Date.now();
   const stats = {
     total_mysql: 0,
@@ -52,27 +53,34 @@ async function syncMySQLInventory() {
     errors: 0,
     unmatched_list: [],
     error_list: [],
+    source: externalData ? 'PUSH' : 'PULL'
   };
 
   try {
-    // 1. Obtener existencias desde MySQL
-    console.log('🔄 [MySQL Sync] Consultando existencias en dbsicofa...');
-    const mysqlRows = await queryMySQL(MYSQL_INVENTORY_QUERY);
-    stats.total_mysql = mysqlRows.length;
-    console.log(`   → ${mysqlRows.length} artículos encontrados en MySQL (Tampico)`);
+    let mysqlRows = [];
+    
+    if (externalData && Array.isArray(externalData)) {
+      // Caso PUSH: Ya recibimos los datos
+      mysqlRows = externalData;
+      console.log(`📥 [MySQL Sync (PUSH)] Procesando ${mysqlRows.length} artículos recibidos...`);
+    } else {
+      // Caso PULL: Intentar consultar MySQL (puede fallar por timeout)
+      console.log('🔄 [MySQL Sync (PULL)] Consultando existencias en dbsicofa...');
+      mysqlRows = await queryMySQL(MYSQL_INVENTORY_QUERY);
+    }
 
-    // 2. Cargar todos los productos de PostgreSQL en memoria (más eficiente que N queries)
+    stats.total_mysql = mysqlRows.length;
+
+    // 2. Cargar todos los productos de PostgreSQL en memoria
     const { rows: pgProducts } = await db.query('SELECT id, name FROM products');
     const pgProductMap = new Map();
     for (const p of pgProducts) {
       pgProductMap.set(normalize(p.name), p.id);
     }
 
-    // 3. Procesar cada artículo de MySQL
+    // 3. Procesar cada artículo
     for (const row of mysqlRows) {
       const nombreNorm = normalize(row.nombre);
-
-      // Buscar match en PostgreSQL
       const productId = pgProductMap.get(nombreNorm);
 
       if (!productId) {
@@ -87,7 +95,6 @@ async function syncMySQLInventory() {
 
       stats.matched++;
 
-      // Actualizar current_stock (y target_stock si hay INTMINIMO) en inventory_stocks
       try {
         const result = await db.query(
           `UPDATE inventory_stocks
@@ -129,8 +136,8 @@ async function syncMySQLInventory() {
     );
 
     console.log(
-      `✅ [MySQL Sync] Completado en ${durationMs}ms → ` +
-      `${stats.updated} actualizados, ${stats.unmatched} sin match, ${stats.errors} errores`
+      `✅ [MySQL Sync (${stats.source})] Completado en ${durationMs}ms → ` +
+      `${stats.updated} actualizados, ${stats.unmatched} sin match`
     );
 
     return { success: true, duration_ms: durationMs, ...stats };
@@ -138,20 +145,18 @@ async function syncMySQLInventory() {
   } catch (err) {
     const durationMs = Date.now() - startTime;
     const errMsg = err.message || err.code || String(err);
-    console.error('❌ [MySQL Sync] Error fatal:', errMsg);
-    if (err.code) console.error('   Código de error:', err.code);
+    console.error(`❌ [MySQL Sync (${stats.source})] Error fatal:`, errMsg);
 
-    // Intentar guardar el error en el log
     try {
       await db.query(
         `INSERT INTO mysql_sync_logs
            (total_mysql, matched, updated, unmatched, errors, duration_ms, unmatched_list)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [0, 0, 0, 0, 1, durationMs, JSON.stringify([{ error: err.message }])]
+        [0, 0, 0, 0, 1, durationMs, JSON.stringify([{ error: errMsg }])]
       );
     } catch (_) {}
 
-    return { success: false, error: err.message, duration_ms: durationMs, ...stats };
+    return { success: false, error: errMsg, duration_ms: durationMs, ...stats };
   }
 }
 

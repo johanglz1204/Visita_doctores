@@ -75,6 +75,38 @@ router.post('/trigger', async (req, res) => {
   }
 });
 
+// POST /api/mysql-sync/push — Recibir datos desde agente local (Push Sync)
+router.post('/push', async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  const serverKey = process.env.SYNC_API_KEY;
+
+  if (!serverKey || apiKey !== serverKey) {
+    return res.status(403).json({ error: 'Acceso denegado. API Key inválida o no configurada en el servidor.' });
+  }
+
+  if (syncInProgress) {
+    return res.status(409).json({ error: 'Ya hay una sincronización en progreso.' });
+  }
+
+  const { data } = req.body;
+  if (!data || !Array.isArray(data)) {
+    return res.status(400).json({ error: 'Formato de datos inválido. Se espera { data: [...] }' });
+  }
+
+  syncInProgress = true;
+  try {
+    const result = await syncMySQLInventory(data);
+    res.json({
+      message: `Sincronización vía PUSH completada: ${result.updated} productos actualizados.`,
+      ...result,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error durante el procesamiento PUSH', detail: err.message });
+  } finally {
+    syncInProgress = false;
+  }
+});
+
 // GET /api/mysql-sync/test — Probar conexión a MySQL
 router.get('/test', async (req, res) => {
   try {
