@@ -110,7 +110,7 @@ async function syncMySQLInventory(externalData = null) {
     if (externalData && Array.isArray(externalData)) {
       // Caso PUSH: Ya recibimos los datos
       mysqlRows = externalData;
-      console.log(`📥 [MySQL Sync (PUSH)] Procesando ${mysqlRows.length} artículos recibidos...`);
+      console.log(`📥 [MySQL Sync (PUSH)] RECIBIDO: ${mysqlRows.length} filas.`);
     } else {
       // Caso PULL: Intentar consultar MySQL (puede fallar por timeout)
       console.log('🔄 [MySQL Sync (PULL)] Consultando existencias en dbsicofa...');
@@ -257,6 +257,7 @@ async function syncMySQLInventory(externalData = null) {
         stats.errors,
         durationMs,
         JSON.stringify(stats.unmatched_list),
+        JSON.stringify(stats.matched_list.slice(0, 100))
       ]
     );
 
