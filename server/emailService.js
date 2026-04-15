@@ -183,15 +183,18 @@ async function syncEmails() {
         }
       }
     } catch(batchErr) {
-      console.error('[SYNC ERROR] Batch error:', batchErr);
+      console.error('[SYNC ERROR] Fatal batch error:', batchErr.message);
     }
   }
-  console.log('[EMAIL SYNC] Finished successfully.');
+  console.log('✅ [EMAIL SYNC] Sincronización finalizada correctamente.');
+  } catch (err) {
+    console.error('❌ [EMAIL SYNC] Error crítico en la conexión IMAP:', err.message);
   } finally {
-    lock.release();
+    if (lock) lock.release();
   }
 
   await client.logout();
 }
 
 module.exports = { syncEmails };
+

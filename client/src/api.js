@@ -1,13 +1,35 @@
 const API_BASE = '/api';
 
-async function request(path, options = {}) {
+// Helper to refresh the token
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) throw new Error('No refresh token available');
+
+  const res = await fetch(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken })
+  });
+
+  if (!res.ok) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    throw new Error('Refresh token invalid');
+  }
+
+  const data = await res.json();
+  localStorage.setItem('accessToken', data.accessToken);
+  return data.accessToken;
+}
+
+async function request(path, options = {}, isRetry = false) {
   const url = `${API_BASE}${path}`;
   const config = {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   };
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
@@ -23,12 +45,17 @@ async function request(path, options = {}) {
   try {
     const res = await fetch(url, config);
     
-    // Si la sesión ha expirado o el token es inválido
-    if (res.status === 401 || res.status === 403) {
-      if (localStorage.getItem('token')) {
-        console.warn('Sesión inválida o expirada. Limpiando token...');
-        localStorage.removeItem('token');
-        window.location.reload(); // Forzar recarga a la pantalla de login
+    // Si el token ha expirado (403) o es inválido (401), intentamos refrescar
+    if ((res.status === 401 || res.status === 403) && !isRetry && localStorage.getItem('refreshToken')) {
+      console.log('Access token expired. Attempting refresh...');
+      try {
+        const newToken = await refreshAccessToken();
+        // Reintentar la petición original con el nuevo token
+        return request(path, options, true);
+      } catch (refreshErr) {
+        console.error('Refresh failed. Redirecting to login.');
+        window.location.reload(); // Forzar logout
+        return;
       }
     }
 
@@ -42,6 +69,7 @@ async function request(path, options = {}) {
     throw error;
   }
 }
+
 
 export const api = {
   // Auth

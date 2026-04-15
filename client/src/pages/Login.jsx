@@ -12,9 +12,10 @@ export default function Login({ onLogin }) {
     setLoading(true);
     try {
       const res = await api.login(username, password);
-      localStorage.setItem('token', res.token);
+      localStorage.setItem('accessToken', res.accessToken);
+      localStorage.setItem('refreshToken', res.refreshToken);
       toast.success(res.message || 'Bienvenido');
-      onLogin(res.token);
+      onLogin(res.accessToken, res.refreshToken);
     } catch (err) {
       toast.error(err.message || 'Error al iniciar sesión');
     } finally {

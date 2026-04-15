@@ -109,17 +109,18 @@ function ToastContainer({ toasts, onDismiss }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
+  const [token, setToken] = useState(() => localStorage.getItem('accessToken') || null);
 
-  const handleLogin = (newToken) => {
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
+  const handleLogin = (accessToken, refreshToken) => {
+    setToken(accessToken);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setToken(null);
   };
+
 
   const addToast = (message, type = 'success') => {
     if (type === 'error') {
