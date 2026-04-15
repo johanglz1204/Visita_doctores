@@ -181,8 +181,11 @@ async function syncMySQLInventory(externalData = null) {
         for (const pgProd of pgProducts) {
           const pgHard = hardClean(pgProd.name);
           if (pgHard.includes(nombreHard) || nombreHard.includes(pgHard)) {
-             product = pgProd;
-             break;
+             // VALIDACIÓN DE SEGURIDAD: La sustancia principal debe coincidir
+             if (isCompatible(row.nombre, pgProd.name)) {
+               product = pgProd;
+               break;
+             }
           }
         }
       }

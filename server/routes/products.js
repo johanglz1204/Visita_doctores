@@ -272,4 +272,40 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// POST /api/products/cleanup-duplicates - Eliminar productos repetidos
+router.post('/cleanup-duplicates', async (req, res) => {
+  try {
+    console.log('🧹 [Cleanup] Iniciando limpieza de duplicados...');
+    
+    // 1. Identificar nombres duplicados
+    const { rows: dupes } = await db.query(`
+      SELECT LOWER(TRIM(name)) as norm_name, COUNT(*), ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
+      FROM products
+      GROUP BY LOWER(TRIM(name))
+      HAVING COUNT(*) > 1
+    `);
+
+    let deletedCount = 0;
+    for (const group of dupes) {
+      const [keepId, ...toDelete] = group.id_list;
+      
+      // Mover asignaciones de stock si existen (opcional pero seguro)
+      for (const oldId of toDelete) {
+        await db.query('UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2', [keepId, oldId]);
+        await db.query('DELETE FROM products WHERE id = $1', [oldId]);
+        deletedCount++;
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Limpieza completada. Se eliminaron ${deletedCount} productos duplicados.`,
+      groups_cleaned: dupes.length
+    });
+  } catch (err) {
+    console.error('Error cleanup:', err);
+    res.status(500).json({ error: 'Fallo en la limpieza', detail: err.message });
+  }
+});
+
 module.exports = router;
