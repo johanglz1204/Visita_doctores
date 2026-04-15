@@ -163,17 +163,26 @@ async function syncMySQLInventory(externalData = null) {
 
       // Paso 1: Match por Código (Exacto)
       if (rowCode) {
-        product = pgCodeMap.get(rowCode);
+        const found = pgCodeMap.get(rowCode);
+        if (found && isCompatible(row.nombre, found.name)) {
+          product = found;
+        }
       }
 
       // Paso 2: Match por Nombre (Normalizado Exacto)
       if (!product) {
-        product = pgNameMap.get(nombreNorm);
+        const found = pgNameMap.get(nombreNorm);
+        if (found && isCompatible(row.nombre, found.name)) {
+          product = found;
+        }
       }
 
       // Paso 3: Match por Nombre (Limpio Alfa-numérico)
       if (!product) {
-        product = pgHardNameMap.get(nombreHard);
+        const found = pgHardNameMap.get(nombreHard);
+        if (found && isCompatible(row.nombre, found.name)) {
+          product = found;
+        }
       }
 
       // Paso 4: Match por Contenido (Contains)
