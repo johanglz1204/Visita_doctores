@@ -132,4 +132,47 @@ router.get('/test', authenticate, async (req, res) => {
 router.setSyncInProgress = (val) => { syncInProgress = val; };
 router.isSyncInProgress = () => syncInProgress;
 
+// POST /api/mysql-sync/cleanup-duplicates - Eliminar productos repetidos del catálogo
+router.post('/cleanup-duplicates', async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  const serverKey = process.env.SYNC_API_KEY;
+
+  if (!serverKey || apiKey !== serverKey) {
+    return res.status(403).json({ error: 'Acceso denegado. API Key inválida.' });
+  }
+
+  try {
+    console.log('🧹 [Cleanup] Iniciando limpieza de duplicados desde mysqlSync...');
+    
+    // 1. Identificar nombres duplicados (mismo nombre normalizado)
+    const { rows: dupes } = await db.query(`
+      SELECT LOWER(TRIM(name)) as norm_name, COUNT(*), ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
+      FROM products
+      GROUP BY LOWER(TRIM(name))
+      HAVING COUNT(*) > 1
+    `);
+
+    let deletedCount = 0;
+    for (const group of dupes) {
+      const [keepId, ...toDelete] = group.id_list;
+      
+      for (const oldId of toDelete) {
+        // Mover dependencias para no perder integridad referencial
+        await db.query('UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2', [keepId, oldId]);
+        await db.query('DELETE FROM products WHERE id = $1', [oldId]);
+        deletedCount++;
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Limpieza completada. Se eliminaron ${deletedCount} productos duplicados.`,
+      groups_cleaned: dupes.length
+    });
+  } catch (err) {
+    console.error('Error cleanup:', err);
+    res.status(500).json({ error: 'Fallo en la limpieza', detail: err.message });
+  }
+});
+
 module.exports = router;
