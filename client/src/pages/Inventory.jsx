@@ -11,6 +11,12 @@ export default function Inventory({ addToast }) {
   const [editing, setEditing] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ doctor_id: '', product_id: '', target_stock: '', current_stock: '' });
+  const [lastLog, setLastLog] = useState(null);
+  const [showLogModal, setShowLogModal] = useState(false);
+
+  const loadLog = () => {
+    api.getLastSyncLog().then(setLastLog).catch(console.error);
+  };
 
   const load = () => {
     setLoading(true);
@@ -24,7 +30,10 @@ export default function Inventory({ addToast }) {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { 
+    load(); 
+    loadLog();
+  }, []);
 
   const handleSyncSync = async () => {
     setSyncing(true);
@@ -256,6 +265,57 @@ export default function Inventory({ addToast }) {
                 <button type="submit" className="btn btn-primary">{editing ? 'Guardar Cambios' : 'Asignar Stock'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Modal de Diagnóstico de Sync */}
+      {showLogModal && (
+        <div className="modal-overlay" onClick={() => setShowLogModal(false)}>
+          <div className="modal" style={{ maxWidth: '800px' }} onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">📊 Última Sincronización (Diagnóstico)</h2>
+            {lastLog ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+                  <div className="card" style={{ padding: '16px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MySQL</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800' }}>{lastLog.total_mysql}</div>
+                  </div>
+                  <div className="card" style={{ padding: '16px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>PRODUCTOS ENCONTRADOS</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary-color)' }}>{lastLog.matched}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                    ❌ Muestra de productos sin coincidencia ({JSON.parse(lastLog.unmatched_list || '[]').length}):
+                  </h3>
+                  <div className="table-wrapper" style={{ maxHeight: '300px' }}>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Nombre en MySQL</th>
+                          <th>Código</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(JSON.parse(lastLog.unmatched_list || '[]')).slice(0, 30).map((item, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px' }}>{item.nombre}</td>
+                            <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="loading-container"><div className="spinner"></div><span>Cargando log...</span></div>
+            )}
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>Cerrar</button>
+            </div>
           </div>
         </div>
       )}
