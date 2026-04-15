@@ -287,27 +287,42 @@ export default function Inventory({ addToast }) {
                 </div>
 
                 <div>
-                  <h3 style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                    ❌ Muestra de productos sin coincidencia ({JSON.parse(lastLog.unmatched_list || '[]').length}):
-                  </h3>
-                  <div className="table-wrapper" style={{ maxHeight: '300px' }}>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Nombre en MySQL</th>
-                          <th>Código</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(JSON.parse(lastLog.unmatched_list || '[]')).slice(0, 30).map((item, i) => (
-                          <tr key={i}>
-                            <td style={{ fontSize: '12px' }}>{item.nombre}</td>
-                            <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {(() => {
+                    let list = [];
+                    try {
+                      list = Array.isArray(lastLog.unmatched_list) 
+                        ? lastLog.unmatched_list 
+                        : JSON.parse(lastLog.unmatched_list || '[]');
+                    } catch (e) {
+                      console.error("Error parsing list:", e);
+                    }
+                    
+                    return (
+                      <>
+                        <h3 style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                          ❌ Muestra de productos sin coincidencia ({list.length}):
+                        </h3>
+                        <div className="table-wrapper" style={{ maxHeight: '300px' }}>
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Nombre en MySQL</th>
+                                <th>Código</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {list.slice(0, 50).map((item, i) => (
+                                <tr key={i}>
+                                  <td style={{ fontSize: '12px' }}>{item.nombre}</td>
+                                  <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             ) : (
