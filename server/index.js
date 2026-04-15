@@ -62,6 +62,30 @@ app.get('/api/sync/last-log', authenticate, async (req, res) => {
 });
 
 
+// Endpoint de Emergencia para Limpieza de Duplicados (Temporal)
+app.post('/api/emergency-cleanup', async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey !== 'VD_Secret_Sync_2026_!$#') return res.status(403).send('Forbidden');
+  
+  try {
+    const db = require('./db');
+    const { rows: dupes } = await db.query(`
+      SELECT LOWER(TRIM(name)) as norm_name, ARRAY_AGG(id ORDER BY updated_at DESC, stock DESC) as id_list
+      FROM products GROUP BY LOWER(TRIM(name)) HAVING COUNT(*) > 1
+    `);
+    let deleted = 0;
+    for (const group of dupes) {
+      const [keepId, ...toDelete] = group.id_list;
+      for (const oldId of toDelete) {
+        await db.query('UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2', [keepId, oldId]);
+        await db.query('DELETE FROM products WHERE id = $1', [oldId]);
+        deleted++;
+      }
+    }
+    res.json({ success: true, deleted });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Serve static frontend in production
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {

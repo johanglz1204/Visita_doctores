@@ -2,7 +2,7 @@ const https = require('https');
 
 const options = {
   hostname: 'visita-doctores.onrender.com',
-  path: '/api/mysql-sync/cleanup-duplicates',
+  path: '/api/emergency-cleanup',
   method: 'POST',
   headers: {
     'Content-Length': 0,
