@@ -44,24 +44,23 @@ export default function Sales() {
   }, [selectedBranch, currentPage, startDate, endDate]);
 
   return (
-    <div>
-      <div className="page-header">
+    <div className="sales-container">
+      <div className="page-header" style={{ flexWrap: 'wrap', gap: '20px' }}>
         <div>
           <h1 className="page-title">Historial de Ventas</h1>
-          <p className="page-subtitle">Registro de ventas por sucursal</p>
+          <p className="page-subtitle">Registro centralizado de recetas y movimientos</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--bg-glass)', padding: '5px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Desde:</label>
-              <input type="date" className="btn btn-secondary" style={{ padding: '4px', margin: 0, border: 'none' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
-              
-              <label style={{ fontSize: '13px', fontWeight: 'bold', marginLeft: '10px' }}>Hasta:</label>
-              <input type="date" className="btn btn-secondary" style={{ padding: '4px', margin: 0, border: 'none' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+        <div className="btn-group" style={{ flexWrap: 'wrap' }}>
+          <div className="search-container" style={{ padding: '4px 12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>Desde:</span>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'none', color: 'var(--text-primary)', fontSize: '13px' }} />
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>Hasta:</span>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'none', color: 'var(--text-primary)', fontSize: '13px' }} />
           </div>
 
           <select 
-            className="btn btn-secondary" 
-            style={{ padding: '8px 12px', cursor: 'pointer' }}
+            className="form-input" 
+            style={{ width: 'auto', minWidth: '180px' }}
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
           >
@@ -71,25 +70,26 @@ export default function Sales() {
               <option key={b} value={b}>📍 {b}</option>
             ))}
           </select>
-          <button className="btn btn-primary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch, startDate, endDate)}>📥 Exportar a Excel</button>
+
+          <button className="btn btn-primary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch, startDate, endDate)}>📥 Exportar</button>
         </div>
       </div>
 
       <div className="card">
-        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 className="card-title">🧾 Ventas ({totalSales})</h2>
+        <div className="card-header">
+          <h2 className="card-title">🧾 Ventas Registradas ({totalSales})</h2>
           {totalSales > 0 && (
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div className="btn-group">
               <button 
-                className="btn btn-secondary" 
+                className="btn btn-secondary btn-sm" 
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               >
                 Anterior
               </button>
-              <span style={{ fontSize: '14px', fontWeight: '500' }}>Página {currentPage}</span>
+              <span style={{ fontSize: '13px', fontWeight: '600' }}>{currentPage} de {Math.ceil(totalSales / 50)}</span>
               <button 
-                className="btn btn-secondary" 
+                className="btn btn-secondary btn-sm" 
                 disabled={currentPage * 50 >= totalSales}
                 onClick={() => setCurrentPage(prev => prev + 1)}
               >
@@ -100,31 +100,29 @@ export default function Sales() {
         </div>
 
         {loading ? (
-          <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
+          <div className="loading-container"><div className="spinner"></div><span>Cargando historial...</span></div>
         ) : sales.length > 0 ? (
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>Doctor</th>
                   <th>Producto</th>
                   <th>Sucursal</th>
-                  <th>Cantidad</th>
+                  <th>Cant.</th>
                   <th>Fecha Venta</th>
-                  <th>Procesado el</th>
+                  <th style={{ textAlign: 'right' }}>Registro</th>
                 </tr>
               </thead>
               <tbody>
                 {sales.map(sale => (
                   <tr key={sale.id}>
-                    <td style={{ color: 'var(--text-muted)' }}>{sale.id}</td>
-                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sale.doctor_name || '—'}</td>
+                    <td style={{ fontWeight: 600 }}>{sale.doctor_name || '—'}</td>
                     <td>{sale.product_name || '—'}</td>
-                    <td style={{ fontSize: 13 }}>{sale.sucursal || '—'}</td>
-                    <td>{sale.quantity} Pza</td>
+                    <td><span className="badge badge-secondary" style={{ background: 'var(--bg-glass)', fontSize: '11px' }}>{sale.sucursal || '—'}</span></td>
+                    <td style={{ fontWeight: 700 }}>{sale.quantity}</td>
                     <td>{new Date(sale.sale_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{new Date(sale.created_at).toLocaleString('es-MX')}</td>
+                    <td style={{ textAlign: 'right', fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(sale.created_at).toLocaleString('es-MX')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -133,11 +131,13 @@ export default function Sales() {
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">🧾</div>
-            <p className="empty-state-text">No hay ventas registradas</p>
-            <p className="empty-state-hint">Las ventas se registran automáticamente al subir archivos TXT</p>
+            <p className="empty-state-text">No hay movimientos en este periodo</p>
+            <p className="empty-state-hint">Ajusta los filtros o selecciona otra sucursal</p>
           </div>
         )}
       </div>
     </div>
+  );
+}
   );
 }

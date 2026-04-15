@@ -97,28 +97,27 @@ export default function Doctors({ addToast }) {
   );
 
   return (
-    <div>
+    <div className="doctors-container">
       <div className="page-header">
-        <h1 className="page-title">Doctores</h1>
-        <p className="page-subtitle">Gestión de médicos registrados en el sistema</p>
+        <div>
+          <h1 className="page-title">Doctores</h1>
+          <p className="page-subtitle">Gestión de médicos registrados en el sistema</p>
+        </div>
+        <div className="search-container" style={{ width: '300px' }}>
+          <span>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Buscar doctor..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+          />
+        </div>
       </div>
 
       <div className="card">
-        <div className="card-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-          <h2 className="card-title" style={{ flex: '1 1 auto' }}>👨‍⚕️ Lista de Doctores ({filteredDoctors.length})</h2>
-          
-          <div className="search-bar" style={{ flex: '1 1 300px', display: 'flex', position: 'relative' }}>
-             <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
-             <input 
-               type="text" 
-               className="form-input" 
-               placeholder="Buscar doctor por nombre..." 
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-               style={{ paddingLeft: '35px', margin: 0, width: '100%' }}
-             />
-          </div>
-
+        <div className="card-header">
+          <h2 className="card-title">👨‍⚕️ Lista de Doctores ({filteredDoctors.length})</h2>
           <div className="btn-group">
             <input 
               type="file" 
@@ -127,17 +126,16 @@ export default function Doctors({ addToast }) {
               id="excel-upload-docs" 
               onChange={handleExcelUpload} 
             />
-            <label htmlFor="excel-upload-docs" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
-              📊 Cargar Excel
+            <label htmlFor="excel-upload-docs" className="btn btn-secondary">
+              📊 Importar
             </label>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Doctor</button>
           </div>
         </div>
 
         {loading ? (
-          <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
+          <div className="loading-container"><div className="spinner"></div><span>Cargando doctores...</span></div>
         ) : doctors.length > 0 ? (
-
           <div className="table-wrapper">
             <table>
               <thead>
@@ -145,35 +143,35 @@ export default function Doctors({ addToast }) {
                   <th>Nombre</th>
                   <th>Especialidad</th>
                   <th>Teléfono</th>
-                  <th>Cédula Profesional</th>
-                  <th>Acciones</th>
+                  <th>Cédula</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredDoctors.map(doc => (
                   <tr key={doc.id}>
-                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{doc.name}</td>
+                    <td style={{ fontWeight: 600 }}>{doc.name}</td>
                     <td>{doc.specialty || '—'}</td>
                     <td>{doc.phone || '—'}</td>
-                    <td>{doc.license || '—'}</td>
-                    <td>
-                      <div className="btn-group">
+                    <td style={{ fontSize: '12px', opacity: 0.8 }}>{doc.license || '—'}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
                         {doc.phone && (
                           <button 
-                            className="btn btn-sm" 
-                            style={{ background: '#25D366', color: 'white', border: 'none', padding: '5px 10px' }}
-                            title="Contactar por WhatsApp"
+                            className="btn btn-secondary btn-sm" 
+                            style={{ color: '#25D366' }}
+                            title="WhatsApp"
                             onClick={() => {
                               const cleanPhone = doc.phone.replace(/\D/g, '');
                               const finalPhone = cleanPhone.length === 10 ? '52' + cleanPhone : cleanPhone;
-                              const message = encodeURIComponent(`Hola Dr. ${doc.name}, le saludo de VisitaDoctores. Quedo a sus órdenes para darle seguimiento a su clínica.`);
+                              const message = encodeURIComponent(`Hola Dr. ${doc.name}, le saludo de VisitaDoctores.`);
                               window.open(`https://api.whatsapp.com/send?phone=${finalPhone}&text=${message}`, '_blank');
                             }}
                           >
                             💬
                           </button>
                         )}
-                        <Link to={`/doctors/${doc.id}`} className="btn btn-primary btn-sm" style={{textDecoration: 'none'}}>Ver Perfil</Link>
+                        <button className="btn btn-secondary btn-sm" onClick={() => window.location.href=`/doctors/${doc.id}`}>👁️</button>
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(doc)}>✏️</button>
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(doc.id, doc.name)}>🗑️</button>
                       </div>
@@ -183,16 +181,11 @@ export default function Doctors({ addToast }) {
               </tbody>
             </table>
           </div>
-        ) : doctors.length > 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">🔍</div>
-            <p className="empty-state-text">No se encontraron doctores que coincidan con "{searchTerm}"</p>
-          </div>
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">👨‍⚕️</div>
             <p className="empty-state-text">No hay doctores registrados</p>
-            <p className="empty-state-hint">Haz clic en "Nuevo Doctor" o sube un archivo Excel</p>
+            <p className="empty-state-hint">Nuevo Doctor o importa un Excel</p>
           </div>
         )}
       </div>

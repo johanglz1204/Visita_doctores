@@ -8,7 +8,6 @@ export default function Products({ addToast }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '' });
   const [searchTerm, setSearchTerm] = useState('');
-  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -16,18 +15,6 @@ export default function Products({ addToast }) {
   };
 
   useEffect(() => { load(); }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const resetForm = () => {
     setForm({ name: '', barcode: '', ranking: '', price: '' });
@@ -107,24 +94,21 @@ export default function Products({ addToast }) {
   );
 
   return (
-    <div>
+    <div className="products-container">
       <div className="page-header">
         <div>
           <h1 className="page-title">Productos</h1>
           <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
         </div>
-        <div className="search-container" style={{ flex: 1, maxWidth: '400px', margin: '0 20px' }}>
-          <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
-            <input 
-              type="text" 
-              className="form-input" 
-              placeholder="Buscar por nombre o código..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ paddingLeft: '35px', borderRadius: '20px', background: 'var(--bg-card)' }}
-            />
-          </div>
+        <div className="search-container" style={{ width: '300px' }}>
+          <span>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Buscar por nombre o código..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+          />
         </div>
       </div>
 
@@ -139,38 +123,38 @@ export default function Products({ addToast }) {
               id="excel-upload-products" 
               onChange={handleExcelUpload} 
             />
-            <label htmlFor="excel-upload-products" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
-              📊 Cargar Excel
+            <label htmlFor="excel-upload-products" className="btn btn-secondary">
+              📊 Importar
             </label>
-            <button className="btn btn-secondary" onClick={() => window.location.href = api.exportProductsExcel()}>📥 Exportar Excel</button>
+            <button className="btn btn-secondary" onClick={() => window.location.href = api.exportProductsExcel()}>📥 Exportar</button>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
           </div>
         </div>
 
         {loading ? (
-          <div className="loading-container"><div className="spinner"></div><span>Cargando...</span></div>
+          <div className="loading-container"><div className="spinner"></div><span>Cargando productos...</span></div>
         ) : filteredProducts.length > 0 ? (
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Código Barras</th>
+                  <th>Código</th>
                   <th>Producto</th>
                   <th>Ranking</th>
-                  <th>Precio Vale</th>
-                  <th>Acciones</th>
+                  <th>Precio</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.map(prod => (
                   <tr key={prod.id}>
-                    <td style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{prod.barcode || '—'}</td>
-                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</td>
-                    <td><span className={`badge ${prod.ranking === 'AA' || prod.ranking === 'A' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
-                    <td style={{ fontWeight: 600 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
-                    <td>
-                      <div className="btn-group">
-                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️ Editar</button>
+                    <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
+                    <td style={{ fontWeight: 600 }}>{prod.name}</td>
+                    <td><span className={`badge ${prod.ranking === 'A' || prod.ranking === 'AA' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
+                    <td style={{ fontWeight: 700 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
                       </div>
                     </td>
@@ -183,7 +167,7 @@ export default function Products({ addToast }) {
           <div className="empty-state">
             <div className="empty-state-icon">💊</div>
             <p className="empty-state-text">No se encontraron productos</p>
-            <p className="empty-state-hint">Asegúrate de que el catálogo tenga información cargada</p>
+            <p className="empty-state-hint">Registra un nuevo producto o importa un archivo Excel</p>
           </div>
         )}
       </div>
@@ -194,17 +178,17 @@ export default function Products({ addToast }) {
             <h2 className="modal-title">{editing ? '✏️ Editar Producto' : '➕ Nuevo Producto'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label">Nombre *</label>
+                <label className="form-label">Nombre del Producto *</label>
                 <input className="form-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. FARMAPRAM" />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Código de Barras</label>
+                  <label className="form-label">Código (Barcode)</label>
                   <input className="form-input" value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="750123456789" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Ranking</label>
-                  <input className="form-input" value={form.ranking} onChange={e => setForm({ ...form, ranking: e.target.value })} placeholder="AA, A, B, C" />
+                  <input className="form-input" value={form.ranking} onChange={e => setForm({ ...form, ranking: e.target.value })} placeholder="A, B, C..." />
                 </div>
               </div>
               <div className="form-group">
@@ -218,25 +202,6 @@ export default function Products({ addToast }) {
             </form>
           </div>
         </div>
-      )}
-
-      {showScrollTop && (
-        <button 
-          className="btn btn-primary btn-icon" 
-          onClick={scrollToTop}
-          style={{
-            position: 'fixed',
-            bottom: '30px',
-            right: '30px',
-            borderRadius: '50%',
-            width: '50px',
-            height: '50px',
-            boxShadow: 'var(--shadow-lg)',
-            zIndex: 90
-          }}
-        >
-          ↑
-        </button>
       )}
     </div>
   );

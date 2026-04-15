@@ -39,109 +39,111 @@ export default function DoctorProfile({ addToast }) {
   if (!doctor) return null;
 
   return (
-    <div>
-       <div className="page-header" style={{ alignItems: 'flex-start' }}>
-         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-           <button className="btn btn-secondary" onClick={() => navigate('/doctors')}>← Regresar</button>
-           <div style={{
-             width: '60px', height: '60px', borderRadius: '50%', 
-             background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-             display: 'flex', alignItems: 'center', justifyContent: 'center',
-             fontSize: '24px', color: 'white', fontWeight: 'bold'
-           }}>
-              {doctor.name.charAt(0).toUpperCase()}
-           </div>
-           <div>
-             <h1 className="page-title">{doctor.name}</h1>
-             <p className="page-subtitle">{doctor.specialty || 'General'} | Licencia: {doctor.license || 'N/A'}</p>
-           </div>
-         </div>
-       </div>
-
-       <div className="stats-grid" style={{ marginBottom: '24px' }}>
-          <div className="stat-card purple">
-            <div className="stat-icon">📈</div>
-            <div className="stat-value">{stats?.totalPrescriptions || 0}</div>
-            <div className="stat-label">Total Histórico de Prescripciones</div>
+    <div className="doctor-profile-container">
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button className="btn btn-secondary" onClick={() => navigate('/doctors')}>←</button>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '16px', 
+            background: 'var(--primary-color)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '24px', color: 'white', fontWeight: '800'
+          }}>
+            {doctor.name.charAt(0).toUpperCase()}
           </div>
-          <div className="stat-card cyan">
-             <div className="stat-icon">📞</div>
-             <div style={{ fontSize: '18px', fontWeight: 'bold', margin: '10px 0' }}>{doctor.phone || 'Sin número'}</div>
-             <div className="stat-label">Contacto Principal</div>
-             {doctor.phone && (
-               <button 
-                 className="btn btn-primary" 
-                 style={{ width: '100%', marginTop: '10px', background: '#25D366', borderColor: '#25D366' }}
-                 onClick={() => {
-                   const cleanPhone = doctor.phone.replace(/\D/g, '');
-                   const finalPhone = cleanPhone.length === 10 ? '52' + cleanPhone : cleanPhone;
-                   const topProduct = stats?.preferredProducts?.[0]?.name || 'nuestros productos';
-                   const message = encodeURIComponent(`Hola Dr. ${doctor.name}, le saludo de VisitaDoctores para darle seguimiento. Nos da gusto ver su preferencia por ${topProduct}. Quedo a sus órdenes.`);
-                   window.open(`https://api.whatsapp.com/send?phone=${finalPhone}&text=${message}`, '_blank');
-                 }}
-               >
-                 💬 Contactar por WhatsApp
-               </button>
-             )}
+          <div>
+            <h1 className="page-title">{doctor.name}</h1>
+            <p className="page-subtitle">{doctor.specialty || 'Especialista'} | {doctor.license || 'Cédula N/A'}</p>
           </div>
-          <div className="stat-card green" style={{ gridColumn: 'span 2' }}>
-             <div className="stat-icon">🏢</div>
-             <div style={{ fontSize: '16px', margin: '10px 0' }}>{doctor.address || 'Sin dirección registrada'}</div>
-             <div className="stat-label">Consultorio / Ubicación</div>
+        </div>
+      </div>
+
+      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '24px' }}>📊</span>
+          <div style={{ fontSize: '28px', fontWeight: '800' }}>{stats?.totalPrescriptions || 0}</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Total Recetas</div>
+        </div>
+        
+        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '24px' }}>📞</span>
+          <div style={{ fontSize: '18px', fontWeight: '700' }}>{doctor.phone || 'Sin número'}</div>
+          {doctor.phone && (
+            <button 
+              className="btn btn-secondary btn-sm" 
+              style={{ color: '#25D366', marginTop: '4px' }}
+              onClick={() => {
+                const cleanPhone = doctor.phone.replace(/\D/g, '');
+                const finalPhone = cleanPhone.length === 10 ? '52' + cleanPhone : cleanPhone;
+                const topProduct = stats?.preferredProducts?.[0]?.name || 'sus productos';
+                const message = encodeURIComponent(`Hola Dr. ${doctor.name}, le saludo de VisitaDoctores.`);
+                window.open(`https://api.whatsapp.com/send?phone=${finalPhone}&text=${message}`, '_blank');
+              }}
+            >
+              💬 WhatsApp
+            </button>
+          )}
+        </div>
+
+        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
+          <span style={{ fontSize: '24px' }}>🏢</span>
+          <div style={{ fontSize: '14px', fontWeight: '600', marginTop: '4px' }}>{doctor.address || 'Sin dirección registrada'}</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>UBICACIÓN / CONSULTORIO</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">💊 Top Productos</h2>
           </div>
-       </div>
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th style={{ textAlign: 'right' }}>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats?.preferredProducts?.length > 0 ? (
+                  stats.preferredProducts.map((p, i) => (
+                    <tr key={i}>
+                      <td style={{ fontWeight: 600 }}>{i === 0 ? '🥇 ' : ''}{p.name}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--primary-color)' }}>{p.quantity} Pza</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="2" style={{ textAlign: 'center' }}>Sin registros</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
-         
-         <div className="card">
-            <div className="card-header">
-               <h2 className="card-title">💊 Top 3 Productos Recetados</h2>
-            </div>
-            <div style={{ padding: '1rem' }}>
-               {stats?.preferredProducts?.length > 0 ? (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                     {stats.preferredProducts.map((p, i) => (
-                        <li key={i} style={{ 
-                           display: 'flex', justifyContent: 'space-between', 
-                           padding: '12px', borderBottom: '1px solid var(--border-color)',
-                           background: i === 0 ? 'var(--bg-glass)' : 'transparent',
-                           borderRadius: i === 0 ? '8px' : '0'
-                        }}>
-                           <span style={{ fontWeight: i === 0 ? 'bold' : 'normal' }}>
-                              {i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : '🥉 '}{p.name}
-                           </span>
-                           <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>{p.quantity} Pza</span>
-                        </li>
-                     ))}
-                  </ul>
-               ) : (
-                  <p className="empty-state">Aún no hay productos registrados para este doctor.</p>
-               )}
-            </div>
-         </div>
-
-         <div className="card">
-            <div className="card-header">
-               <h2 className="card-title">📉 Historial de Tendencia (Últimos 6 meses)</h2>
-            </div>
-            <div style={{ height: 250, padding: '1rem', width: '100%' }}>
-               {stats?.recentHistory?.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                     <BarChart data={stats.recentHistory}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-                        <XAxis dataKey="month" stroke="var(--text-muted)" />
-                        <YAxis stroke="var(--text-muted)" allowDecimals={false} />
-                        <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-                        <Bar dataKey="quantity" name="Recetas" fill="var(--primary-color)" radius={[4, 4, 0, 0]} />
-                     </BarChart>
-                  </ResponsiveContainer>
-               ) : (
-                  <p className="empty-state">No hay registros en los últimos 6 meses.</p>
-               )}
-            </div>
-         </div>
-
-       </div>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">📉 Tendencia Mensual</h2>
+          </div>
+          <div style={{ height: 250, width: '100%', marginTop: '16px' }}>
+            {stats?.recentHistory?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.recentHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
+                  <XAxis dataKey="month" stroke="var(--text-muted)" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="var(--text-muted)" allowDecimals={false} hide />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px' }} />
+                  <Bar dataKey="quantity" fill="var(--primary-color)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-state">No hay registros históricos</div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
+  );
+}
   );
 }
