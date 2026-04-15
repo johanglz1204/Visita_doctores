@@ -235,34 +235,32 @@ async function syncMySQLInventory(externalData = null) {
 
         try {
           // Actualización de stock
-          await db.query(
+          console.log(`📡 [DB Update] Intentando actualizar "${product.name}" (ID: ${product.id}) con stock: ${stockVal}`);
+          
+          const prodUpdate = await db.query(
             `UPDATE products 
              SET stock = $1, min_stock = $2, updated_at = NOW() 
              WHERE id = $3`,
-            [
-              stockVal,
-              minVal,
-              product.id
-            ]
+            [stockVal, minVal, product.id]
           );
           
-          await db.query(
+          const stockUpdate = await db.query(
             `UPDATE inventory_stocks
              SET current_stock = $1,
                  target_stock  = CASE WHEN $2 > 0 THEN $2 ELSE target_stock END,
                  updated_at    = NOW()
              WHERE product_id = $3`,
-            [
-              stockVal,
-              minVal,
-              product.id,
-            ]
+            [stockVal, minVal, product.id]
           );
+
+          console.log(`✅ [DB Update] Filas afectadas: Products(${prodUpdate.rowCount}), Stocks(${stockUpdate.rowCount})`);
+          
           stats.updated++;
           if (stats.updated <= 5) {
             console.log(`✅ [Sync Debug] "${row.nombre}" -> "${product.name}" (Stock: ${stockVal})`);
           }
         } catch (updateErr) {
+          console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);
           stats.errors++;
           stats.error_list.push(`${row.nombre}: ${updateErr.message}`);
         }
