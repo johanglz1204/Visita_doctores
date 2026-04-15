@@ -274,6 +274,13 @@ router.delete('/:id', async (req, res) => {
 
 // POST /api/products/cleanup-duplicates - Eliminar productos repetidos
 router.post('/cleanup-duplicates', async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  const serverKey = process.env.SYNC_API_KEY;
+
+  if (!serverKey || apiKey !== serverKey) {
+    return res.status(403).json({ error: 'Acceso denegado. API Key inválida.' });
+  }
+
   try {
     console.log('🧹 [Cleanup] Iniciando limpieza de duplicados...');
     
