@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS products (
     barcode       VARCHAR(255) DEFAULT '',
     ranking       VARCHAR(50) DEFAULT '',
     price         NUMERIC(10, 2) DEFAULT 0,
+    stock         INTEGER DEFAULT 0,
+    min_stock     INTEGER DEFAULT 0,
     description   TEXT DEFAULT '',
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW()

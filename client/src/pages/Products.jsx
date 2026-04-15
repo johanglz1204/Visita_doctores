@@ -141,6 +141,7 @@ export default function Products({ addToast }) {
                   <th>Código</th>
                   <th>Producto</th>
                   <th>Ranking</th>
+                  <th style={{ textAlign: 'center' }}>Existencia</th>
                   <th>Precio</th>
                   <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
@@ -151,6 +152,16 @@ export default function Products({ addToast }) {
                     <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
                     <td style={{ fontWeight: 600 }}>{prod.name}</td>
                     <td><span className={`badge ${prod.ranking === 'A' || prod.ranking === 'AA' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ 
+                        fontWeight: 700, 
+                        color: (prod.stock <= prod.min_stock) ? '#ef4444' : 'var(--text-primary)',
+                        fontSize: '15px'
+                      }}>
+                        {prod.stock || 0}
+                      </span>
+                      {prod.min_stock > 0 && <span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '4px' }}>/ {prod.min_stock}</span>}
+                    </td>
                     <td style={{ fontWeight: 700 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                     <td style={{ textAlign: 'right' }}>
                       <div className="btn-group" style={{ justifyContent: 'flex-end' }}>

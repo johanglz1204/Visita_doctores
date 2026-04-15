@@ -123,6 +123,19 @@ async function syncMySQLInventory(externalData = null) {
       stats.matched++;
 
       try {
+        // 1. ACTUALIZAR STOCK GLOBAL EN TABLA PRODUCTS
+        await db.query(
+          `UPDATE products 
+           SET stock = $1, min_stock = $2, updated_at = NOW() 
+           WHERE id = $3`,
+          [
+            Math.max(0, parseInt(row.existencia) || 0),
+            Math.max(0, parseInt(row.minimo) || 0),
+            productId
+          ]
+        );
+
+        // 2. ACTUALIZAR STOCK POR DOCTOR SI EXISTE
         const result = await db.query(
           `UPDATE inventory_stocks
            SET current_stock = $1,
@@ -135,9 +148,9 @@ async function syncMySQLInventory(externalData = null) {
             productId,
           ]
         );
-        if (result.rowCount > 0) {
-          stats.updated++;
-        }
+        
+        // Contamos como actualizado si se actualizó el global (siempre llega aquí si hay match)
+        stats.updated++;
       } catch (updateErr) {
         stats.errors++;
         stats.error_list.push(`${row.nombre}: ${updateErr.message}`);
