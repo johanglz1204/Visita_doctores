@@ -108,93 +108,100 @@ async function syncMySQLInventory(externalData = null) {
       
       let product = null;
 
-      // Prioridad 1: Match por Código (limpio de ceros iniciales)
+      // Paso 1: Match por Código (Exacto)
       if (rowCode) {
         product = pgCodeMap.get(rowCode);
       }
 
-      // Prioridad 2: Match por Nombre Normalizado
+      // Paso 2: Match por Nombre (Normalizado Exacto)
       if (!product) {
         product = pgNameMap.get(nombreNorm);
       }
 
-      // Prioridad 3: Match Agresivo (solo letras y números)
+      // Paso 3: Match por Nombre (Limpio Alfa-numérico)
       if (!product) {
         product = pgHardNameMap.get(nombreHard);
       }
 
-      // Prioridad 4: Match por contenido (Containment) - Solo si el nombreMySQL tiene al menos 5 letras
-      if (!product && nombreHard.length >= 5) {
-        // Buscamos si el nombre de MySQL está contenido en alguno de PG o viceversa
-        // Lo hacemos sobre la lista de PG ya cargada
+      // Paso 4: Match por Contenido (Contains)
+      if (!product && nombreHard.length >= 6) {
         for (const pgProd of pgProducts) {
           const pgHard = hardClean(pgProd.name);
           if (pgHard.includes(nombreHard) || nombreHard.includes(pgHard)) {
-             // Verificamos si es una coincidencia razonable (evitamos falsos positivos muy cortos)
-             if (Math.abs(pgHard.length - nombreHard.length) < 15) {
-               product = pgProd;
-               break;
-             }
+             product = pgProd;
+             break;
           }
         }
       }
-      
-      // AUTO-LEARN: Si lo encontramos por nombre y no tiene barcode en PG, guardamos el código
-      if (product && !product.barcode && row.codigo) {
-        try {
-          await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [row.codigo.toString().trim(), product.id]);
-          product.barcode = row.codigo.toString().trim();
-          console.log(`✨ [MySQL Sync] Código ${row.codigo} vinculado a "${product.name}"`);
-        } catch (codeErr) {
-          console.warn(`⚠️ Error vinculando código a ${product.name}:`, codeErr.message);
-        }
-      }
 
+      // Paso 5: Match por Superposición de palabras (Word Overlap)
       if (!product) {
+        let bestScore = 0;
+        let bestMatch = null;
+        for (const pgProd of pgProducts) {
+          const score = getOverlapScore(row.nombre, pgProd.name);
+          if (score > 0.6 && score > bestScore) { // Al menos 60% de palabras coinciden
+            bestScore = score;
+            bestMatch = pgProd;
+          }
+        }
+        product = bestMatch;
+      }
+      
+      // AUTO-LEARN y Tracking
+      if (product) {
+        stats.matched++;
+        stats.matched_list.push({
+          mysql: row.nombre,
+          pg: product.name,
+          codigo: row.codigo,
+          stock: row.existencia
+        });
+
+        if (!product.barcode && row.codigo) {
+           try {
+             await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [row.codigo.toString().trim(), product.id]);
+             product.barcode = row.codigo.toString().trim();
+           } catch (e) {}
+        }
+
+        try {
+          // Actualización de stock
+          await db.query(
+            `UPDATE products 
+             SET stock = $1, min_stock = $2, updated_at = NOW() 
+             WHERE id = $3`,
+            [
+              Math.max(0, parseInt(row.existencia) || 0),
+              Math.max(0, parseInt(row.minimo) || 0),
+              product.id
+            ]
+          );
+          
+          await db.query(
+            `UPDATE inventory_stocks
+             SET current_stock = $1,
+                 target_stock  = CASE WHEN $2 > 0 THEN $2 ELSE target_stock END,
+                 updated_at    = NOW()
+             WHERE product_id = $3`,
+            [
+              Math.max(0, parseInt(row.existencia) || 0),
+              Math.max(0, parseInt(row.minimo) || 0),
+              product.id,
+            ]
+          );
+          stats.updated++;
+        } catch (updateErr) {
+          stats.errors++;
+          stats.error_list.push(`${row.nombre}: ${updateErr.message}`);
+        }
+      } else {
         stats.unmatched++;
         stats.unmatched_list.push({
           codigo: row.codigo,
           nombre: row.nombre,
           existencia: row.existencia,
         });
-        continue;
-      }
-
-      const productId = product.id;
-      stats.matched++;
-
-      try {
-        // 1. ACTUALIZAR STOCK GLOBAL EN TABLA PRODUCTS
-        await db.query(
-          `UPDATE products 
-           SET stock = $1, min_stock = $2, updated_at = NOW() 
-           WHERE id = $3`,
-          [
-            Math.max(0, parseInt(row.existencia) || 0),
-            Math.max(0, parseInt(row.minimo) || 0),
-            productId
-          ]
-        );
-
-        // 2. ACTUALIZAR STOCK POR DOCTOR SI EXISTE
-        const result = await db.query(
-          `UPDATE inventory_stocks
-           SET current_stock = $1,
-               target_stock  = CASE WHEN $2 > 0 THEN $2 ELSE target_stock END,
-               updated_at    = NOW()
-           WHERE product_id = $3`,
-          [
-            Math.max(0, parseInt(row.existencia) || 0),
-            Math.max(0, parseInt(row.minimo) || 0),
-            productId,
-          ]
-        );
-        
-        // Contamos como actualizado si se actualizó el global (siempre llega aquí si hay match)
-        stats.updated++;
-      } catch (updateErr) {
-        stats.errors++;
-        stats.error_list.push(`${row.nombre}: ${updateErr.message}`);
       }
     }
 

@@ -271,62 +271,83 @@ export default function Inventory({ addToast }) {
       {/* Modal de Diagnóstico de Sync */}
       {showLogModal && (
         <div className="modal-overlay" onClick={() => setShowLogModal(false)}>
-          <div className="modal" style={{ maxWidth: '800px' }} onClick={e => e.stopPropagation()}>
-            <h2 className="modal-title">📊 Última Sincronización (Diagnóstico)</h2>
+          <div className="modal" style={{ maxWidth: '900px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">📊 Diagnóstico de Sincronización</h2>
             {lastLog ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-                  <div className="card" style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MySQL</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid var(--primary-color)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MYSQL</div>
                     <div style={{ fontSize: '24px', fontWeight: '800' }}>{lastLog.total_mysql}</div>
                   </div>
-                  <div className="card" style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>PRODUCTOS ENCONTRADOS</div>
-                    <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary-color)' }}>{lastLog.matched}</div>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #10b981' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>✅ ENCONTRADOS</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#10b981' }}>{lastLog.matched}</div>
+                  </div>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #ef4444' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>❌ SIN COINCIDENCIA</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#ef4444' }}>{lastLog.unmatched}</div>
                   </div>
                 </div>
 
-                <div>
-                  {(() => {
-                    let list = [];
-                    try {
-                      list = Array.isArray(lastLog.unmatched_list) 
-                        ? lastLog.unmatched_list 
-                        : JSON.parse(lastLog.unmatched_list || '[]');
-                    } catch (e) {
-                      console.error("Error parsing list:", e);
-                    }
-                    
-                    return (
-                      <>
-                        <h3 style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                          ❌ Muestra de productos sin coincidencia ({list.length}):
-                        </h3>
-                        <div className="table-wrapper" style={{ maxHeight: '300px' }}>
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>Nombre en MySQL</th>
-                                <th>Código</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {list.slice(0, 50).map((item, i) => (
-                                <tr key={i}>
-                                  <td style={{ fontSize: '12px' }}>{item.nombre}</td>
-                                  <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
-                    );
-                  })()}
+                <div className="tabs" style={{ display: 'flex', gap: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                   <button 
+                    className={`btn ${diagnosticTab === 'matched' ? 'btn-primary' : 'btn-secondary'}`} 
+                    onClick={() => setDiagnosticTab('matched')}
+                    style={{ fontSize: '12px' }}
+                   >
+                     ✅ Ver Encontrados ({lastLog.matched})
+                   </button>
+                   <button 
+                    className={`btn ${diagnosticTab === 'unmatched' ? 'btn-primary' : 'btn-secondary'}`} 
+                    onClick={() => setDiagnosticTab('unmatched')}
+                    style={{ fontSize: '12px' }}
+                   >
+                     ❌ Ver No Encontrados ({lastLog.unmatched})
+                   </button>
+                </div>
+
+                <div className="table-wrapper" style={{ maxHeight: '400px' }}>
+                  <table>
+                    <thead>
+                      {diagnosticTab === 'matched' ? (
+                        <tr>
+                          <th>Nombre en MySQL</th>
+                          <th>Vinculado con (Render)</th>
+                          <th style={{ textAlign: 'center' }}>Stock</th>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <th>Nombre en MySQL</th>
+                          <th>Código</th>
+                          <th>Stock</th>
+                        </tr>
+                      )}
+                    </thead>
+                    <tbody>
+                      {diagnosticTab === 'matched' ? (
+                        (Array.isArray(lastLog.matched_list) ? lastLog.matched_list : JSON.parse(lastLog.matched_list || '[]')).slice(0, 100).map((item, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px', fontWeight: 600 }}>{item.mysql}</td>
+                            <td style={{ fontSize: '12px', color: '#10b981' }}>{item.pg}</td>
+                            <td style={{ fontSize: '12px', textAlign: 'center' }}>{item.stock}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        (Array.isArray(lastLog.unmatched_list) ? lastLog.unmatched_list : JSON.parse(lastLog.unmatched_list || '[]')).slice(0, 100).map((item, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px' }}>{item.nombre}</td>
+                            <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
+                            <td style={{ fontSize: '12px' }}>{item.existencia}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             ) : (
-              <div className="loading-container"><div className="spinner"></div><span>Cargando log...</span></div>
+              <div className="loading-container"><div className="spinner"></div><span>Cargando diagnóstico...</span></div>
             )}
             <div className="modal-actions">
               <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>Cerrar</button>
