@@ -50,6 +50,17 @@ app.use('/api/mysql-sync', require('./routes/mysqlSync'));
 const { getDashboardStats } = require('./controllers/dashboardController');
 app.get('/api/dashboard', authenticate, getDashboardStats);
 
+// Endpoint para ver el último log de sincronización (Diagnóstico)
+app.get('/api/sync/last-log', authenticate, async (req, res) => {
+  try {
+    const db = require('./db');
+    const result = await db.query('SELECT * FROM mysql_sync_logs ORDER BY id DESC LIMIT 1');
+    res.json(result.rows[0] || { message: 'No hay logs de sincronización aún.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Serve static frontend in production
 app.use(express.static(path.join(__dirname, 'public')));

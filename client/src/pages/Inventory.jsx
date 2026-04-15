@@ -124,18 +124,12 @@ export default function Inventory({ addToast }) {
     <div className="inventory-container">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Inventario</h1>
-          <p className="page-subtitle">Asignación y seguimiento de stock por doctor y producto</p>
+          <h1 className="page-title">Inventario por Doctor</h1>
+          <p className="page-subtitle">Control de muestras y vales asignados</p>
         </div>
-        <div className="search-container" style={{ width: '350px' }}>
-          <span>🔍</span>
-          <input 
-            type="text" 
-            placeholder="Buscar por doctor o producto..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
-          />
+        <div className="btn-group">
+          <button className="btn btn-secondary" onClick={() => { loadLog(); setShowLogModal(true); }}>🔍 Log de Sync</button>
+          <button className="btn btn-primary" onClick={openCreate}>+ Asignar Stock</button>
         </div>
       </div>
 

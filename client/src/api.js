@@ -100,6 +100,7 @@ export const api = {
   // Inventory
   getInventory: () => request('/inventory'),
   getCriticalStock: (threshold) => request(`/inventory/critical?threshold=${threshold || 2}`),
+  getLastSyncLog: () => request('/sync/last-log'),
   createInventory: (data) => request('/inventory', { method: 'POST', body: data }),
   updateInventory: (id, data) => request(`/inventory/${id}`, { method: 'PUT', body: data }),
   deleteInventory: (id) => request(`/inventory/${id}`, { method: 'DELETE' }),
