@@ -73,39 +73,47 @@ async function syncMySQLInventory(externalData = null) {
 
     // 2. Cargar todos los productos de PostgreSQL en memoria para matching rápido
     const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
-    const pgCodeMap = new Map();   // barcode -> product
-    const pgNameMap = new Map();   // normalized(name) -> product
+    const pgCodeMap = new Map();         // code -> product
+    const pgNameMap = new Map();         // normalized(name) -> product
+    const pgHardNameMap = new Map();     // hardClean(name) -> product
     
     for (const p of pgProducts) {
-      if (p.barcode) pgCodeMap.set(p.barcode.trim(), p);
+      if (p.barcode) pgCodeMap.set(cleanCode(p.barcode), p);
       pgNameMap.set(normalize(p.name), p);
+      pgHardNameMap.set(hardClean(p.name), p);
     }
 
     // 3. Procesar cada artículo
     for (const row of mysqlRows) {
       const nombreNorm = normalize(row.nombre);
-      const rowCode = row.codigo ? row.codigo.toString().trim() : null;
+      const nombreHard = hardClean(row.nombre);
+      const rowCode = cleanCode(row.codigo);
       
       let product = null;
 
-      // Prioridad 1: Match por Código
+      // Prioridad 1: Match por Código (limpio de ceros iniciales)
       if (rowCode) {
         product = pgCodeMap.get(rowCode);
       }
 
-      // Prioridad 2: Match por Nombre (si no hubo match por código)
+      // Prioridad 2: Match por Nombre Normalizado
       if (!product) {
         product = pgNameMap.get(nombreNorm);
-        
-        // AUTO-LEARN: Si lo encontramos por nombre y no tiene barcode en PG, guardamos el código
-        if (product && !product.barcode && rowCode) {
-          try {
-            await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [rowCode, product.id]);
-            product.barcode = rowCode; // Actualizar objeto en memoria
-            console.log(`✨ [MySQL Sync] Código ${rowCode} vinculado a "${product.name}"`);
-          } catch (codeErr) {
-            console.warn(`⚠️ Error vinculando código a ${product.name}:`, codeErr.message);
-          }
+      }
+
+      // Prioridad 3: Match Agresivo (solo letras y números)
+      if (!product) {
+        product = pgHardNameMap.get(nombreHard);
+      }
+      
+      // AUTO-LEARN: Si lo encontramos por nombre y no tiene barcode en PG, guardamos el código
+      if (product && !product.barcode && row.codigo) {
+        try {
+          await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [row.codigo.toString().trim(), product.id]);
+          product.barcode = row.codigo.toString().trim();
+          console.log(`✨ [MySQL Sync] Código ${row.codigo} vinculado a "${product.name}"`);
+        } catch (codeErr) {
+          console.warn(`⚠️ Error vinculando código a ${product.name}:`, codeErr.message);
         }
       }
 
