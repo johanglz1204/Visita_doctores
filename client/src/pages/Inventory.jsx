@@ -13,6 +13,7 @@ export default function Inventory({ addToast }) {
   const [form, setForm] = useState({ doctor_id: '', product_id: '', target_stock: '', current_stock: '' });
   const [lastLog, setLastLog] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [diagnosticTab, setDiagnosticTab] = useState('unmatched'); // 'matched' o 'unmatched'
 
   const loadLog = () => {
     api.getLastSyncLog().then(setLastLog).catch(console.error);

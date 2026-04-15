@@ -41,6 +41,29 @@ const cleanCode = (code) => {
   return c;
 };
 
+// Obtener palabras únicas de una cadena (mínimo 3 letras, ignorando comunes)
+const getWords = (str) => {
+  const commonWords = new Set(['tabletas', 'capsulas', 'caja', 'frasco', 'ampolletas', 'suspension', 'solucion', 'jarabe', 'inyectable', 'crema', 'unguento', 'gel', 'con', 'para', 'del', 'los', 'mgs', 'ml']);
+  return new Set(
+    normalize(str)
+      .split(/[^a-z0-9]/)
+      .filter(w => w.length >= 2 && !commonWords.has(w) && isNaN(w)) // Ignoramos números puros para el overlap
+  );
+};
+
+// Calcular qué tanto se parecen dos nombres por sus palabras en común
+const getOverlapScore = (strMySQL, strPG) => {
+  const wordsMySQL = getWords(strMySQL);
+  const wordsPG = getWords(strPG);
+  if (wordsMySQL.size === 0) return 0;
+  
+  let matches = 0;
+  for (const word of wordsMySQL) {
+    if (wordsPG.has(word)) matches++;
+  }
+  return matches / wordsMySQL.size;
+};
+
 /**
  * Query principal que el usuario usa para extraer existencias de Tampico (INTIDSUCURSAL=2)
  */
@@ -68,12 +91,20 @@ async function syncMySQLInventory(externalData = null) {
     updated: 0,
     unmatched: 0,
     errors: 0,
+    matched_list: [],
     unmatched_list: [],
     error_list: [],
     source: externalData ? 'PUSH' : 'PULL'
   };
 
   try {
+    // Asegurar que la tabla de logs tenga la columna matched_list (Migración rápida)
+    try {
+      if (process.env.DATABASE_URL) {
+        await db.query("ALTER TABLE mysql_sync_logs ADD COLUMN IF NOT EXISTS matched_list JSONB DEFAULT '[]'::jsonb");
+      }
+    } catch (_) {}
+
     let mysqlRows = [];
     
     if (externalData && Array.isArray(externalData)) {
@@ -140,7 +171,7 @@ async function syncMySQLInventory(externalData = null) {
         let bestMatch = null;
         for (const pgProd of pgProducts) {
           const score = getOverlapScore(row.nombre, pgProd.name);
-          if (score > 0.6 && score > bestScore) { // Al menos 60% de palabras coinciden
+          if (score >= 0.6 && score > bestScore) { // Al menos 60% de palabras coinciden
             bestScore = score;
             bestMatch = pgProd;
           }
@@ -151,11 +182,14 @@ async function syncMySQLInventory(externalData = null) {
       // AUTO-LEARN y Tracking
       if (product) {
         stats.matched++;
+        const stockVal = Math.round(parseFloat(row.existencia) || 0);
+        const minVal = Math.round(parseFloat(row.minimo) || 0);
+
         stats.matched_list.push({
           mysql: row.nombre,
           pg: product.name,
           codigo: row.codigo,
-          stock: row.existencia
+          stock: stockVal
         });
 
         if (!product.barcode && row.codigo) {
@@ -172,8 +206,8 @@ async function syncMySQLInventory(externalData = null) {
              SET stock = $1, min_stock = $2, updated_at = NOW() 
              WHERE id = $3`,
             [
-              Math.max(0, parseInt(row.existencia) || 0),
-              Math.max(0, parseInt(row.minimo) || 0),
+              stockVal,
+              minVal,
               product.id
             ]
           );
@@ -185,12 +219,15 @@ async function syncMySQLInventory(externalData = null) {
                  updated_at    = NOW()
              WHERE product_id = $3`,
             [
-              Math.max(0, parseInt(row.existencia) || 0),
-              Math.max(0, parseInt(row.minimo) || 0),
+              stockVal,
+              minVal,
               product.id,
             ]
           );
           stats.updated++;
+          if (stats.updated <= 5) {
+            console.log(`✅ [Sync Debug] "${row.nombre}" -> "${product.name}" (Stock: ${stockVal})`);
+          }
         } catch (updateErr) {
           stats.errors++;
           stats.error_list.push(`${row.nombre}: ${updateErr.message}`);
@@ -210,8 +247,8 @@ async function syncMySQLInventory(externalData = null) {
     // 4. Guardar log en PostgreSQL
     await db.query(
       `INSERT INTO mysql_sync_logs
-         (total_mysql, matched, updated, unmatched, errors, duration_ms, unmatched_list)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+         (total_mysql, matched, updated, unmatched, errors, duration_ms, unmatched_list, matched_list)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         stats.total_mysql,
         stats.matched,
