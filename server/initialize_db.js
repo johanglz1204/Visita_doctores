@@ -34,6 +34,9 @@ async function initializeDatabase() {
 
   // Always ensure the admin user exists with the correct password
   await ensureAdminUser();
+
+  // Ensure MySQL sync log table exists
+  await ensureMySQLSyncLogsTable();
 }
 
 async function ensureAdminUser() {
@@ -108,7 +111,28 @@ async function restoreSeedData() {
   }
 }
 
-module.exports = { initializeDatabase, ensureAdminUser, restoreSeedData };
+async function ensureMySQLSyncLogsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS mysql_sync_logs (
+        id             SERIAL PRIMARY KEY,
+        synced_at      TIMESTAMPTZ DEFAULT NOW(),
+        total_mysql    INT DEFAULT 0,
+        matched        INT DEFAULT 0,
+        updated        INT DEFAULT 0,
+        unmatched      INT DEFAULT 0,
+        errors         INT DEFAULT 0,
+        duration_ms    INT DEFAULT 0,
+        unmatched_list JSONB DEFAULT '[]'
+      );
+    `);
+    console.log('✅ Tabla mysql_sync_logs verificada/creada.');
+  } catch (err) {
+    console.warn('⚠️ No se pudo crear mysql_sync_logs:', err.message);
+  }
+}
+
+module.exports = { initializeDatabase, ensureAdminUser, restoreSeedData, ensureMySQLSyncLogsTable };
 
 // If run directly via node initialize_db.js
 if (require.main === module) {

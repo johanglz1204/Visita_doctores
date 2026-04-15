@@ -42,6 +42,9 @@ syncRouter.setLastSyncSetter((t) => {
 });
 app.use('/api/sync', authenticate, syncRouter);
 
+// MySQL Inventory Sync routes (protected)
+app.use('/api/mysql-sync', authenticate, require('./routes/mysqlSync'));
+
 
 // Dashboard stats endpoint (Protected)
 const { getDashboardStats } = require('./controllers/dashboardController');
@@ -85,6 +88,37 @@ initializeDatabase().then(() => {
   // Ejecutar a los minutos 00 y 30 de dada hora
   cron.schedule('0,30 * * * *', runAutoSync);
   console.log(`⏱️  Sincronización automática programada con Cron (*/30).`);
+
+  // --- Auto MySQL Inventory Sync cada 5 minutos ---
+  const { syncMySQLInventory } = require('./services/inventorySyncService');
+  let mysqlSyncRunning = false;
+
+  const runMySQLSync = async () => {
+    if (mysqlSyncRunning) {
+      console.log('⏭️  [MySQL Sync] Sync anterior aún en progreso, saltando...');
+      return;
+    }
+    mysqlSyncRunning = true;
+    const now = new Date().toLocaleTimeString('es-MX');
+    console.log(`\n🔄 [${now}] Sincronizando existencias desde MySQL...`);
+    try {
+      const result = await syncMySQLInventory();
+      if (result.success) {
+        console.log(`✅ [${now}] MySQL Sync: ${result.updated} actualizados, ${result.unmatched} sin match.`);
+      } else {
+        console.error(`❌ [${now}] MySQL Sync falló: ${result.error}`);
+      }
+    } catch (err) {
+      console.error(`❌ [${now}] Error inesperado en MySQL Sync:`, err.message);
+    } finally {
+      mysqlSyncRunning = false;
+    }
+  };
+
+  // Ejecutar inmediatamente al arrancar, luego cada 5 minutos
+  runMySQLSync();
+  cron.schedule('*/5 * * * *', runMySQLSync);
+  console.log(`⏱️  MySQL Sync programado cada 5 minutos.`);
 
   // --- Auto Backup every 24 hours ---
   const { generateSQLDump } = require('./routes/backup');
