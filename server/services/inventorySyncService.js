@@ -122,6 +122,22 @@ async function syncMySQLInventory(externalData = null) {
       if (!product) {
         product = pgHardNameMap.get(nombreHard);
       }
+
+      // Prioridad 4: Match por contenido (Containment) - Solo si el nombreMySQL tiene al menos 5 letras
+      if (!product && nombreHard.length >= 5) {
+        // Buscamos si el nombre de MySQL está contenido en alguno de PG o viceversa
+        // Lo hacemos sobre la lista de PG ya cargada
+        for (const pgProd of pgProducts) {
+          const pgHard = hardClean(pgProd.name);
+          if (pgHard.includes(nombreHard) || nombreHard.includes(pgHard)) {
+             // Verificamos si es una coincidencia razonable (evitamos falsos positivos muy cortos)
+             if (Math.abs(pgHard.length - nombreHard.length) < 15) {
+               product = pgProd;
+               break;
+             }
+          }
+        }
+      }
       
       // AUTO-LEARN: Si lo encontramos por nombre y no tiene barcode en PG, guardamos el código
       if (product && !product.barcode && row.codigo) {
