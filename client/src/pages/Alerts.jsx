@@ -95,5 +95,3 @@ export default function Alerts() {
     </div>
   );
 }
-  );
-}
