@@ -41,18 +41,40 @@ const cleanCode = (code) => {
   return c;
 };
 
-// Obtener palabras únicas de una cadena (mínimo 3 letras, ignorando comunes)
+// Obtener palabras únicas significativas para el emparejamiento
 const getWords = (str) => {
-  const commonWords = new Set(['tabletas', 'capsulas', 'caja', 'frasco', 'ampolletas', 'suspension', 'solucion', 'jarabe', 'inyectable', 'crema', 'unguento', 'gel', 'con', 'para', 'del', 'los', 'mgs', 'ml']);
+  const normalized = normalize(str);
+  // Lista expandida de términos genéricos que NO identifican al producto
+  const stopWords = new Set([
+    'tabletas', 'capsulas', 'caja', 'frasco', 'ampolletas', 'suspension', 'solucion', 'jarabe', 
+    'inyectable', 'crema', 'unguento', 'gel', 'con', 'para', 'del', 'los', 'mgs', 'ml', 'pza',
+    'pzas', 'tab', 'tabs', 'cap', 'caps', 'iny', 'gr', 'mcg', 'u', 'im', 'iv', 'vo', 'c', '14', 
+    '28', '30', '10', '12', '15', '20', '500', '250', '100', '1g', '2g', '5g', '50', '75', '80', 
+    '150', '300', '400', '600', '800', '1200', '60', '90'
+  ]);
+  
   return new Set(
-    normalize(str)
+    normalized
       .split(/[^a-z0-9]/)
-      .filter(w => w.length >= 2 && !commonWords.has(w) && isNaN(w)) // Ignoramos números puros para el overlap
+      .filter(w => w.length >= 3 && !stopWords.has(w) && isNaN(w))
   );
 };
 
-// Calcular qué tanto se parecen dos nombres por sus palabras en común
+// Validar si dos nombres son compatibles (la primera palabra de MySQL debe estar en PG)
+const isCompatible = (strMySQL, strPG) => {
+  const wordsMySQL = Array.from(getWords(strMySQL));
+  const wordsPG = normalize(strPG);
+  if (wordsMySQL.length === 0) return false;
+  
+  // La sustancia principal (primera palabra real) debe estar presente
+  const mainSubstance = wordsMySQL[0];
+  return wordsPG.includes(mainSubstance);
+};
+
+// Calcular qué tanto se parecen por palabras comunes significativas
 const getOverlapScore = (strMySQL, strPG) => {
+  if (!isCompatible(strMySQL, strPG)) return 0; // Si el nombre base no coincide, abortamos
+
   const wordsMySQL = getWords(strMySQL);
   const wordsPG = getWords(strPG);
   if (wordsMySQL.size === 0) return 0;
