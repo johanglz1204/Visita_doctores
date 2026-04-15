@@ -161,6 +161,58 @@ export default function Dashboard({ addToast }) {
         </div>
       </div>
 
+      <div className="card" style={{ marginTop: '24px' }}>
+        <div className="card-header">
+          <h2 className="card-title">🚦 Rutero Sugerido (Atención Requerida)</h2>
+        </div>
+        {data?.urgentDoctors?.length > 0 ? (
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Prioridad</th>
+                  <th>Doctor</th>
+                  <th>Días Inactividad</th>
+                  <th>Última Receta</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.urgentDoctors.map(doc => {
+                  const isUrgent = doc.inactive_days >= 45;
+                  return (
+                    <tr key={doc.id}>
+                      <td>
+                        <span style={{ 
+                          padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '800',
+                          background: isUrgent ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                          color: isUrgent ? '#ef4444' : '#f59e0b',
+                          border: `1px solid ${isUrgent ? '#ef4444' : '#f59e0b'}`
+                        }}>
+                          {isUrgent ? '🔴 URGENTE' : '🟡 ATENCIÓN'}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{doc.name}</td>
+                      <td><span style={{ color: isUrgent ? '#ef4444' : 'inherit', fontWeight: 'bold' }}>{doc.inactive_days} días</span></td>
+                      <td>{new Date(doc.last_sale_date).toLocaleDateString('es-MX')}</td>
+                      <td>
+                        <button className="btn btn-secondary btn-sm" onClick={() => window.location.href=`/doctors/${doc.id}`}>Ver Perfil</button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">✅</div>
+            <p className="empty-state-text">Todo al día</p>
+            <p className="empty-state-hint">No hay doctores inactivos por más de 30 días.</p>
+          </div>
+        )}
+      </div>
+
       <style dangerouslySetInnerHTML={{ __html: `
         .dashboard-container { animation: fadeIn 0.5s ease; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
