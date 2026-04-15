@@ -90,8 +90,11 @@ router.post('/push', async (req, res) => {
   }
 
   const { data } = req.body;
-  if (!data || !Array.isArray(data)) {
-    return res.status(400).json({ error: 'Formato de datos inválido. Se espera { data: [...] }' });
+  console.log(`📡 [POST /push] Recibido paquete de: ${Object.keys(req.body || {})}`);
+  if (data && Array.isArray(data)) {
+    console.log(`📊 [POST /push] Tamaño de data: ${data.length} artículos.`);
+  } else {
+    console.error(`❌ [POST /push] Error: data no es un array o no existe.`);
   }
 
   syncInProgress = true;
