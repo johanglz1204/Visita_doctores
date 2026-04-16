@@ -117,9 +117,6 @@ export const api = {
   cleanupProducts: () => request('/mysql-sync/cleanup-duplicates', { method: 'POST' }),
   syncStatus: () => request('/mysql-sync/status'),
   triggerSync: () => request('/mysql-sync/trigger', { method: 'POST' }),
-  triggerRankingSync: () => request('/mysql-sync/rankings', { method: 'POST' }),
-
-
 
   // Inventory
   getInventory: () => request('/inventory'),

@@ -157,19 +157,6 @@ const MYSQL_INVENTORY_QUERY = `
     AND INTIDSUCURSAL = 2
 `;
 
-/**
- * Query para actualizar rankings sin filtrar por existencia o sucursal.
- * Buscamos todos los artículos que tengan un ranking asignado.
- */
-const MYSQL_RANKING_ONLY_QUERY = `
-  SELECT
-    stramecop        AS codigo,
-    STRNOMBRE        AS nombre,
-    STRRANKING       AS ranking
-  FROM tblclsarticulo
-  WHERE STRRANKING IS NOT NULL 
-    AND STRRANKING <> ''
-`;
 
 /**
  * Ejecuta la sincronización completa.
@@ -252,14 +239,12 @@ async function syncMySQLInventory(externalData = null) {
           // Actualización de stock
           console.log(`📡 [DB Update] Intentando actualizar "${product.name}" (ID: ${product.id}) con stock: ${stockVal}`);
           
-          // PROTECCIÓN DE RANKING: Solo actualizar si MySQL trae algo, para no borrar rankings existentes
-          const rankingVal = (row.ranking && row.ranking.trim()) ? row.ranking.trim() : null;
 
           const prodUpdate = await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, ranking = COALESCE($3, ranking), updated_at = NOW() 
-             WHERE id = $4`,
-            [stockVal, minVal, rankingVal, product.id]
+             SET stock = $1, min_stock = $2, updated_at = NOW() 
+             WHERE id = $3`,
+            [stockVal, minVal, product.id]
           );
           
           // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
@@ -275,9 +260,9 @@ async function syncMySQLInventory(externalData = null) {
           // Esto ayuda mientras se terminan de limpiar los duplicados
           await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, ranking = $3, updated_at = NOW() 
-             WHERE LOWER(TRIM(name)) = LOWER(TRIM($4)) AND id <> $5`,
-            [stockVal, minVal, row.ranking || '', product.name, product.id]
+             SET stock = $1, min_stock = $2, updated_at = NOW() 
+             WHERE LOWER(TRIM(name)) = LOWER(TRIM($3)) AND id <> $4`,
+            [stockVal, minVal, product.name, product.id]
           );
         } catch (updateErr) {
           console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);
@@ -338,131 +323,4 @@ async function syncMySQLInventory(externalData = null) {
   }
 }
 
-
-/**
- * Sincroniza ÚNICAMENTE los rankings de todos los productos.
- * Útil cuando se quiere actualizar rankings de productos sin stock.
- */
-async function syncMySQLRankings() {
-  const startTime = Date.now();
-  const stats = {
-    total_mysql: 0,
-    matched: 0,
-    updated: 0,
-    errors: 0,
-    unmatched: 0,
-    matched_list: [],
-    unmatched_list: [],
-    error_list: [],
-    source: 'RANKING_ONLY'
-  };
-
-  try {
-    console.log('🔄 [MySQL Rankings Sync] Consultando todos los rankings en dbsicofa...');
-    const mysqlRows = await queryMySQL(MYSQL_RANKING_ONLY_QUERY);
-    stats.total_mysql = mysqlRows.length;
-
-    // PRE-PROCESAR RANKINGS: Priorizar el mejor ranking si hay duplicados en MySQL
-    const getRankValue = (r) => {
-      const vals = { 'AA': 100, 'A': 90, 'B': 80, 'C': 70, 'D': 60, 'E': 50, 'Z': 10, '0': 1 };
-      return vals[(r||'').toString().toUpperCase().trim()] || 0;
-    };
-
-    const bestRankingsMap = new Map(); // codigoNormalizado -> mejor_ranking
-    for (const row of mysqlRows) {
-      if (!row.codigo) continue;
-      const c = cleanCode(row.codigo);
-      const currentRnk = (row.ranking || '').toString().trim();
-      if (!currentRnk) continue;
-
-      if (!bestRankingsMap.has(c)) {
-        bestRankingsMap.set(c, { ranking: currentRnk, val: getRankValue(currentRnk), row });
-      } else {
-        const exist = bestRankingsMap.get(c);
-        if (getRankValue(currentRnk) > exist.val) {
-          bestRankingsMap.set(c, { ranking: currentRnk, val: getRankValue(currentRnk), row });
-        }
-      }
-    }
-
-    const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
-    const pgCodeMap = new Map();
-    const pgNameMap = new Map();
-    const pgHardNameMap = new Map();
-    
-    for (const p of pgProducts) {
-      if (p.barcode) pgCodeMap.set(cleanCode(p.barcode), p);
-      pgNameMap.set(normalize(p.name), p);
-      pgHardNameMap.set(hardClean(p.name), p);
-    }
-
-    const pgMaps = { pgCodeMap, pgNameMap, pgHardNameMap };
-
-    // Solo iterar sobre los mejores rankings únicos
-    for (const [code, data] of bestRankingsMap.entries()) {
-      const row = data.row;
-      row.ranking = data.ranking; // aseguramos que tenga el mejor ranking evaluado
-
-      const product = findBestMatch(row, pgProducts, pgMaps);
-
-      if (product) {
-        stats.matched++;
-        try {
-          // Actualización Masiva: Aplicar el mismo ranking a todos los que se llamen igual O tengan el mismo código
-          const res = await db.query(
-            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE LOWER(TRIM(name)) = LOWER(TRIM($2)) OR (barcode IS NOT NULL AND barcode = $3)',
-            [row.ranking, product.name, product.barcode]
-          );
-          if (res.rowCount > 0) {
-            stats.updated += res.rowCount;
-            stats.matched_list.push({ 
-              mysql: row.nombre, 
-              pg: product.name, 
-              ranking: row.ranking, 
-              count: res.rowCount,
-              stock: (product.stock || 0)
-            });
-          }
-        } catch (e) {
-          stats.errors++;
-          stats.error_list.push(`${row.nombre}: ${e.message}`);
-        }
-      } else {
-        stats.unmatched++;
-        stats.unmatched_list.push({
-          codigo: row.codigo,
-          nombre: row.nombre,
-          existencia: 0,
-        });
-      }
-    }
-
-    const durationMs = Date.now() - startTime;
-    
-    // GUARDAR LOG PARA DIAGNÓSTICO
-    await db.query(
-      `INSERT INTO mysql_sync_logs
-         (total_mysql, matched, updated, unmatched, errors, duration_ms, unmatched_list, matched_list)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        stats.total_mysql,
-        stats.matched,
-        stats.updated,
-        stats.unmatched,
-        stats.errors,
-        durationMs,
-        JSON.stringify(stats.unmatched_list.slice(0, 100)),
-        JSON.stringify(stats.matched_list.slice(0, 100))
-      ]
-    );
-
-    console.log(`✅ [MySQL Rankings Sync] Completado: ${stats.updated} rankings actualizados en ${durationMs}ms.`);
-
-    return { success: true, duration_ms: durationMs, ...stats };
-  } catch (err) {
-    console.error('❌ [MySQL Rankings Sync] Error fatal:', err.message);
-    return { success: false, error: err.message, ...stats };
-  }
-}
-
-module.exports = { syncMySQLInventory, syncMySQLRankings };
+module.exports = { syncMySQLInventory };

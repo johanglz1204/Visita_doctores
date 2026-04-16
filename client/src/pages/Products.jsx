@@ -113,19 +113,6 @@ export default function Products({ addToast }) {
     }
   };
 
-  const handleRankingSync = async () => {
-    setSyncing(true);
-    try {
-      const res = await api.triggerRankingSync();
-      addToast(res.message);
-      load();
-      loadLog();
-    } catch (err) {
-      addToast(err.message, 'error');
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
