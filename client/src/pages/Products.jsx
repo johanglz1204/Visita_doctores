@@ -210,14 +210,6 @@ export default function Products({ addToast }) {
             </button>
 
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
-            <button 
-              className="btn btn-secondary" 
-              style={{ color: '#10b981', borderColor: '#10b981' }} 
-              onClick={handleRankingSync}
-              disabled={syncing}
-            >
-              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '✨ Sincronizar Rankings'}
-            </button>
           </div>
         </div>
 
