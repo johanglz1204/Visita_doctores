@@ -362,6 +362,29 @@ async function syncMySQLRankings() {
     const mysqlRows = await queryMySQL(MYSQL_RANKING_ONLY_QUERY);
     stats.total_mysql = mysqlRows.length;
 
+    // PRE-PROCESAR RANKINGS: Priorizar el mejor ranking si hay duplicados en MySQL
+    const getRankValue = (r) => {
+      const vals = { 'AA': 100, 'A': 90, 'B': 80, 'C': 70, 'D': 60, 'E': 50, 'Z': 10, '0': 1 };
+      return vals[(r||'').toString().toUpperCase().trim()] || 0;
+    };
+
+    const bestRankingsMap = new Map(); // codigoNormalizado -> mejor_ranking
+    for (const row of mysqlRows) {
+      if (!row.codigo) continue;
+      const c = cleanCode(row.codigo);
+      const currentRnk = (row.ranking || '').toString().trim();
+      if (!currentRnk) continue;
+
+      if (!bestRankingsMap.has(c)) {
+        bestRankingsMap.set(c, { ranking: currentRnk, val: getRankValue(currentRnk), row });
+      } else {
+        const exist = bestRankingsMap.get(c);
+        if (getRankValue(currentRnk) > exist.val) {
+          bestRankingsMap.set(c, { ranking: currentRnk, val: getRankValue(currentRnk), row });
+        }
+      }
+    }
+
     const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
     const pgCodeMap = new Map();
     const pgNameMap = new Map();
@@ -375,16 +398,20 @@ async function syncMySQLRankings() {
 
     const pgMaps = { pgCodeMap, pgNameMap, pgHardNameMap };
 
-    for (const row of mysqlRows) {
+    // Solo iterar sobre los mejores rankings únicos
+    for (const [code, data] of bestRankingsMap.entries()) {
+      const row = data.row;
+      row.ranking = data.ranking; // aseguramos que tenga el mejor ranking evaluado
+
       const product = findBestMatch(row, pgProducts, pgMaps);
 
       if (product) {
         stats.matched++;
         try {
-          // Actualización Masiva: Aplicar el mismo ranking a todos los que se llamen igual (Dedupe preventivo)
+          // Actualización Masiva: Aplicar el mismo ranking a todos los que se llamen igual O tengan el mismo código
           const res = await db.query(
-            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE LOWER(TRIM(name)) = LOWER(TRIM($2))',
-            [row.ranking, product.name]
+            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE LOWER(TRIM(name)) = LOWER(TRIM($2)) OR (barcode IS NOT NULL AND barcode = $3)',
+            [row.ranking, product.name, product.barcode]
           );
           if (res.rowCount > 0) {
             stats.updated += res.rowCount;
