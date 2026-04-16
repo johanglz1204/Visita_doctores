@@ -242,9 +242,9 @@ async function syncMySQLInventory(externalData = null) {
 
           const prodUpdate = await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, updated_at = NOW() 
-             WHERE id = $3`,
-            [stockVal, minVal, product.id]
+             SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
+             WHERE id = $4`,
+            [stockVal, minVal, row.nombre, product.id]
           );
           
           // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
@@ -257,12 +257,12 @@ async function syncMySQLInventory(externalData = null) {
           }
 
           // [DEDUPE SAFETY] Actualizar también cualquier otro producto con el mismo nombre normalizado
-          // Esto ayuda mientras se terminan de limpiar los duplicados
+          // Usamos el nombre ANTERIOR del producto (product.name) para encontrar a sus hermanos
           await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, updated_at = NOW() 
-             WHERE LOWER(TRIM(name)) = LOWER(TRIM($3)) AND id <> $4`,
-            [stockVal, minVal, product.name, product.id]
+             SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
+             WHERE LOWER(TRIM(name)) = LOWER(TRIM($4)) AND id <> $5`,
+            [stockVal, minVal, row.nombre, product.name, product.id]
           );
         } catch (updateErr) {
           console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);
