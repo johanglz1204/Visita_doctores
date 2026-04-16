@@ -10,7 +10,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { syncMySQLInventory } = require('../services/inventorySyncService');
+const { syncMySQLInventory, syncMySQLRankings } = require('../services/inventorySyncService');
 const { testConnection } = require('../mysqlDb');
 const db = require('../db');
 const authenticate = require('../middlewares/authMiddleware');
@@ -73,6 +73,26 @@ router.post('/trigger', authenticate, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Error durante la sincronización', detail: err.message });
+  } finally {
+    syncInProgress = false;
+  }
+});
+
+// POST /api/mysql-sync/rankings — Sincronizar rankings (sin filtro de existencia)
+router.post('/rankings', authenticate, async (req, res) => {
+  if (syncInProgress) {
+    return res.status(409).json({ error: 'Ya hay una sincronización en progreso.' });
+  }
+
+  syncInProgress = true;
+  try {
+    const result = await syncMySQLRankings();
+    res.json({
+      message: `Actualización de rankings completada: ${result.updated} productos actualizados.`,
+      ...result,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error durante la actualización de rankings', detail: err.message });
   } finally {
     syncInProgress = false;
   }

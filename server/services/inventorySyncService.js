@@ -102,6 +102,20 @@ const MYSQL_INVENTORY_QUERY = `
 `;
 
 /**
+ * Query para actualizar rankings sin filtrar por existencia o sucursal.
+ * Buscamos todos los artículos que tengan un ranking asignado.
+ */
+const MYSQL_RANKING_ONLY_QUERY = `
+  SELECT
+    stramecop        AS codigo,
+    STRNOMBRE        AS nombre,
+    STRRANKING       AS ranking
+  FROM tblclsarticulo
+  WHERE STRRANKING IS NOT NULL 
+    AND STRRANKING <> ''
+`;
+
+/**
  * Ejecuta la sincronización completa.
  * @param {any[]} externalData - (Opcional) Datos enviados desde un agente externo (Push Sync)
  * @returns {Promise<object>} Estadísticas del sync
@@ -313,4 +327,87 @@ async function syncMySQLInventory(externalData = null) {
   }
 }
 
-module.exports = { syncMySQLInventory };
+  }
+}
+
+/**
+ * Sincroniza ÚNICAMENTE los rankings de todos los productos.
+ * Útil cuando se quiere actualizar rankings de productos sin stock.
+ */
+async function syncMySQLRankings() {
+  const startTime = Date.now();
+  const stats = {
+    total_mysql: 0,
+    matched: 0,
+    updated: 0,
+    errors: 0,
+    matched_list: [],
+    error_list: []
+  };
+
+  try {
+    console.log('🔄 [MySQL Rankings Sync] Consultando todos los rankings en dbsicofa...');
+    const mysqlRows = await queryMySQL(MYSQL_RANKING_ONLY_QUERY);
+    stats.total_mysql = mysqlRows.length;
+
+    const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
+    const pgCodeMap = new Map();
+    const pgNameMap = new Map();
+    const pgHardNameMap = new Map();
+    
+    for (const p of pgProducts) {
+      if (p.barcode) pgCodeMap.set(cleanCode(p.barcode), p);
+      pgNameMap.set(normalize(p.name), p);
+      pgHardNameMap.set(hardClean(p.name), p);
+    }
+
+    for (const row of mysqlRows) {
+      const nombreNorm = normalize(row.nombre);
+      const nombreHard = hardClean(row.nombre);
+      const rowCode = cleanCode(row.codigo);
+      
+      let product = null;
+
+      if (rowCode) {
+        product = pgCodeMap.get(rowCode);
+      }
+
+      if (!product) {
+        const found = pgNameMap.get(nombreNorm);
+        if (found && isCompatible(row.nombre, found.name)) product = found;
+      }
+
+      if (!product) {
+        const found = pgHardNameMap.get(nombreHard);
+        if (found && isCompatible(row.nombre, found.name)) product = found;
+      }
+
+      if (product) {
+        stats.matched++;
+        try {
+          const res = await db.query(
+            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE id = $2',
+            [row.ranking, product.id]
+          );
+          if (res.rowCount > 0) {
+            stats.updated++;
+            stats.matched_list.push({ mysql: row.nombre, pg: product.name, ranking: row.ranking });
+          }
+        } catch (e) {
+          stats.errors++;
+          stats.error_list.push(`${row.nombre}: ${e.message}`);
+        }
+      }
+    }
+
+    const durationMs = Date.now() - startTime;
+    console.log(`✅ [MySQL Rankings Sync] Completado: ${stats.updated} rankings actualizados en ${durationMs}ms.`);
+
+    return { success: true, duration_ms: durationMs, ...stats };
+  } catch (err) {
+    console.error('❌ [MySQL Rankings Sync] Error fatal:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+module.exports = { syncMySQLInventory, syncMySQLRankings };

@@ -10,6 +10,15 @@ export default function Products({ addToast }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [syncInfo, setSyncInfo] = useState(null);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [diagnosticTab, setDiagnosticTab] = useState('unmatched');
+
+  const loadLog = () => {
+    api.syncStatus().then(setData => {
+       setSyncInfo(setData);
+       // El backend devuelve el historial y el último log en syncStatus
+    }).catch(console.error);
+  };
 
   const load = () => {
     setLoading(true);
@@ -104,6 +113,19 @@ export default function Products({ addToast }) {
     }
   };
 
+  const handleRankingSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await api.triggerRankingSync();
+      addToast(res.message);
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -116,17 +138,20 @@ export default function Products({ addToast }) {
           <h1 className="page-title">Productos</h1>
           <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
         </div>
-          <div className="search-container" style={{ width: '300px' }}>
+        <div className="btn-group">
+          <div className="search-container" style={{ width: '250px' }}>
             <span>🔍</span>
             <input 
               type="text" 
-              placeholder="Buscar por nombre o código..." 
+              placeholder="Buscar..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
             />
           </div>
+          <button className="btn btn-secondary" onClick={() => setShowLogModal(true)}>🔍 Diagnóstico</button>
         </div>
+      </div>
         
         {syncInfo?.last_sync && (
           <div className="card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(var(--primary-rgb), 0.05)', border: '1px solid rgba(var(--primary-rgb), 0.1)' }}>
@@ -197,7 +222,14 @@ export default function Products({ addToast }) {
             </button>
 
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
-
+            <button 
+              className="btn btn-secondary" 
+              style={{ color: '#10b981', borderColor: '#10b981' }} 
+              onClick={handleRankingSync}
+              disabled={syncing}
+            >
+              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '✨ Sincronizar Rankings'}
+            </button>
           </div>
         </div>
 
@@ -287,6 +319,94 @@ export default function Products({ addToast }) {
                 <button type="submit" className="btn btn-primary">{editing ? 'Guardar Cambios' : 'Crear Producto'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Diagnóstico de Sync */}
+      {showLogModal && (
+        <div className="modal-overlay" onClick={() => setShowLogModal(false)}>
+          <div className="modal" style={{ maxWidth: '900px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">📊 Diagnóstico de Sincronización</h2>
+            {syncInfo?.last_sync ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid var(--primary-color)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MYSQL</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800' }}>{syncInfo.last_sync.total_mysql}</div>
+                  </div>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #10b981' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>✅ ENCONTRADOS</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#10b981' }}>{syncInfo.last_sync.matched}</div>
+                  </div>
+                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #ef4444' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>❌ SIN COINCIDENCIA</div>
+                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#ef4444' }}>{syncInfo.last_sync.unmatched}</div>
+                  </div>
+                </div>
+
+                <div className="tabs" style={{ display: 'flex', gap: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                   <button 
+                    className={`btn ${diagnosticTab === 'matched' ? 'btn-primary' : 'btn-secondary'}`} 
+                    onClick={() => setDiagnosticTab('matched')}
+                    style={{ fontSize: '12px' }}
+                   >
+                     ✅ Ver Encontrados ({syncInfo.last_sync.matched})
+                   </button>
+                   <button 
+                    className={`btn ${diagnosticTab === 'unmatched' ? 'btn-primary' : 'btn-secondary'}`} 
+                    onClick={() => setDiagnosticTab('unmatched')}
+                    style={{ fontSize: '12px' }}
+                   >
+                     ❌ Ver No Encontrados ({syncInfo.last_sync.unmatched})
+                   </button>
+                </div>
+
+                <div className="table-wrapper" style={{ maxHeight: '400px' }}>
+                  <table>
+                    <thead>
+                      {diagnosticTab === 'matched' ? (
+                        <tr>
+                          <th>Nombre en MySQL</th>
+                          <th>Vinculado con (Render)</th>
+                          <th style={{ textAlign: 'center' }}>Stock</th>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <th>Nombre en MySQL</th>
+                          <th>Código</th>
+                          <th>Stock</th>
+                        </tr>
+                      )}
+                    </thead>
+                    <tbody>
+                      {diagnosticTab === 'matched' ? (
+                        (Array.isArray(syncInfo.matched_list) ? syncInfo.matched_list : JSON.parse(syncInfo.last_sync.matched_list || '[]')).slice(0, 100).map((item, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px', fontWeight: 600 }}>{item.mysql}</td>
+                            <td style={{ fontSize: '12px', color: '#10b981' }}>{item.pg}</td>
+                            <td style={{ fontSize: '12px', textAlign: 'center' }}>{item.stock}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        (Array.isArray(syncInfo.unmatched_list) ? syncInfo.unmatched_list : JSON.parse(syncInfo.last_sync.unmatched_list || '[]')).slice(0, 100).map((item, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px' }}>{item.nombre}</td>
+                            <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
+                            <td style={{ fontSize: '12px' }}>{item.existencia}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="loading-container"><div className="spinner"></div><span>Cargando diagnóstico...</span></div>
+            )}
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>Cerrar</button>
+            </div>
           </div>
         </div>
       )}
