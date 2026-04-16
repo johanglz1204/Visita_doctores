@@ -97,10 +97,10 @@ router.post('/', validateRequest(productSchema), async (req, res) => {
   try {
     const { name, barcode, ranking, price } = req.body;
     
-    // Check for duplicates
+    // Check for duplicates (Normalized)
     const { rows: existing } = await db.query(
-      'SELECT id FROM products WHERE UPPER(trim(name)) = $1',
-      [name.trim().toUpperCase()]
+      'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))',
+      [name]
     );
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Ya existe un producto con ese nombre' });
@@ -201,11 +201,12 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
         const nameUpper = name.toString().trim().toUpperCase();
 
         const { rows: existing } = await db.query(
-          'SELECT id FROM products WHERE UPPER(trim(name)) = $1',
-          [nameUpper]
+          'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))',
+          [name.toString()]
         );
 
         if (existing.length > 0) {
+          // Si hay múltiples, actualizamos el primero (el cleanup los unirá después)
           await db.query(
             `UPDATE products SET 
                barcode=$1, 
@@ -215,6 +216,13 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
              WHERE id=$4`,
             [barcode.toString(), ranking.toString(), price, existing[0].id]
           );
+          // Y nos aseguramos que los otros (si hay duplicados) al menos tengan el mismo ranking
+          if (existing.length > 1) {
+            await db.query(
+              'UPDATE products SET ranking=$1 WHERE LOWER(TRIM(name)) = LOWER(TRIM($2))',
+              [ranking.toString(), name.toString()]
+            );
+          }
         } else {
           await db.query(
             `INSERT INTO products (name, barcode, ranking, price) 

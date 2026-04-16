@@ -268,6 +268,15 @@ async function syncMySQLInventory(externalData = null) {
           if (stats.updated <= 5) {
             console.log(`✅ [Sync Debug] "${row.nombre}" -> "${product.name}" (Stock: ${stockVal})`);
           }
+
+          // [DEDUPE SAFETY] Actualizar también cualquier otro producto con el mismo nombre normalizado
+          // Esto ayuda mientras se terminan de limpiar los duplicados
+          await db.query(
+            `UPDATE products 
+             SET stock = $1, min_stock = $2, ranking = $3, updated_at = NOW() 
+             WHERE LOWER(TRIM(name)) = LOWER(TRIM($4)) AND id <> $5`,
+            [stockVal, minVal, row.ranking || '', product.name, product.id]
+          );
         } catch (updateErr) {
           console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);
           stats.errors++;
@@ -383,13 +392,14 @@ async function syncMySQLRankings() {
       if (product) {
         stats.matched++;
         try {
+          // Actualización Masiva: Aplicar el mismo ranking a todos los que se llamen igual (Dedupe preventivo)
           const res = await db.query(
-            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE id = $2',
-            [row.ranking, product.id]
+            'UPDATE products SET ranking = $1, updated_at = NOW() WHERE LOWER(TRIM(name)) = LOWER(TRIM($2))',
+            [row.ranking, product.name]
           );
           if (res.rowCount > 0) {
-            stats.updated++;
-            stats.matched_list.push({ mysql: row.nombre, pg: product.name, ranking: row.ranking });
+            stats.updated += res.rowCount;
+            stats.matched_list.push({ mysql: row.nombre, pg: product.name, ranking: row.ranking, count: res.rowCount });
           }
         } catch (e) {
           stats.errors++;

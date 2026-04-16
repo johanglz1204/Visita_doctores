@@ -13,6 +13,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { initializeDatabase } = require('./initialize_db');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +79,11 @@ initializeDatabase().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
   console.log(`🏥 VisitaDoctores server running on port ${PORT}`);
   console.log(`   Dashboard: http://localhost:${PORT}`);
+
+  // DB CONSTRAINTS (Dedupe)
+  db.query("CREATE UNIQUE INDEX IF NOT EXISTS idx_products_unique_name ON products (LOWER(TRIM(name)))")
+    .then(() => console.log('✅ Index UNIQUE verified.'))
+    .catch(e => console.error('⚠️ Index UNIQUE error:', e.message));
 
   // --- Configuración de tareas de fondo (Cron) ---
   const cron = require('node-cron');
