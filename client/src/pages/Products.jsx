@@ -145,7 +145,6 @@ export default function Products({ addToast }) {
             </button>
           </div>
         )}
-      </div>
 
       <div className="card">
         <div className="card-header">
@@ -200,7 +199,6 @@ export default function Products({ addToast }) {
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
 
           </div>
-        </div>
 
         {loading ? (
           <div className="loading-container"><div className="spinner"></div><span>Cargando productos...</span></div>
