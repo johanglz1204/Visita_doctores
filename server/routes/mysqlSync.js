@@ -37,19 +37,21 @@ router.get('/status', authenticate, async (req, res) => {
       LIMIT 10
     `);
 
-    // Sin match del último sync (para diagnóstico)
     let unmatchedList = [];
+    let matchedList = [];
     if (lastSync.length > 0) {
       const { rows: detail } = await db.query(`
-        SELECT unmatched_list FROM mysql_sync_logs WHERE id = $1
+        SELECT unmatched_list, matched_list FROM mysql_sync_logs WHERE id = $1
       `, [lastSync[0].id]);
       unmatchedList = detail[0]?.unmatched_list || [];
+      matchedList = detail[0]?.matched_list || [];
     }
 
     res.json({
       last_sync: lastSync[0] || null,
       history,
       unmatched_list: unmatchedList,
+      matched_list: matchedList,
       sync_in_progress: syncInProgress,
     });
   } catch (err) {
