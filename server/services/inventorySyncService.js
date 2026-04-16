@@ -327,8 +327,6 @@ async function syncMySQLInventory(externalData = null) {
   }
 }
 
-  }
-}
 
 /**
  * Sincroniza ÚNICAMENTE los rankings de todos los productos.
