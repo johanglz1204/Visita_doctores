@@ -119,6 +119,7 @@ export default function Products({ addToast }) {
       const res = await api.triggerRankingSync();
       addToast(res.message);
       load();
+      loadLog();
     } catch (err) {
       addToast(err.message, 'error');
     } finally {

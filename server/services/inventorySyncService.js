@@ -87,6 +87,62 @@ const getOverlapScore = (strMySQL, strPG) => {
 };
 
 /**
+ * Lógica UNIFICADA de búsqueda (5 pasos)
+ */
+function findBestMatch(row, pgProducts, pgMaps) {
+  const { pgCodeMap, pgNameMap, pgHardNameMap } = pgMaps;
+  const nombreNorm = normalize(row.nombre);
+  const nombreHard = hardClean(row.nombre);
+  const rowCode = cleanCode(row.codigo);
+
+  let product = null;
+
+  // Paso 1: Match por Código (Exacto) - PRIORIDAD ALTA
+  if (rowCode) {
+    const found = pgCodeMap.get(rowCode);
+    if (found) product = found;
+  }
+
+  // Paso 2: Match por Nombre (Normalizado Exacto)
+  if (!product) {
+    const found = pgNameMap.get(nombreNorm);
+    if (found && isCompatible(row.nombre, found.name)) product = found;
+  }
+
+  // Paso 3: Match por Nombre (Limpio Alfa-numérico)
+  if (!product) {
+    const found = pgHardNameMap.get(nombreHard);
+    if (found && isCompatible(row.nombre, found.name)) product = found;
+  }
+
+  // Paso 4: Match por Contenido (Contains)
+  if (!product && nombreHard.length >= 6) {
+    for (const pgProd of pgProducts) {
+      if (hardClean(pgProd.name).includes(nombreHard) || nombreHard.includes(hardClean(pgProd.name))) {
+        if (isCompatible(row.nombre, pgProd.name)) {
+          product = pgProd;
+          break;
+        }
+      }
+    }
+  }
+
+  // Paso 5: Match por Superposición (Word Overlap)
+  if (!product) {
+    let bestScore = 0;
+    for (const pgProd of pgProducts) {
+      const score = getOverlapScore(row.nombre, pgProd.name);
+      if (score >= 0.6 && score > bestScore) {
+        bestScore = score;
+        product = pgProd;
+      }
+    }
+  }
+
+  return product;
+}
+
+/**
  * Query principal que el usuario usa para extraer existencias de Tampico (INTIDSUCURSAL=2)
  */
 const MYSQL_INVENTORY_QUERY = `
@@ -170,64 +226,7 @@ async function syncMySQLInventory(externalData = null) {
 
     // 3. Procesar cada artículo
     for (const row of mysqlRows) {
-      const nombreNorm = normalize(row.nombre);
-      const nombreHard = hardClean(row.nombre);
-      const rowCode = cleanCode(row.codigo);
-      
-      let product = null;
-
-      // Paso 1: Match por Código (Exacto) - PRIORIDAD ALTA
-      if (rowCode) {
-        const found = pgCodeMap.get(rowCode);
-        if (found) {
-          // Si hay match por código, lo tomamos directamente (el usuario pidió PRIORIDAD al código)
-          product = found;
-        }
-      }
-
-      // Paso 2: Match por Nombre (Normalizado Exacto)
-      if (!product) {
-        const found = pgNameMap.get(nombreNorm);
-        if (found && isCompatible(row.nombre, found.name)) {
-          product = found;
-        }
-      }
-
-      // Paso 3: Match por Nombre (Limpio Alfa-numérico)
-      if (!product) {
-        const found = pgHardNameMap.get(nombreHard);
-        if (found && isCompatible(row.nombre, found.name)) {
-          product = found;
-        }
-      }
-
-      // Paso 4: Match por Contenido (Contains)
-      if (!product && nombreHard.length >= 6) {
-        for (const pgProd of pgProducts) {
-          const pgHard = hardClean(pgProd.name);
-          if (pgHard.includes(nombreHard) || nombreHard.includes(pgHard)) {
-             // VALIDACIÓN DE SEGURIDAD: La sustancia principal debe coincidir
-             if (isCompatible(row.nombre, pgProd.name)) {
-               product = pgProd;
-               break;
-             }
-          }
-        }
-      }
-
-      // Paso 5: Match por Superposición de palabras (Word Overlap)
-      if (!product) {
-        let bestScore = 0;
-        let bestMatch = null;
-        for (const pgProd of pgProducts) {
-          const score = getOverlapScore(row.nombre, pgProd.name);
-          if (score >= 0.6 && score > bestScore) { // Al menos 60% de palabras coinciden
-            bestScore = score;
-            bestMatch = pgProd;
-          }
-        }
-        product = bestMatch;
-      }
+      const product = findBestMatch(row, pgProducts, { pgCodeMap, pgNameMap, pgHardNameMap });
       
       // AUTO-LEARN y Tracking
       if (product) {
@@ -253,11 +252,14 @@ async function syncMySQLInventory(externalData = null) {
           // Actualización de stock
           console.log(`📡 [DB Update] Intentando actualizar "${product.name}" (ID: ${product.id}) con stock: ${stockVal}`);
           
+          // PROTECCIÓN DE RANKING: Solo actualizar si MySQL trae algo, para no borrar rankings existentes
+          const rankingVal = (row.ranking && row.ranking.trim()) ? row.ranking.trim() : null;
+
           const prodUpdate = await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, ranking = $3, updated_at = NOW() 
+             SET stock = $1, min_stock = $2, ranking = COALESCE($3, ranking), updated_at = NOW() 
              WHERE id = $4`,
-            [stockVal, minVal, row.ranking || '', product.id]
+            [stockVal, minVal, rankingVal, product.id]
           );
           
           // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
@@ -348,8 +350,11 @@ async function syncMySQLRankings() {
     matched: 0,
     updated: 0,
     errors: 0,
+    unmatched: 0,
     matched_list: [],
-    error_list: []
+    unmatched_list: [],
+    error_list: [],
+    source: 'RANKING_ONLY'
   };
 
   try {
@@ -368,26 +373,10 @@ async function syncMySQLRankings() {
       pgHardNameMap.set(hardClean(p.name), p);
     }
 
+    const pgMaps = { pgCodeMap, pgNameMap, pgHardNameMap };
+
     for (const row of mysqlRows) {
-      const nombreNorm = normalize(row.nombre);
-      const nombreHard = hardClean(row.nombre);
-      const rowCode = cleanCode(row.codigo);
-      
-      let product = null;
-
-      if (rowCode) {
-        product = pgCodeMap.get(rowCode);
-      }
-
-      if (!product) {
-        const found = pgNameMap.get(nombreNorm);
-        if (found && isCompatible(row.nombre, found.name)) product = found;
-      }
-
-      if (!product) {
-        const found = pgHardNameMap.get(nombreHard);
-        if (found && isCompatible(row.nombre, found.name)) product = found;
-      }
+      const product = findBestMatch(row, pgProducts, pgMaps);
 
       if (product) {
         stats.matched++;
@@ -399,22 +388,53 @@ async function syncMySQLRankings() {
           );
           if (res.rowCount > 0) {
             stats.updated += res.rowCount;
-            stats.matched_list.push({ mysql: row.nombre, pg: product.name, ranking: row.ranking, count: res.rowCount });
+            stats.matched_list.push({ 
+              mysql: row.nombre, 
+              pg: product.name, 
+              ranking: row.ranking, 
+              count: res.rowCount,
+              stock: (product.stock || 0)
+            });
           }
         } catch (e) {
           stats.errors++;
           stats.error_list.push(`${row.nombre}: ${e.message}`);
         }
+      } else {
+        stats.unmatched++;
+        stats.unmatched_list.push({
+          codigo: row.codigo,
+          nombre: row.nombre,
+          existencia: 0,
+        });
       }
     }
 
     const durationMs = Date.now() - startTime;
+    
+    // GUARDAR LOG PARA DIAGNÓSTICO
+    await db.query(
+      `INSERT INTO mysql_sync_logs
+         (total_mysql, matched, updated, unmatched, errors, duration_ms, unmatched_list, matched_list)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        stats.total_mysql,
+        stats.matched,
+        stats.updated,
+        stats.unmatched,
+        stats.errors,
+        durationMs,
+        JSON.stringify(stats.unmatched_list.slice(0, 100)),
+        JSON.stringify(stats.matched_list.slice(0, 100))
+      ]
+    );
+
     console.log(`✅ [MySQL Rankings Sync] Completado: ${stats.updated} rankings actualizados en ${durationMs}ms.`);
 
     return { success: true, duration_ms: durationMs, ...stats };
   } catch (err) {
     console.error('❌ [MySQL Rankings Sync] Error fatal:', err.message);
-    return { success: false, error: err.message };
+    return { success: false, error: err.message, ...stats };
   }
 }
 
