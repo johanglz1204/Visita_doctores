@@ -94,7 +94,8 @@ const MYSQL_INVENTORY_QUERY = `
     stramecop        AS codigo,
     STRNOMBRE        AS nombre,
     INTEXISTENCIA    AS existencia,
-    INTMINIMO        AS minimo
+    INTMINIMO        AS minimo,
+    STRRANKING       AS ranking
   FROM tblclsarticulo
   WHERE INTEXISTENCIA <> 0
     AND INTIDSUCURSAL = 2
@@ -161,10 +162,11 @@ async function syncMySQLInventory(externalData = null) {
       
       let product = null;
 
-      // Paso 1: Match por Código (Exacto)
+      // Paso 1: Match por Código (Exacto) - PRIORIDAD ALTA
       if (rowCode) {
         const found = pgCodeMap.get(rowCode);
-        if (found && isCompatible(row.nombre, found.name)) {
+        if (found) {
+          // Si hay match por código, lo tomamos directamente (el usuario pidió PRIORIDAD al código)
           product = found;
         }
       }
@@ -239,21 +241,14 @@ async function syncMySQLInventory(externalData = null) {
           
           const prodUpdate = await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, updated_at = NOW() 
-             WHERE id = $3`,
-            [stockVal, minVal, product.id]
+             SET stock = $1, min_stock = $2, ranking = $3, updated_at = NOW() 
+             WHERE id = $4`,
+            [stockVal, minVal, row.ranking || '', product.id]
           );
           
-          const stockUpdate = await db.query(
-            `UPDATE inventory_stocks
-             SET current_stock = $1,
-                 target_stock  = CASE WHEN $2 > 0 THEN $2 ELSE target_stock END,
-                 updated_at    = NOW()
-             WHERE product_id = $3`,
-            [stockVal, minVal, product.id]
-          );
-
-          console.log(`✅ [DB Update] Filas afectadas: Products(${prodUpdate.rowCount}), Stocks(${stockUpdate.rowCount})`);
+          // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
+          
+          console.log(`✅ [DB Update] Filas afectadas: Products(${prodUpdate.rowCount})`);
           
           stats.updated++;
           if (stats.updated <= 5) {

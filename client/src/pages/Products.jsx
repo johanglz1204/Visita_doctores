@@ -8,10 +8,13 @@ export default function Products({ addToast }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncInfo, setSyncInfo] = useState(null);
 
   const load = () => {
     setLoading(true);
     api.getProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));
+    api.syncStatus().then(setSyncInfo).catch(console.error);
   };
 
   useEffect(() => { load(); }, []);
@@ -87,6 +90,19 @@ export default function Products({ addToast }) {
       e.target.value = '';
     }
   };
+  
+  const handleManualSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await api.triggerSync();
+      addToast(res.message);
+      load();
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,16 +116,35 @@ export default function Products({ addToast }) {
           <h1 className="page-title">Productos</h1>
           <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
         </div>
-        <div className="search-container" style={{ width: '300px' }}>
-          <span>🔍</span>
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre o código..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
-          />
+          <div className="search-container" style={{ width: '300px' }}>
+            <span>🔍</span>
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre o código..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+            />
+          </div>
         </div>
+        
+        {syncInfo?.last_sync && (
+          <div className="card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(var(--primary-rgb), 0.05)', border: '1px solid rgba(var(--primary-rgb), 0.1)' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>📡 Última Sincronización Local</div>
+              <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                Hace {Math.floor((new Date() - new Date(syncInfo.last_sync.synced_at)) / 60000)} min 
+                <span style={{ margin: '0 8px', color: 'var(--border-color)' }}>|</span>
+                <span style={{ color: '#10b981' }}>{syncInfo.last_sync.updated} Actualizados</span>
+                <span style={{ margin: '0 8px', color: 'var(--border-color)' }}>|</span>
+                <span style={{ color: '#ef4444' }}>{syncInfo.last_sync.unmatched} Sin Match</span>
+              </div>
+            </div>
+            <button className="btn btn-secondary" onClick={handleManualSync} disabled={syncing}>
+              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '🔄 Forzar Actualización'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="card">

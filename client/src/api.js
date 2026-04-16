@@ -97,6 +97,8 @@ export const api = {
   uploadProductsExcel: (formData) => request('/products/upload-excel', { method: 'POST', body: formData }),
   getDuplicatesPreview: () => request('/mysql-sync/duplicates-preview'),
   cleanupProducts: () => request('/mysql-sync/cleanup-duplicates', { method: 'POST' }),
+  syncStatus: () => request('/mysql-sync/status'),
+  triggerSync: () => request('/mysql-sync/trigger', { method: 'POST' }),
 
 
 

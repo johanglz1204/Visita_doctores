@@ -8,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import Doctors from './pages/Doctors';
 import DoctorProfile from './pages/DoctorProfile';
 import Products from './pages/Products';
-import Inventory from './pages/Inventory';
 import Upload from './pages/Upload';
 import Alerts from './pages/Alerts';
 import Sales from './pages/Sales';
@@ -31,7 +30,6 @@ function Sidebar({ onLogout }) {
     { to: '/', icon: '📊', label: 'Dashboard' },
     { to: '/doctors', icon: '👨‍⚕️', label: 'Doctores' },
     { to: '/products', icon: '💊', label: 'Productos' },
-    { to: '/inventory', icon: '📦', label: 'Inventario' },
     { to: '/sales', icon: '🧾', label: 'Historial' },
     { to: '/alerts', icon: '🚨', label: 'Alertas', badge: criticalCount },
   ];
@@ -145,7 +143,6 @@ export default function App() {
                   <Route path="/doctors" element={<Doctors addToast={addToast} />} />
                   <Route path="/doctors/:id" element={<DoctorProfile addToast={addToast} />} />
                   <Route path="/products" element={<Products addToast={addToast} />} />
-                  <Route path="/inventory" element={<Inventory addToast={addToast} />} />
                   <Route path="/sales" element={<Sales />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
