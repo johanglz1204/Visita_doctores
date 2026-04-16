@@ -71,7 +71,7 @@ export default function Sales() {
             ))}
           </select>
 
-          <button className="btn btn-primary" onClick={() => window.location.href = api.exportSalesExcel(selectedBranch, startDate, endDate)}>📥 Exportar</button>
+          <button className="btn btn-primary" onClick={() => api.exportSalesExcel(selectedBranch, startDate, endDate)}>📥 Exportar</button>
         </div>
       </div>
 

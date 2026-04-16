@@ -59,15 +59,33 @@ async function request(path, options = {}, isRetry = false) {
       }
     }
 
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({ error: 'Error de red' }));
-      throw new Error(error.error || `HTTP ${res.status}`);
-    }
     return res.json();
   } catch (error) {
     console.error(`Error en API Request (${path}):`, error);
     throw error;
   }
+}
+
+async function downloadFile(path, filename) {
+  const token = localStorage.getItem('accessToken');
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${path}`, { headers });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: 'Error al descargar archivo' }));
+    throw new Error(error.error || `HTTP ${res.status}`);
+  }
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'download.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
 
 
@@ -86,7 +104,7 @@ export const api = {
   updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
   deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
   uploadDoctorsExcel: (formData) => request('/doctors/upload-excel', { method: 'POST', body: formData }),
-  exportProductsExcel: () => `${API_BASE}/products/export-excel`,
+  exportProductsExcel: () => downloadFile('/products/export-excel', 'Productos.xlsx'),
 
   // Products
   getProducts: () => request('/products'),
@@ -123,7 +141,7 @@ export const api = {
   uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
   parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
   exportSalesExcel: (sucursal, startDate, endDate) => {
-    let url = `${API_BASE}/sales/export-excel`;
+    let url = `/sales/export-excel`;
     const params = [];
     if (sucursal) params.push(`sucursal=${encodeURIComponent(sucursal)}`);
     if (startDate) params.push(`startDate=${startDate}`);
@@ -132,7 +150,7 @@ export const api = {
     if (params.length > 0) {
        url += `?${params.join('&')}`;
     }
-    return url;
+    return downloadFile(url, 'Reporte_Ventas.xlsx');
   },
 
   // Sync

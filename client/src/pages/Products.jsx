@@ -186,7 +186,7 @@ export default function Products({ addToast }) {
             <label htmlFor="excel-upload-products" className="btn btn-secondary">
               📊 Importar
             </label>
-            <button className="btn btn-secondary" onClick={() => window.location.href = api.exportProductsExcel()}>📥 Exportar</button>
+            <button className="btn btn-secondary" onClick={() => api.exportProductsExcel()}>📥 Exportar</button>
             <button 
               className="btn btn-secondary" 
               style={{ color: '#d97706', borderColor: '#fbbf24' }} 
