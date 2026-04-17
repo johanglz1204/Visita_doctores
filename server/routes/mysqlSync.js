@@ -11,6 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const { syncMySQLInventory } = require('../services/inventorySyncService');
+const { cleanForDisplay } = require('../utils/stringUtils');
 const { testConnection } = require('../mysqlDb');
 const db = require('../db');
 const authenticate = require('../middlewares/authMiddleware');
@@ -163,7 +164,33 @@ router.post('/cleanup-duplicates', authenticate, async (req, res) => {
   try {
     console.log('🧹 [Cleanup] Iniciando limpieza profunda de duplicados...');
     
-    // Agrupar duplicados por nombre normalizado
+    // PASO 1: Limpieza de nombres y recuperación de símbolos rotos (como Zinolox)
+    const { rows: allProducts } = await db.query('SELECT id, name FROM products');
+    let repairedCount = 0;
+    let autoMergedCount = 0;
+
+    for (const prod of allProducts) {
+      const cleaned = cleanForDisplay(prod.name);
+      if (cleaned !== prod.name) {
+        try {
+          await db.query('UPDATE products SET name = $1 WHERE id = $2', [cleaned, prod.id]);
+          repairedCount++;
+        } catch (err) {
+          if (err.code === '23505') { // Choque de nombres tras limpieza
+            const { rows: existing } = await db.query('SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))', [cleaned]);
+            if (existing.length > 0) {
+              const keepId = existing[0].id;
+              await db.query('UPDATE inventory_stocks SET product_id = $1 WHERE product_id = $2', [keepId, prod.id]);
+              await db.query('UPDATE sales_history SET product_id = $1 WHERE product_id = $2', [keepId, prod.id]);
+              await db.query('DELETE FROM products WHERE id = $1', [prod.id]);
+              autoMergedCount++;
+            }
+          }
+        }
+      }
+    }
+
+    // PASO 2: Agrupar duplicados restantes (por normalización estándar)
     const { rows: dupes } = await db.query(`
       SELECT 
         LOWER(TRIM(name)) as norm_name,
@@ -200,10 +227,9 @@ router.post('/cleanup-duplicates', authenticate, async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: `Limpieza completada. Se eliminaron ${deletedCount} productos duplicados y se migraron ${recordsMigrated} registros relacionados.`,
-      groups_cleaned: dupes.length,
-      deleted_count: deletedCount,
-      records_migrated: recordsMigrated
+      message: `Limpieza completada. Se repararon ${repairedCount} nombres, se fusionaron ${autoMergedCount + deletedCount} duplicados y se migraron los registros relacionados.`,
+      repaired_count: repairedCount,
+      merged_total: autoMergedCount + deletedCount
     });
   } catch (err) {
     console.error('Error cleanup:', err);

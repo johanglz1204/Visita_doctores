@@ -12,22 +12,8 @@
 
 const { queryMySQL } = require('../mysqlDb');
 const db = require('../db');
+const { normalize, hardClean, cleanForDisplay } = require('../utils/stringUtils');
 
-// Normalizar cadenas: minúsculas, sin acentos, sin espacios extra
-const normalize = (str) => {
-  if (!str) return '';
-  return str
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-};
-
-// Normalización agresiva: SOLO letras y números (para comparar nombres muy distintos en formato)
-const hardClean = (str) => {
-  return normalize(str).replace(/[^a-z0-9]/g, '');
-};
 
 // Limpiar códigos: quitar ceros iniciales y espacios
 const cleanCode = (code) => {
@@ -143,6 +129,13 @@ function findBestMatch(row, pgProducts, pgMaps) {
 }
 
 /**
+ * Limpia y normaliza el campo STRNOMBRE proveniente de MySQL
+ */
+function cleanMySQLName(nombre) {
+  return cleanForDisplay(nombre);
+}
+
+/**
  * Query principal que el usuario usa para extraer existencias de Tampico (INTIDSUCURSAL=2)
  */
 const MYSQL_INVENTORY_QUERY = `
@@ -240,11 +233,12 @@ async function syncMySQLInventory(externalData = null) {
           console.log(`📡 [DB Update] Intentando actualizar "${product.name}" (ID: ${product.id}) con stock: ${stockVal}`);
           
 
+          const cleanedName = cleanMySQLName(row.nombre);
           const prodUpdate = await db.query(
             `UPDATE products 
              SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
              WHERE id = $4`,
-            [stockVal, minVal, row.nombre, product.id]
+            [stockVal, minVal, cleanedName, product.id]
           );
           
           // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
@@ -262,7 +256,7 @@ async function syncMySQLInventory(externalData = null) {
             `UPDATE products 
              SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
              WHERE LOWER(TRIM(name)) = LOWER(TRIM($4)) AND id <> $5`,
-            [stockVal, minVal, row.nombre, product.name, product.id]
+            [stockVal, minVal, cleanMySQLName(row.nombre), product.name, product.id]
           );
         } catch (updateErr) {
           console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);

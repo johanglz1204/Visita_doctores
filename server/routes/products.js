@@ -7,6 +7,7 @@ const xlsx = require('xlsx');
 const db = require('../db');
 const { z } = require('zod');
 const { validateRequest } = require('../middlewares/validate');
+const { normalize, hardClean, cleanForDisplay } = require('../utils/stringUtils');
 
 const productSchema = z.object({
   body: z.object({
@@ -99,8 +100,8 @@ router.post('/', validateRequest(productSchema), async (req, res) => {
     
     // Check for duplicates (Normalized)
     const { rows: existing } = await db.query(
-      'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))',
-      [name]
+      'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR barcode = $2',
+      [cleanForDisplay(name), barcode || '---MISSING---']
     );
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Ya existe un producto con ese nombre' });
@@ -109,7 +110,7 @@ router.post('/', validateRequest(productSchema), async (req, res) => {
     const { rows } = await db.query(
       `INSERT INTO products (name, barcode, ranking, price)
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [name.trim(), barcode || '', ranking || '', price || 0]
+      [cleanForDisplay(name), barcode || '', ranking || '', price || 0]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -129,13 +130,7 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     const results = { processed: 0, errors: [] };
 
     // Function to normalize strings by removing accents
-    const normalize = (str) => {
-      if (!str) return '';
-      return str.toString().trim()
-        .toLowerCase()
-        .normalize('NFD') // Split base char and accents
-        .replace(/[\u0300-\u036f]/g, ''); // Remove accents
-    };
+    const normalizeLocal = (str) => normalize(str);
 
     // Find the right sheet (look for one that has 'Producto' or 'Nombre')
     let data = [];
@@ -169,9 +164,9 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
 
     for (const row of data) {
       const findValue = (row, names) => {
-        const normalizedNames = names.map(n => normalize(n));
+        const normalizedNames = names.map(n => normalizeLocal(n));
         const key = Object.keys(row).find(k => 
-          normalizedNames.includes(normalize(k))
+          normalizedNames.includes(normalizeLocal(k))
         );
         return key ? row[key] : undefined;
       };
@@ -198,11 +193,11 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
       }
 
       try {
-        const nameUpper = name.toString().trim().toUpperCase();
+        const cleanedName = cleanForDisplay(name);
 
         const { rows: existing } = await db.query(
-          'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))',
-          [name.toString()]
+          'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR (barcode IS NOT NULL AND barcode = $2 AND barcode <> \'\')',
+          [cleanedName, barcode.toString().trim()]
         );
 
         if (existing.length > 0) {
@@ -219,15 +214,15 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
           // Y nos aseguramos que los otros (si hay duplicados) al menos tengan el mismo ranking
           if (existing.length > 1) {
             await db.query(
-              'UPDATE products SET ranking=$1 WHERE LOWER(TRIM(name)) = LOWER(TRIM($2))',
-              [ranking.toString(), name.toString()]
+              'UPDATE products SET ranking=$1, name=$2 WHERE LOWER(TRIM(name)) = LOWER(TRIM($3))',
+              [ranking.toString(), cleanedName, name.toString()]
             );
           }
         } else {
           await db.query(
             `INSERT INTO products (name, barcode, ranking, price) 
              VALUES ($1, $2, $3, $4)`,
-            [name.toString().trim(), barcode.toString(), ranking.toString(), price]
+            [cleanedName, barcode.toString().trim(), ranking.toString(), price]
           );
         }
         results.processed++;
