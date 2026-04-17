@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const db = require('../db');
+const { cleanForDisplay } = require('../utils/stringUtils');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -181,22 +182,30 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
           doctorId = newDoc[0].id;
         }
 
-        // Find or create product (first try by code if available, then by name)
+        // Find/Match product (first try by code if available, then by cleaned name)
         let productId;
         let existingProduct = null;
 
         if (productCode) {
-          const { rows: codeRows } = await db.query('SELECT id FROM products WHERE code = $1', [productCode.toString().trim()]);
+          const cleanedCode = productCode.toString().trim().replace(/^0+/, '');
+          const { rows: codeRows } = await db.query(
+            'SELECT id FROM products WHERE barcode = $1 OR barcode = $2', 
+            [productCode.toString().trim(), cleanedCode]
+          );
           if (codeRows.length > 0) existingProduct = codeRows[0];
         }
 
         if (!existingProduct) {
-          const { rows: nameRows } = await db.query('SELECT id FROM products WHERE UPPER(trim(name)) = $1', [productName.toString().trim().toUpperCase()]);
+          const cleanedName = cleanForDisplay(productName);
+          const { rows: nameRows } = await db.query(
+            'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR LOWER(TRIM(name)) = LOWER(TRIM($2)) LIMIT 1', 
+            [cleanedName, productName]
+          );
           if (nameRows.length > 0) {
             existingProduct = nameRows[0];
-            // Update code if it was missing
-            if (productCode) {
-              await db.query('UPDATE products SET code = $1 WHERE id = $2', [productCode.toString().trim(), existingProduct.id]);
+            // Update code if it was missing and we found it by name
+            if (productCode && !existingProduct.barcode) {
+              await db.query('UPDATE products SET barcode = $1 WHERE id = $2', [productCode.toString().trim(), existingProduct.id]);
             }
           }
         }
@@ -204,7 +213,11 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
         if (existingProduct) {
           productId = existingProduct.id;
         } else {
-          const { rows: newProd } = await db.query('INSERT INTO products (name, code) VALUES ($1, $2) RETURNING id', [productName.toString().trim(), productCode ? productCode.toString().trim() : null]);
+          // Si no existe, lo creamos PERO LIMPIO
+          const { rows: newProd } = await db.query(
+            'INSERT INTO products (name, barcode) VALUES ($1, $2) RETURNING id', 
+            [cleanForDisplay(productName), productCode ? productCode.toString().trim() : '']
+          );
           productId = newProd[0].id;
         }
 

@@ -82,18 +82,26 @@ async function restoreSeedData() {
       return;
     }
 
-    // Check current counts
-    const { rows } = await db.query('SELECT COUNT(*) as count FROM doctors');
-    const doctorCount = parseInt(rows[0].count);
+    // Check current counts to see if seeding is needed
+    const { rows: docRows } = await db.query('SELECT COUNT(*) as count FROM doctors');
+    const { rows: prodRows } = await db.query('SELECT COUNT(*) as count FROM products');
+    const doctorCount = parseInt(docRows[0].count);
+    const productCount = parseInt(prodRows[0].count);
+
+    // If we already have a significant number of records, skip seeding
+    // This prevents deleted products from reappearing on server restart
+    if (doctorCount > 5 || productCount > 20) {
+      console.log(`ℹ️  Skipping seed restore: DB already has ${doctorCount} doctors and ${productCount} products.`);
+      return;
+    }
 
     const seedSql = fs.readFileSync(seedFile, 'utf8');
     const statements = seedSql.split('\n').filter(l => {
       const t = l.trim();
-      return t.startsWith('INSERT') || t.startsWith('SELECT setval');
+      return (t.startsWith('INSERT') || t.startsWith('SELECT setval')) && !t.includes('PBXMo9pauS');
     });
 
-    // Always run seed (ON CONFLICT DO NOTHING makes it safe to re-run)
-    console.log(`🌱 Running seed restore (DB has ${doctorCount} doctors, seed has ${statements.length} statements)...`);
+    console.log(`🌱 Running seed restore (DB is empty, seed has ${statements.length} statements)...`);
     let success = 0, errors = 0;
     for (const stmt of statements) {
       try {
@@ -104,8 +112,7 @@ async function restoreSeedData() {
       }
     }
 
-    const { rows: after } = await db.query('SELECT COUNT(*) as count FROM doctors');
-    console.log(`✅ Seed complete: ${success} OK, ${errors} skipped. Doctors in DB: ${after[0].count}`);
+    console.log(`✅ Seed complete: ${success} OK, ${errors} skipped.`);
   } catch (err) {
     console.error('❌ Error restoring seed data:', err.message);
   }

@@ -35,12 +35,17 @@ const hardClean = (str) => {
  */
 const cleanForDisplay = (str) => {
   if (!str) return '';
-  return str
-    .toString()
+  
+  // Pre-process common corruption or special symbols that shouldn't be "a"
+  let cleaned = str.toString()
+    .replace(/[ªª]/g, '') // Remove feminine ordinal (U+00AA) which NFD turns into 'a'
+    .replace(/[ºº]/g, ''); // Remove masculine ordinal
+
+  return cleaned
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\x20-\x7E\s]/g, '') // Eliminar símbolos rotos tipo ┬á
-    .replace(/\s+/g, ' ')           // Colapsar espacios múltiples
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^\x20-\x7E\s]/g, '')  // Remove non-ASCII
+    .replace(/\s+/g, ' ')           // Collapse spaces
     .trim();
 };
 

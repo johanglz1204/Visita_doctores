@@ -99,18 +99,19 @@ router.post('/', validateRequest(productSchema), async (req, res) => {
     const { name, barcode, ranking, price } = req.body;
     
     // Check for duplicates (Normalized)
+    const cleanedName = cleanForDisplay(name);
     const { rows: existing } = await db.query(
-      'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR barcode = $2',
-      [cleanForDisplay(name), barcode || '---MISSING---']
+      'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR (barcode IS NOT NULL AND barcode = $2 AND barcode <> \'\')',
+      [cleanedName, barcode || '---MISSING---']
     );
     if (existing.length > 0) {
-      return res.status(400).json({ error: 'Ya existe un producto con ese nombre' });
+      return res.status(400).json({ error: 'Ya existe un producto con ese nombre o código de barras' });
     }
 
     const { rows } = await db.query(
       `INSERT INTO products (name, barcode, ranking, price)
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [cleanForDisplay(name), barcode || '', ranking || '', price || 0]
+      [cleanedName, barcode || '', ranking || '', price || 0]
     );
     res.status(201).json(rows[0]);
   } catch (err) {

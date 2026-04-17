@@ -94,7 +94,7 @@ export const api = {
   login: (username, password) => request('/auth/login', { method: 'POST', body: { username, password } }),
 
   // Dashboard
-  getDashboard: () => request('/dashboard'),
+  getDashboard: (days) => request(`/dashboard${days ? `?days=${days}` : ''}`),
 
   // Doctors
   getDoctors: () => request('/doctors'),

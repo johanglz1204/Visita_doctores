@@ -306,43 +306,43 @@ export default function Products({ addToast }) {
       {/* Modal de Diagnóstico de Sync */}
       {showLogModal && (
         <div className="modal-overlay" onClick={() => setShowLogModal(false)}>
-          <div className="modal" style={{ maxWidth: '900px', width: '90%' }} onClick={e => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '800px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <h2 className="modal-title">📊 Diagnóstico de Sincronización</h2>
             {syncInfo?.last_sync ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid var(--primary-color)' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MYSQL</div>
-                    <div style={{ fontSize: '24px', fontWeight: '800' }}>{syncInfo.last_sync.total_mysql}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                  <div className="card" style={{ padding: '12px', borderLeft: '4px solid var(--primary-color)' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 'bold' }}>TOTAL MYSQL</div>
+                    <div style={{ fontSize: '20px', fontWeight: '800' }}>{syncInfo.last_sync.total_mysql}</div>
                   </div>
-                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #10b981' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>✅ ENCONTRADOS</div>
-                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#10b981' }}>{syncInfo.last_sync.matched}</div>
+                  <div className="card" style={{ padding: '12px', borderLeft: '4px solid #10b981' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 'bold' }}>✅ ENCONTRADOS</div>
+                    <div style={{ fontSize: '20px', fontWeight: '800', color: '#10b981' }}>{syncInfo.last_sync.matched}</div>
                   </div>
-                  <div className="card" style={{ padding: '16px', borderLeft: '4px solid #ef4444' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 'bold' }}>❌ SIN COINCIDENCIA</div>
-                    <div style={{ fontSize: '24px', fontWeight: '800', color: '#ef4444' }}>{syncInfo.last_sync.unmatched}</div>
+                  <div className="card" style={{ padding: '12px', borderLeft: '4px solid #ef4444' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 'bold' }}>❌ SIN COINCIDENCIA</div>
+                    <div style={{ fontSize: '20px', fontWeight: '800', color: '#ef4444' }}>{syncInfo.last_sync.unmatched}</div>
                   </div>
                 </div>
 
-                <div className="tabs" style={{ display: 'flex', gap: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                <div className="tabs" style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                    <button 
                     className={`btn ${diagnosticTab === 'matched' ? 'btn-primary' : 'btn-secondary'}`} 
                     onClick={() => setDiagnosticTab('matched')}
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '11px', padding: '6px 12px' }}
                    >
                      ✅ Ver Encontrados ({syncInfo.last_sync.matched})
                    </button>
                    <button 
                     className={`btn ${diagnosticTab === 'unmatched' ? 'btn-primary' : 'btn-secondary'}`} 
                     onClick={() => setDiagnosticTab('unmatched')}
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '11px', padding: '6px 12px' }}
                    >
                      ❌ Ver No Encontrados ({syncInfo.last_sync.unmatched})
                    </button>
                 </div>
 
-                <div className="table-wrapper" style={{ maxHeight: '400px' }}>
+                <div className="table-wrapper" style={{ maxHeight: '300px' }}>
                   <table>
                     <thead>
                       {diagnosticTab === 'matched' ? (

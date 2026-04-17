@@ -1,6 +1,7 @@
 const { ImapFlow } = require('imapflow');
 const { simpleParser } = require('mailparser');
 const db = require('./db');
+const { cleanForDisplay, normalize } = require('./utils/stringUtils');
 
 async function syncEmails() {
   const client = new ImapFlow({
@@ -98,14 +99,19 @@ async function syncEmails() {
                 doctorId = newDoc[0].id;
               }
 
-              // 2. Find/Create Product
+              // 2. Find/Match Product (Cleaned)
               let productId;
-              const { rows: prodRows } = await db.query('SELECT id FROM products WHERE UPPER(name) = $1', [productName]);
+              const cleanedProdMatch = cleanForDisplay(productName);
+              const { rows: prodRows } = await db.query(
+                'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR LOWER(TRIM(name)) = LOWER(TRIM($2)) LIMIT 1', 
+                [cleanedProdMatch, productName]
+              );
+              
               if (prodRows.length > 0) {
                 productId = prodRows[0].id;
               } else {
-                const { rows: newProd } = await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName]);
-                productId = newProd[0].id;
+                console.warn(`[SYNC WARNING] Producto no encontrado en catálogo oficial: "${productName}". Saltando venta para evitar duplicados.`);
+                continue; // Saltar esta venta, el producto debe ser dado de alta vía Excel o MySQL Sync
               }
 
               // 3. Record Sale (Prevent duplicates by Ticket ID in raw_text)
@@ -153,25 +159,35 @@ async function syncEmails() {
                 const { rows: docR } = await db.query('SELECT id FROM doctors WHERE UPPER(name) = $1', [doctorName]);
                 const docId = docR.length > 0 ? docR[0].id : (await db.query('INSERT INTO doctors (name) VALUES ($1) RETURNING id', [doctorName])).rows[0].id;
                 
-                const { rows: prodR } = await db.query('SELECT id FROM products WHERE UPPER(name) = $1', [productName]);
-                const prodId = prodR.length > 0 ? prodR[0].id : (await db.query('INSERT INTO products (name) VALUES ($1) RETURNING id', [productName])).rows[0].id;
-
-                const rawTextFallback = `Email UID ${msg.uid} (Fallback)`;
-                const { rows: existingFbSale } = await db.query(
-                  `SELECT id FROM sales_history WHERE doctor_id = $1 AND product_id = $2 AND raw_text = $3`,
-                  [docId, prodId, rawTextFallback]
+                // 2. Find/Match Product (Fallback)
+                const cleanedProdFb = cleanForDisplay(productName);
+                const { rows: prodR } = await db.query(
+                  'SELECT id FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) OR LOWER(TRIM(name)) = LOWER(TRIM($2)) LIMIT 1', 
+                  [cleanedProdFb, productName]
                 );
+                
+                if (prodR.length > 0) {
+                  const prodId = prodR[0].id;
 
-                if (existingFbSale.length === 0) {
-                  await db.query(`INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, sucursal, raw_text) VALUES ($1, $2, $3, $4, $5, $6)`,
-                    [docId, prodId, quantity, saleDate, emailSucursal, rawTextFallback]);
-                  
-                  await db.query(`UPDATE inventory_stocks SET current_stock = GREATEST(current_stock - $1, 0), updated_at = NOW() WHERE doctor_id = $2 AND product_id = $3`,
-                    [quantity, docId, prodId]);
-                  
-                  count++;
+                  const rawTextFallback = `Email UID ${msg.uid} (Fallback)`;
+                  const { rows: existingFbSale } = await db.query(
+                    `SELECT id FROM sales_history WHERE doctor_id = $1 AND product_id = $2 AND raw_text = $3`,
+                    [docId, prodId, rawTextFallback]
+                  );
+
+                  if (existingFbSale.length === 0) {
+                    await db.query(`INSERT INTO sales_history (doctor_id, product_id, quantity, sale_date, sucursal, raw_text) VALUES ($1, $2, $3, $4, $5, $6)`,
+                      [docId, prodId, quantity, saleDate, emailSucursal, rawTextFallback]);
+                    
+                    await db.query(`UPDATE inventory_stocks SET current_stock = GREATEST(current_stock - $1, 0), updated_at = NOW() WHERE doctor_id = $2 AND product_id = $3`,
+                      [quantity, docId, prodId]);
+                    
+                    count++;
+                  } else {
+                    console.log(`   [SYNC SKIP] Duplicate fallback sale prevented for UID ${msg.uid}`);
+                  }
                 } else {
-                  console.log(`   [SYNC SKIP] Duplicate fallback sale prevented for UID ${msg.uid}`);
+                  console.warn(`   [SYNC SKIP] Producto fallback no encontrado: "${productName}"`);
                 }
              }
           }

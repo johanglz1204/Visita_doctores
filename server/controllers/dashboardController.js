@@ -26,12 +26,27 @@ const getDashboardStats = async (req, res, next) => {
         .limit(10) // Increased to 10 for better visibility
     ]);
 
-    // Data for Graphs (Reporting Suite)
+    // 2. Data for Graphs (Reporting Suite)
+    const days = parseInt(req.query.days) || 30;
     const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - days);
     const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+    // Previous period for growth comparison
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - (days * 2));
+    const sixtyDaysAgoStr = sixtyDaysAgo.toISOString().split('T')[0];
     
-    const [salesTrendRows, topDoctorsRows, urgentDoctorsRows] = await Promise.all([
+    const [
+      salesTrendRows, 
+      topDoctorsRows, 
+      urgentDoctorsRows,
+      sucursalRows,
+      lineStatsRows,
+      currentSalesSum,
+      previousSalesSum,
+      inventoryForecastRows
+    ] = await Promise.all([
       // Sales grouped by Date for LineChart (last 30 days)
       knex('sales_history')
         .select(knex.raw("TO_CHAR(sale_date, 'YYYY-MM-DD') as date"))
@@ -60,8 +75,54 @@ const getDashboardStats = async (req, res, next) => {
         .groupBy('d.id', 'd.name', 'd.phone')
         .having(knex.raw("DATE_PART('day', NOW() - MAX(s.sale_date)) >= 30"))
         .orderBy('inactive_days', 'desc')
+        .limit(10),
+
+      // Sales by Sucursal (Regional Distribution)
+      knex('sales_history')
+        .select(knex.raw("COALESCE(NULLIF(sucursal, ''), 'GENERAL') as name"))
+        .select(knex.raw("CAST(SUM(quantity) AS INT) as value"))
+        .where('sale_date', '>=', thirtyDaysAgoStr)
+        .groupBy('sucursal')
+        .orderBy('value', 'desc'),
+
+      // Sales by Product Line (First word of name)
+      knex('sales_history as s')
+        .join('products as p', 's.product_id', 'p.id')
+        .select(knex.raw("split_part(p.name, ' ', 1) as line"))
+        .select(knex.raw("CAST(SUM(s.quantity) AS INT) as value"))
+        .where('s.sale_date', '>=', thirtyDaysAgoStr)
+        .groupByRaw("split_part(p.name, ' ', 1)")
+        .orderBy('value', 'desc')
+        .limit(8),
+
+      // Totals for Growth indicator
+      knex('sales_history').where('sale_date', '>=', thirtyDaysAgoStr).sum('quantity as total'),
+      knex('sales_history').whereBetween('sale_date', [sixtyDaysAgoStr, thirtyDaysAgoStr]).sum('quantity as total'),
+
+      // Inventory Forecast (Days of stock left)
+      // Logic: current_stock / (sum_quantity_30_days / 30)
+      knex('products as p')
+        .leftJoin(
+          knex('sales_history')
+            .select('product_id')
+            .select(knex.raw('SUM(quantity) as total_30d'))
+            .where('sale_date', '>=', thirtyDaysAgoStr)
+            .groupBy('product_id')
+            .as('s'),
+          'p.id', 's.product_id'
+        )
+        .select('p.name', 'p.stock')
+        .select(knex.raw('COALESCE(s.total_30d, 0) as sales_30d'))
+        .select(knex.raw('CASE WHEN COALESCE(s.total_30d, 0) > 0 THEN ROUND(p.stock / (CAST(s.total_30d AS NUMERIC) / 30)) ELSE 999 END as days_left'))
+        .where('p.stock', '>', 0)
+        .orderBy('days_left', 'asc')
         .limit(10)
     ]);
+
+    // Calculate growth percentage
+    const curVal = parseInt(currentSalesSum[0].total) || 0;
+    const prevVal = parseInt(previousSalesSum[0].total) || 0;
+    const growth = prevVal === 0 ? 0 : Math.round(((curVal - prevVal) / prevVal) * 100);
 
     res.json({
       totalDoctors: parseInt(doctorsCount[0].count),
@@ -72,7 +133,10 @@ const getDashboardStats = async (req, res, next) => {
       salesTrend: salesTrendRows,
       topDoctors: topDoctorsRows,
       urgentDoctors: urgentDoctorsRows,
-      // lastSyncTime will be injected by the route handler if needed or we can pass it via req
+      sucursalStats: sucursalRows,
+      lineStats: lineStatsRows,
+      growth,
+      inventoryForecast: inventoryForecastRows,
       lastSyncTime: req.app.get('lastSyncTime') || null,
     });
   } catch (err) {
