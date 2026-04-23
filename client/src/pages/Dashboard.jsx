@@ -101,8 +101,47 @@ export default function Dashboard({ addToast }) {
         <StatCard title="Doctores" value={data?.totalDoctors} icon="👨‍⚕️" colorClass="purple" />
         <StatCard title="Productos" value={data?.totalProducts} icon="💊" colorClass="cyan" />
         <StatCard title="Ventas Periodo" value={data?.salesTrend?.reduce((acc, curr) => acc + curr.total_quantity, 0)} icon="📈" colorClass="green" trend={data?.growth} />
-        <StatCard title="Existencia Bajo Mínimo" value={data?.criticalAlerts} icon="🚨" colorClass="red" />
+        <StatCard title="AA/A en Riesgo" value={data?.criticalRankedProducts?.length ?? 0} icon="🚨" colorClass="red" />
       </div>
+
+      {/* Panel de Alerta: Riesgo de Desabasto AA/A */}
+      {data?.criticalRankedProducts?.length > 0 && (
+        <div className="card" style={{ marginBottom: '24px', border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.04)' }}>
+          <div className="card-header" style={{ borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
+            <h2 className="card-title" style={{ color: '#ef4444' }}>🚨 Riesgo de Desabasto — Productos AA / A</h2>
+            <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: 700 }}>{data.criticalRankedProducts.length} producto(s) bajo mínimo</span>
+          </div>
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ranking</th>
+                  <th>Producto</th>
+                  <th style={{ textAlign: 'center' }}>Stock Actual</th>
+                  <th style={{ textAlign: 'center' }}>Stock Mínimo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.criticalRankedProducts.map((p, i) => (
+                  <tr key={i} style={{ borderLeft: '4px solid #ef4444' }}>
+                    <td><span className="badge badge-success" style={{ fontWeight: 900 }}>{p.ranking}</span></td>
+                    <td style={{ fontWeight: 600 }}>{p.name}</td>
+                    <td style={{ textAlign: 'center', fontSize: '18px', fontWeight: 800, color: '#ef4444' }}>{p.stock}</td>
+                    <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{p.min_stock ?? 5}</td>
+                    <td>
+                      {p.stock === 0
+                        ? <span style={{ color: '#ef4444', fontWeight: 800, fontSize: '12px' }}>⛔ AGOTADO</span>
+                        : <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '12px' }}>⚠️ Bajo mínimo</span>
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="charts-main-grid">
         {/* Gráfico de Tendencia */}
@@ -196,29 +235,38 @@ export default function Dashboard({ addToast }) {
          {/* Salud de Inventario (Pronóstico) */}
          <div className="card">
             <div className="card-header">
-              <h2 className="card-title">🔋 Salud de Inventario (Días Restantes)</h2>
+              <h2 className="card-title">🔋 Pronóstico de Agotamiento</h2>
             </div>
             <div className="table-wrapper">
               <table>
                 <thead>
                   <tr>
+                    <th>Ranking</th>
                     <th>Producto</th>
                     <th>Stock Act.</th>
-                    <th>Venta Diaria Prom.</th>
-                    <th>Pronóstico OOS</th>
+                    <th>Pza/Día</th>
+                    <th>Días Restantes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data?.inventoryForecast?.map((item, idx) => {
+                    const isHighRank = item.ranking === 'AA' || item.ranking === 'A';
                     const isCritical = item.days_left <= 7;
+                    const isUrgent = isHighRank && isCritical;
                     return (
-                      <tr key={idx}>
+                      <tr key={idx} style={{ borderLeft: isUrgent ? '4px solid #ef4444' : '4px solid transparent', background: isUrgent ? 'rgba(239,68,68,0.04)' : 'transparent' }}>
+                        <td>
+                          {item.ranking
+                            ? <span className={`badge ${isHighRank ? 'badge-success' : 'badge-warning'}`}>{item.ranking}</span>
+                            : <span style={{ color: 'var(--text-muted)' }}>—</span>
+                          }
+                        </td>
                         <td style={{ fontWeight: 600 }}>{item.name}</td>
-                        <td>{item.stock}</td>
-                        <td style={{ color: 'var(--text-muted)' }}>{(item.sales_30d / 30).toFixed(1)} pza/día</td>
+                        <td style={{ color: isUrgent ? '#ef4444' : 'inherit', fontWeight: isUrgent ? 800 : 400 }}>{item.stock}</td>
+                        <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{item.sales_30d > 0 ? (item.sales_30d / 30).toFixed(1) : '—'}</td>
                         <td>
                           <span className={`oos-badge ${isCritical ? 'critical' : ''}`}>
-                            {item.days_left >= 999 ? '∞' : `${item.days_left} días`}
+                            {item.days_left >= 999 ? '∞ stock' : `${item.days_left} días`}
                           </span>
                         </td>
                       </tr>

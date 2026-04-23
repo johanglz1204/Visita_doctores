@@ -39,13 +39,14 @@ const getDashboardStats = async (req, res, next) => {
     
     const [
       salesTrendRows, 
-      topDoctorsRows, 
+      topDoctorsRows,
       urgentDoctorsRows,
       sucursalRows,
       lineStatsRows,
       currentSalesSum,
       previousSalesSum,
-      inventoryForecastRows
+      inventoryForecastRows,
+      criticalRankedProducts
     ] = await Promise.all([
       // Sales grouped by Date for LineChart (last 30 days)
       knex('sales_history')
@@ -111,12 +112,19 @@ const getDashboardStats = async (req, res, next) => {
             .as('s'),
           'p.id', 's.product_id'
         )
-        .select('p.name', 'p.stock')
+        .select('p.name', 'p.stock', 'p.ranking', 'p.min_stock')
         .select(knex.raw('COALESCE(s.total_30d, 0) as sales_30d'))
         .select(knex.raw('CASE WHEN COALESCE(s.total_30d, 0) > 0 THEN ROUND(p.stock / (CAST(s.total_30d AS NUMERIC) / 30)) ELSE 999 END as days_left'))
-        .where('p.stock', '>', 0)
+        .orderByRaw("CASE WHEN p.ranking IN ('AA', 'A') THEN 0 ELSE 1 END")
         .orderBy('days_left', 'asc')
-        .limit(10)
+        .limit(20),
+        
+      // Critical Ranked Products (Riesgo de Desabasto para AA y A)
+      knex('products')
+        .select('name', 'stock', 'min_stock', 'ranking')
+        .whereIn('ranking', ['AA', 'A'])
+        .andWhereRaw('stock <= COALESCE(min_stock, 5)')
+        .orderBy('stock', 'asc')
     ]);
 
     // Calculate growth percentage
@@ -137,6 +145,7 @@ const getDashboardStats = async (req, res, next) => {
       lineStats: lineStatsRows,
       growth,
       inventoryForecast: inventoryForecastRows,
+      criticalRankedProducts,
       lastSyncTime: req.app.get('lastSyncTime') || null,
     });
   } catch (err) {

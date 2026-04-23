@@ -12,6 +12,7 @@ export default function Products({ addToast }) {
   const [syncInfo, setSyncInfo] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const [diagnosticTab, setDiagnosticTab] = useState('unmatched');
+  const [rankingFilter, setRankingFilter] = useState('all'); // 'all', 'aa', 'a', 'risk'
 
   const loadLog = () => {
     api.syncStatus().then(setData => {
@@ -114,10 +115,19 @@ export default function Products({ addToast }) {
   };
 
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    if (!matchesSearch) return false;
+
+    const r = p.ranking || '';
+    if (rankingFilter === 'aa') return r === 'AA';
+    if (rankingFilter === 'a') return r === 'A';
+    if (rankingFilter === 'risk') return (r === 'AA' || r === 'A') && p.stock <= (p.min_stock || 5);
+    
+    return true; // 'all'
+  });
 
   return (
     <div className="products-container">
@@ -160,8 +170,16 @@ export default function Products({ addToast }) {
         )}
 
       <div className="card">
-        <div className="card-header">
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '10px' }}>
           <h2 className="card-title">💊 Lista de Productos ({filteredProducts.length})</h2>
+          
+          <div className="tabs" style={{ display: 'flex', gap: '6px', background: 'var(--bg-glass)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <button className={`btn ${rankingFilter === 'all' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('all')}>Todos</button>
+            <button className={`btn ${rankingFilter === 'aa' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('aa')}>Solo AA</button>
+            <button className={`btn ${rankingFilter === 'a' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('a')}>Solo A</button>
+            <button className={`btn ${rankingFilter === 'risk' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px', color: rankingFilter === 'risk' ? 'white' : '#ef4444' }} onClick={() => setRankingFilter('risk')}>🚨 En Riesgo (AA/A)</button>
+          </div>
+
           <div className="btn-group">
             <input 
               type="file" 
@@ -229,17 +247,25 @@ export default function Products({ addToast }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map(prod => (
-                    <tr key={prod.id}>
+                  {filteredProducts.map(prod => {
+                    const isHighRanking = prod.ranking === 'AA' || prod.ranking === 'A';
+                    const isLowStock = prod.stock <= (prod.min_stock || 5);
+                    const isCritical = isHighRanking && isLowStock;
+
+                    return (
+                    <tr key={prod.id} style={{ backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.05)' : 'transparent', borderLeft: isCritical ? '4px solid #ef4444' : '4px solid transparent' }}>
                       <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
-                      <td style={{ fontWeight: 600 }}>{prod.name}</td>
-                      <td><span className={`badge ${prod.ranking === 'A' || prod.ranking === 'AA' ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
+                      <td style={{ fontWeight: 600 }}>
+                        {prod.name}
+                        {isCritical && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#ef4444', fontWeight: 'bold' }}>⚠️ Stock Crítico</span>}
+                      </td>
+                      <td><span className={`badge ${isHighRanking ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
                       <td style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.02)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                           <span style={{ 
                             fontSize: '18px', 
                             fontWeight: '800', 
-                            color: 'var(--primary-color)' 
+                            color: isCritical ? '#ef4444' : 'var(--primary-color)' 
                           }}>
                             {prod.stock || 0}
                           </span>
@@ -258,7 +284,7 @@ export default function Products({ addToast }) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )})}
               </tbody>
             </table>
           </div>

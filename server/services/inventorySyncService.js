@@ -234,11 +234,12 @@ async function syncMySQLInventory(externalData = null) {
           
 
           const cleanedName = cleanMySQLName(row.nombre);
+          const rankingVal = row.ranking || '';
           const prodUpdate = await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
-             WHERE id = $4`,
-            [stockVal, minVal, cleanedName, product.id]
+             SET stock = $1, min_stock = $2, name = $3, ranking = $4, updated_at = NOW() 
+             WHERE id = $5`,
+            [stockVal, minVal, cleanedName, rankingVal, product.id]
           );
           
           // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
@@ -254,9 +255,9 @@ async function syncMySQLInventory(externalData = null) {
           // Usamos el nombre ANTERIOR del producto (product.name) para encontrar a sus hermanos
           await db.query(
             `UPDATE products 
-             SET stock = $1, min_stock = $2, name = $3, updated_at = NOW() 
-             WHERE LOWER(TRIM(name)) = LOWER(TRIM($4)) AND id <> $5`,
-            [stockVal, minVal, cleanMySQLName(row.nombre), product.name, product.id]
+             SET stock = $1, min_stock = $2, name = $3, ranking = $4, updated_at = NOW() 
+             WHERE LOWER(TRIM(name)) = LOWER(TRIM($5)) AND id <> $6`,
+            [stockVal, minVal, cleanMySQLName(row.nombre), rankingVal, product.name, product.id]
           );
         } catch (updateErr) {
           console.error(`❌ [DB Update Error] "${product.name}":`, updateErr.message);
