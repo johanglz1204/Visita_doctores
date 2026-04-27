@@ -237,5 +237,88 @@ router.post('/cleanup-duplicates', authenticate, async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════
+// MANUAL MAPPING — Vincular productos "Sin Match" con productos existentes
+// ══════════════════════════════════════════════
+
+// POST /api/mysql-sync/map — Crear un alias manual (nombre MySQL → producto PG)
+router.post('/map', authenticate, async (req, res) => {
+  try {
+    const { alias_name, product_id } = req.body;
+    if (!alias_name || !product_id) {
+      return res.status(400).json({ error: 'Se requiere alias_name y product_id' });
+    }
+
+    // Verificar que el producto existe
+    const { rows: product } = await db.query('SELECT id, name FROM products WHERE id = $1', [product_id]);
+    if (product.length === 0) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    // Insertar o actualizar el alias
+    await db.query(`
+      INSERT INTO product_aliases (alias_name, product_id)
+      VALUES ($1, $2)
+      ON CONFLICT (LOWER(alias_name)) DO UPDATE SET product_id = $2, created_at = NOW()
+    `, [alias_name.trim(), product_id]);
+
+    res.json({ 
+      message: `"${alias_name}" ahora se vincula con "${product[0].name}". Será reconocido automáticamente en la próxima sincronización.`,
+      alias_name,
+      product_id,
+      product_name: product[0].name
+    });
+  } catch (err) {
+    console.error('[Manual Map] Error:', err.message);
+    res.status(500).json({ error: 'Error al crear el mapeo', detail: err.message });
+  }
+});
+
+// GET /api/mysql-sync/aliases — Listar todos los alias manuales
+router.get('/aliases', authenticate, async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT a.id, a.alias_name, a.product_id, p.name as product_name, a.created_at
+      FROM product_aliases a
+      JOIN products p ON a.product_id = p.id
+      ORDER BY a.created_at DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/mysql-sync/aliases/:id — Eliminar un alias
+router.delete('/aliases/:id', authenticate, async (req, res) => {
+  try {
+    const { rows } = await db.query('DELETE FROM product_aliases WHERE id = $1 RETURNING *', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Alias no encontrado' });
+    res.json({ message: 'Alias eliminado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/mysql-sync/products-search?q=term — Buscar productos para vincular
+router.get('/products-search', authenticate, async (req, res) => {
+  try {
+    const q = req.query.q || '';
+    if (q.length < 2) return res.json([]);
+    
+    const { rows } = await db.query(
+      `SELECT id, name, barcode, ranking, stock 
+       FROM products 
+       WHERE LOWER(name) LIKE $1 OR barcode LIKE $1
+       ORDER BY name ASC
+       LIMIT 15`,
+      [`%${q.toLowerCase()}%`]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;

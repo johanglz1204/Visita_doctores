@@ -117,6 +117,10 @@ export const api = {
   cleanupProducts: () => request('/mysql-sync/cleanup-duplicates', { method: 'POST' }),
   syncStatus: () => request('/mysql-sync/status'),
   triggerSync: () => request('/mysql-sync/trigger', { method: 'POST' }),
+  mapProduct: (alias_name, product_id) => request('/mysql-sync/map', { method: 'POST', body: { alias_name, product_id } }),
+  getAliases: () => request('/mysql-sync/aliases'),
+  deleteAlias: (id) => request(`/mysql-sync/aliases/${id}`, { method: 'DELETE' }),
+  searchProductsForMapping: (q) => request(`/mysql-sync/products-search?q=${encodeURIComponent(q)}`),
 
   // Inventory
   getInventory: () => request('/inventory'),

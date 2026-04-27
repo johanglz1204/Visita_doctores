@@ -15,6 +15,14 @@ export default function Products({ addToast }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [diagnosticTab, setDiagnosticTab] = useState('unmatched');
   const [rankingFilter, setRankingFilter] = useState('all'); // 'all', 'aa', 'a', 'risk'
+  const [mappingFor, setMappingFor] = useState(null); // nombre MySQL que se está vinculando
+  const [mapSearch, setMapSearch] = useState('');
+  const [mapResults, setMapResults] = useState([]);
+  const [aliases, setAliases] = useState([]);
+
+  const loadAliases = () => {
+    api.getAliases().then(data => setAliases(Array.isArray(data) ? data : [])).catch(console.error);
+  };
 
   const loadLog = () => {
     api.syncStatus().then(setData => {
@@ -335,7 +343,7 @@ export default function Products({ addToast }) {
       {/* Modal de Diagnóstico de Sync */}
       {showLogModal && (
         <div className="modal-overlay" onClick={() => setShowLogModal(false)}>
-          <div className="modal" style={{ maxWidth: '800px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '900px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <h2 className="modal-title">📊 Diagnóstico de Sincronización</h2>
             {syncInfo?.last_sync ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -360,18 +368,25 @@ export default function Products({ addToast }) {
                     onClick={() => setDiagnosticTab('matched')}
                     style={{ fontSize: '11px', padding: '6px 12px' }}
                    >
-                     ✅ Ver Encontrados ({syncInfo.last_sync.matched})
+                     ✅ Encontrados ({syncInfo.last_sync.matched})
                    </button>
                    <button 
                     className={`btn ${diagnosticTab === 'unmatched' ? 'btn-primary' : 'btn-secondary'}`} 
                     onClick={() => setDiagnosticTab('unmatched')}
                     style={{ fontSize: '11px', padding: '6px 12px' }}
                    >
-                     ❌ Ver No Encontrados ({syncInfo.last_sync.unmatched})
+                     ❌ No Encontrados ({syncInfo.last_sync.unmatched})
+                   </button>
+                   <button 
+                    className={`btn ${diagnosticTab === 'aliases' ? 'btn-primary' : 'btn-secondary'}`} 
+                    onClick={() => { setDiagnosticTab('aliases'); loadAliases(); }}
+                    style={{ fontSize: '11px', padding: '6px 12px' }}
+                   >
+                     🔗 Alias Manuales
                    </button>
                 </div>
 
-                <div className="table-wrapper" style={{ maxHeight: '300px' }}>
+                <div className="table-wrapper" style={{ maxHeight: '350px' }}>
                   <table>
                     <thead>
                       {diagnosticTab === 'matched' ? (
@@ -380,11 +395,18 @@ export default function Products({ addToast }) {
                           <th>Vinculado con (Render)</th>
                           <th style={{ textAlign: 'center' }}>Stock</th>
                         </tr>
-                      ) : (
+                      ) : diagnosticTab === 'unmatched' ? (
                         <tr>
                           <th>Nombre en MySQL</th>
                           <th>Código</th>
                           <th>Stock</th>
+                          <th style={{ textAlign: 'center' }}>Vincular</th>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <th>Nombre MySQL (Alias)</th>
+                          <th>Vinculado con</th>
+                          <th style={{ textAlign: 'right' }}>Acciones</th>
                         </tr>
                       )}
                     </thead>
@@ -397,12 +419,95 @@ export default function Products({ addToast }) {
                             <td style={{ fontSize: '12px', textAlign: 'center' }}>{item.stock}</td>
                           </tr>
                         ))
-                      ) : (
+                      ) : diagnosticTab === 'unmatched' ? (
                         (Array.isArray(syncInfo.unmatched_list) ? syncInfo.unmatched_list : JSON.parse(syncInfo.last_sync.unmatched_list || '[]')).slice(0, 100).map((item, i) => (
                           <tr key={i}>
-                            <td style={{ fontSize: '12px' }}>{item.nombre}</td>
+                            <td style={{ fontSize: '12px', fontWeight: 600 }}>{item.nombre}</td>
                             <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.codigo}</td>
                             <td style={{ fontSize: '12px' }}>{item.existencia}</td>
+                            <td style={{ textAlign: 'center' }}>
+                              {mappingFor === item.nombre ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '200px' }}>
+                                  <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    placeholder="Buscar producto..." 
+                                    value={mapSearch}
+                                    onChange={(e) => {
+                                      setMapSearch(e.target.value);
+                                      if (e.target.value.length >= 2) {
+                                        api.searchProductsForMapping(e.target.value).then(r => setMapResults(Array.isArray(r) ? r : [])).catch(() => {});
+                                      } else {
+                                        setMapResults([]);
+                                      }
+                                    }}
+                                    style={{ fontSize: '11px', padding: '4px 8px' }}
+                                    autoFocus
+                                  />
+                                  {mapResults.length > 0 && (
+                                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', maxHeight: '120px', overflowY: 'auto' }}>
+                                      {mapResults.map(p => (
+                                        <div 
+                                          key={p.id}
+                                          onClick={async () => {
+                                            try {
+                                              const res = await api.mapProduct(item.nombre, p.id);
+                                              addToast(res.message);
+                                              setMappingFor(null);
+                                              setMapSearch('');
+                                              setMapResults([]);
+                                            } catch (err) {
+                                              addToast(err.message || 'Error al vincular', 'error');
+                                            }
+                                          }}
+                                          style={{ padding: '6px 10px', cursor: 'pointer', fontSize: '11px', borderBottom: '1px solid var(--border-color)' }}
+                                          onMouseEnter={e => e.target.style.background = 'rgba(var(--primary-rgb), 0.1)'}
+                                          onMouseLeave={e => e.target.style.background = 'transparent'}
+                                        >
+                                          <strong>{p.name}</strong>
+                                          <span style={{ color: 'var(--text-muted)', marginLeft: '8px' }}>
+                                            {p.ranking && `[${p.ranking}]`} Stock: {p.stock}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <button className="btn btn-secondary" style={{ fontSize: '10px', padding: '2px 8px' }} onClick={() => { setMappingFor(null); setMapSearch(''); setMapResults([]); }}>Cancelar</button>
+                                </div>
+                              ) : (
+                                <button 
+                                  className="btn btn-secondary btn-sm" 
+                                  style={{ fontSize: '10px', padding: '3px 10px' }}
+                                  onClick={() => { setMappingFor(item.nombre); setMapSearch(''); setMapResults([]); }}
+                                >
+                                  🔗 Vincular
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        aliases.map((a, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '12px', fontWeight: 600 }}>{a.alias_name}</td>
+                            <td style={{ fontSize: '12px', color: '#10b981' }}>{a.product_name}</td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button 
+                                className="btn btn-danger btn-sm" 
+                                style={{ fontSize: '10px', padding: '3px 8px' }}
+                                onClick={async () => {
+                                  try {
+                                    await api.deleteAlias(a.id);
+                                    addToast('Alias eliminado');
+                                    loadAliases();
+                                  } catch (err) {
+                                    addToast(err.message, 'error');
+                                  }
+                                }}
+                              >
+                                🗑️
+                              </button>
+                            </td>
                           </tr>
                         ))
                       )}

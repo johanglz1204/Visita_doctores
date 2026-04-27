@@ -23,6 +23,18 @@ async function runMigrations() {
     {
       name: 'Create unique index on products.name',
       query: `CREATE UNIQUE INDEX IF NOT EXISTS idx_products_name_unique ON products (LOWER(TRIM(name)))`
+    },
+    {
+      name: 'Create product_aliases table',
+      query: `
+        CREATE TABLE IF NOT EXISTS product_aliases (
+          id              SERIAL PRIMARY KEY,
+          alias_name      VARCHAR(255) NOT NULL,
+          product_id      INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+          created_at      TIMESTAMPTZ DEFAULT NOW(),
+          UNIQUE(LOWER(alias_name))
+        );
+      `
     }
   ];
 

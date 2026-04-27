@@ -73,15 +73,24 @@ const getOverlapScore = (strMySQL, strPG) => {
 };
 
 /**
- * Lógica UNIFICADA de búsqueda (5 pasos)
+ * Lógica UNIFICADA de búsqueda (6 pasos — Paso 0 es alias manual)
  */
 function findBestMatch(row, pgProducts, pgMaps) {
-  const { pgCodeMap, pgNameMap, pgHardNameMap } = pgMaps;
+  const { pgCodeMap, pgNameMap, pgHardNameMap, aliasMap } = pgMaps;
   const nombreNorm = normalize(row.nombre);
   const nombreHard = hardClean(row.nombre);
   const rowCode = cleanCode(row.codigo);
 
   let product = null;
+
+  // Paso 0: Match por Alias Manual (tabla product_aliases)
+  if (aliasMap) {
+    const aliasMatch = aliasMap.get(nombreNorm);
+    if (aliasMatch) {
+      product = pgProducts.find(p => p.id === aliasMatch);
+      if (product) return product;
+    }
+  }
 
   // Paso 1: Match por Código (Exacto) - PRIORIDAD ALTA
   if (rowCode) {
@@ -204,9 +213,23 @@ async function syncMySQLInventory(externalData = null) {
       pgHardNameMap.set(hardClean(p.name), p);
     }
 
+    // Cargar alias manuales (product_aliases)
+    const aliasMap = new Map();
+    try {
+      const { rows: aliases } = await db.query('SELECT alias_name, product_id FROM product_aliases');
+      for (const a of aliases) {
+        aliasMap.set(normalize(a.alias_name), a.product_id);
+      }
+      if (aliases.length > 0) {
+        console.log(`📎 [MySQL Sync] ${aliases.length} alias manuales cargados.`);
+      }
+    } catch (_) {
+      // Table might not exist yet — that's OK
+    }
+
     // 3. Procesar cada artículo
     for (const row of mysqlRows) {
-      const product = findBestMatch(row, pgProducts, { pgCodeMap, pgNameMap, pgHardNameMap });
+      const product = findBestMatch(row, pgProducts, { pgCodeMap, pgNameMap, pgHardNameMap, aliasMap });
       
       // AUTO-LEARN y Tracking
       if (product) {
