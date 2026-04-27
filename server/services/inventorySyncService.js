@@ -193,7 +193,7 @@ async function syncMySQLInventory(externalData = null) {
     stats.total_mysql = mysqlRows.length;
 
     // 2. Cargar todos los productos de PostgreSQL en memoria para matching rápido
-    const { rows: pgProducts } = await db.query('SELECT id, name, barcode FROM products');
+    const { rows: pgProducts } = await db.query('SELECT id, name, barcode, stock FROM products');
     const pgCodeMap = new Map();         // code -> product
     const pgNameMap = new Map();         // normalized(name) -> product
     const pgHardNameMap = new Map();     // hardClean(name) -> product
@@ -235,6 +235,35 @@ async function syncMySQLInventory(externalData = null) {
 
           const cleanedName = cleanMySQLName(row.nombre);
           const rankingVal = row.ranking || '';
+
+          // --- Lógica de Detección de Quiebre de Stock ---
+          try {
+            const oldStock = parseInt(product.stock) || 0;
+            const newStock = stockVal;
+
+            if (oldStock > 0 && newStock === 0) {
+              // Inicio de quiebre
+              await db.query(
+                `INSERT INTO stock_out_history (product_id, start_date, last_stock_value) 
+                 VALUES ($1, NOW(), $2)
+                 ON CONFLICT DO NOTHING`,
+                [product.id, oldStock]
+              );
+            } else if (oldStock === 0 && newStock > 0) {
+              // Fin de quiebre
+              // Calculamos pérdida estimada simple: (días * promedio_diario_ventas * precio)
+              // Por ahora solo cerramos el registro
+              await db.query(
+                `UPDATE stock_out_history 
+                 SET end_date = NOW() 
+                 WHERE product_id = $1 AND end_date IS NULL`,
+                [product.id]
+              );
+            }
+          } catch (stkErr) {
+            console.warn('⚠️ Error en tracking de stock-out:', stkErr.message);
+          }
+
           const prodUpdate = await db.query(
             `UPDATE products 
              SET stock = $1, min_stock = $2, name = $3, ranking = $4, updated_at = NOW() 

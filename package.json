@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "concurrently": "^8.2.2",
-    "mysql2": "^3.22.1"
+    "mysql2": "^3.22.3"
   }
 }

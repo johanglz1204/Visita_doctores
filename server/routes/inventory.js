@@ -6,6 +6,16 @@ const fs = require('fs');
 const xlsx = require('xlsx');
 const db = require('../db');
 const { cleanForDisplay } = require('../utils/stringUtils');
+const { 
+  getSuggestedOrders, 
+  recalculateDynamicMinStock, 
+  getStockOutHistory 
+} = require('../controllers/inventoryController');
+
+// New Planning Routes
+router.get('/planning/suggestions', getSuggestedOrders);
+router.post('/planning/recalculate-min-stock', recalculateDynamicMinStock);
+router.get('/planning/stock-out-history', getStockOutHistory);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

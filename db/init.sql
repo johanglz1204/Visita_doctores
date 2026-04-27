@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS products (
     price         NUMERIC(10, 2) DEFAULT 0,
     stock         INTEGER DEFAULT 0,
     min_stock     INTEGER DEFAULT 0,
+    target_stock  INTEGER DEFAULT 0,
     description   TEXT DEFAULT '',
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW()
@@ -95,6 +96,21 @@ CREATE TABLE IF NOT EXISTS sales_history (
 CREATE INDEX IF NOT EXISTS idx_sales_doctor ON sales_history(doctor_id);
 CREATE INDEX IF NOT EXISTS idx_sales_product ON sales_history(product_id);
 CREATE INDEX IF NOT EXISTS idx_sales_date ON sales_history(sale_date);
+
+-- ============================================
+-- Table: stock_out_history
+-- ============================================
+CREATE TABLE IF NOT EXISTS stock_out_history (
+    id                SERIAL PRIMARY KEY,
+    product_id        INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    start_date        TIMESTAMPTZ DEFAULT NOW(),
+    end_date          TIMESTAMPTZ,
+    last_stock_value  INTEGER DEFAULT 0,
+    estimated_loss    NUMERIC(10, 2) DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_out_product ON stock_out_history(product_id);
+CREATE INDEX IF NOT EXISTS idx_stock_out_dates ON stock_out_history(start_date, end_date);
 
 -- ============================================
 -- Seed: common products

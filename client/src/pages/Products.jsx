@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
 export default function Products({ addToast }) {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -227,6 +229,7 @@ export default function Products({ addToast }) {
               ✨ Limpiar Duplicados
             </button>
 
+            <button className="btn btn-secondary" onClick={() => navigate('/planning')}>🧠 Planeación</button>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
           </div>
         </div>

@@ -11,6 +11,7 @@ import Products from './pages/Products';
 import Upload from './pages/Upload';
 import Alerts from './pages/Alerts';
 import Sales from './pages/Sales';
+import InventoryPlanning from './pages/InventoryPlanning';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function Sidebar({ onLogout }) {
@@ -31,6 +32,7 @@ function Sidebar({ onLogout }) {
     { to: '/doctors', icon: '👨‍⚕️', label: 'Doctores' },
     { to: '/products', icon: '💊', label: 'Productos' },
     { to: '/sales', icon: '🧾', label: 'Historial' },
+    { to: '/planning', icon: '🧠', label: 'Planeación' },
     { to: '/alerts', icon: '🚨', label: 'Alertas', badge: criticalCount },
   ];
 
@@ -144,6 +146,7 @@ export default function App() {
                   <Route path="/doctors/:id" element={<DoctorProfile addToast={addToast} />} />
                   <Route path="/products" element={<Products addToast={addToast} />} />
                   <Route path="/sales" element={<Sales />} />
+                  <Route path="/planning" element={<InventoryPlanning />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

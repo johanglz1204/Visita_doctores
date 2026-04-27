@@ -126,6 +126,9 @@ export const api = {
   updateInventory: (id, data) => request(`/inventory/${id}`, { method: 'PUT', body: data }),
   deleteInventory: (id) => request(`/inventory/${id}`, { method: 'DELETE' }),
   uploadInventoryExcel: (formData) => request('/inventory/upload-excel', { method: 'POST', body: formData }),
+  getSuggestedOrders: () => request('/inventory/planning/suggestions'),
+  recalculateMinStock: (data) => request('/inventory/planning/recalculate-min-stock', { method: 'POST', body: data }),
+  getStockOutHistory: () => request('/inventory/planning/stock-out-history'),
 
   // Sales
   getSales: (limit, offset, sucursal, startDate, endDate) => {

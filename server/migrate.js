@@ -21,6 +21,21 @@ async function runMigrations() {
     `);
     console.log('Migration: Created unique index on products.name (case-insensitive)');
 
+    await db.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS target_stock INTEGER DEFAULT 0;");
+    console.log('Migration: Added target_stock column to products');
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS stock_out_history (
+        id                SERIAL PRIMARY KEY,
+        product_id        INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        start_date        TIMESTAMPTZ DEFAULT NOW(),
+        end_date          TIMESTAMPTZ,
+        last_stock_value  INTEGER DEFAULT 0,
+        estimated_loss    NUMERIC(10, 2) DEFAULT 0
+      );
+    `);
+    console.log('Migration: Created stock_out_history table');
+
     return true;
   } catch (err) {
     // Log but don't throw — unique index creation fails if there are still duplicates
