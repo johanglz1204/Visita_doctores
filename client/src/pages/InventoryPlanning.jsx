@@ -52,15 +52,14 @@ export default function InventoryPlanning() {
   const exportToExcel = () => {
     // Basic implementation using a CSV blob for simplicity in this demo, 
     // but could use a specialized library or backend endpoint
-    const headers = ['Producto', 'Ranking', 'Stock Actual', 'Stock Min', 'Stock Ideal', 'Sugerido', 'Costo Est.'];
+    const headers = ['Producto', 'Ranking', 'Stock Actual', 'Stock Min', 'Stock Ideal', 'Sugerido'];
     const rows = suggestions.map(s => [
       s.name, 
       s.ranking, 
       s.stock, 
       s.min_stock, 
       s.target_used, 
-      s.suggested_qty, 
-      s.estimated_cost.toFixed(2)
+      s.suggested_qty
     ]);
     
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
@@ -120,9 +119,6 @@ export default function InventoryPlanning() {
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">🛍️ Productos a Ordenar ({suggestions.length})</h2>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Inversión estimada: <strong>${suggestions.reduce((acc, s) => acc + s.estimated_cost, 0).toLocaleString()}</strong>
-            </div>
           </div>
           {suggestions.length > 0 ? (
             <div className="table-wrapper">
@@ -135,7 +131,6 @@ export default function InventoryPlanning() {
                     <th style={{ textAlign: 'center' }}>Mínimo</th>
                     <th style={{ textAlign: 'center' }}>Ideal</th>
                     <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>📦 Sugerido</th>
-                    <th style={{ textAlign: 'right' }}>Costo Est.</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -151,7 +146,6 @@ export default function InventoryPlanning() {
                         <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--primary-color)', backgroundColor: 'rgba(var(--primary-rgb), 0.02)' }}>
                            {s.suggested_qty}
                         </td>
-                        <td style={{ textAlign: 'right', fontWeight: 600 }}>${s.estimated_cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                       </tr>
                     );
                   })}
