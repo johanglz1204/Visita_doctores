@@ -35,6 +35,23 @@ async function runMigrations() {
           UNIQUE(LOWER(alias_name))
         );
       `
+    },
+    {
+      name: 'Create doctor_visits table',
+      query: `
+        CREATE TABLE IF NOT EXISTS doctor_visits (
+          id              SERIAL PRIMARY KEY,
+          doctor_id       INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+          visit_date      TIMESTAMPTZ DEFAULT NOW(),
+          samples_left    TEXT DEFAULT '',
+          notes           TEXT DEFAULT '',
+          created_at      TIMESTAMPTZ DEFAULT NOW()
+        );
+      `
+    },
+    {
+      name: 'Add category to doctors',
+      query: "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS category VARCHAR(10) DEFAULT '';"
     }
   ];
 

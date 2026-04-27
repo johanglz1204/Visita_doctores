@@ -129,6 +129,13 @@ export default function Doctors({ addToast }) {
             <label htmlFor="excel-upload-docs" className="btn btn-secondary">
               📊 Importar
             </label>
+            <button className="btn btn-secondary" onClick={async () => {
+              try {
+                const res = await api.classifyDoctors();
+                addToast(res.message);
+                load();
+              } catch(err) { addToast(err.message, 'error'); }
+            }}>🏷️ Clasificar A/B/C</button>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Doctor</button>
           </div>
         </div>
@@ -141,6 +148,7 @@ export default function Doctors({ addToast }) {
               <thead>
                 <tr>
                   <th>Nombre</th>
+                  <th>Cat.</th>
                   <th>Especialidad</th>
                   <th>Teléfono</th>
                   <th>Cédula</th>
@@ -151,6 +159,13 @@ export default function Doctors({ addToast }) {
                 {filteredDoctors.map(doc => (
                   <tr key={doc.id}>
                     <td style={{ fontWeight: 600 }}>{doc.name}</td>
+                    <td>
+                      {doc.category ? (
+                        <span className={`badge ${doc.category === 'A' ? 'badge-success' : doc.category === 'B' ? 'badge-warning' : 'badge-secondary'}`}>
+                          {doc.category}
+                        </span>
+                      ) : '—'}
+                    </td>
                     <td>{doc.specialty || '—'}</td>
                     <td>{doc.phone || '—'}</td>
                     <td style={{ fontSize: '12px', opacity: 0.8 }}>{doc.license || '—'}</td>

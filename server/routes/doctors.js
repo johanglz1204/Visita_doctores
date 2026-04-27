@@ -247,5 +247,111 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════
+// BITÁCORA DE VISITAS
+// ══════════════════════════════════════════════
+
+// GET /api/doctors/:id/visits — Historial de visitas
+router.get('/:id/visits', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT * FROM doctor_visits WHERE doctor_id = $1 ORDER BY visit_date DESC LIMIT 50`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    // Table might not exist yet
+    res.json([]);
+  }
+});
+
+// POST /api/doctors/:id/visits — Registrar visita
+router.post('/:id/visits', async (req, res) => {
+  try {
+    const { samples_left, notes } = req.body;
+    const { rows } = await db.query(
+      `INSERT INTO doctor_visits (doctor_id, visit_date, samples_left, notes) 
+       VALUES ($1, NOW(), $2, $3) RETURNING *`,
+      [req.params.id, samples_left || '', notes || '']
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('Error creating visit:', err);
+    res.status(500).json({ error: 'Error al registrar visita' });
+  }
+});
+
+// DELETE /api/doctors/:id/visits/:visitId
+router.delete('/:id/visits/:visitId', async (req, res) => {
+  try {
+    await db.query('DELETE FROM doctor_visits WHERE id = $1 AND doctor_id = $2', [req.params.visitId, req.params.id]);
+    res.json({ message: 'Visita eliminada' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ══════════════════════════════════════════════
+// CLASIFICACIÓN AUTOMÁTICA DE DOCTORES
+// ══════════════════════════════════════════════
+
+// POST /api/doctors/classify — Clasificar doctores por volumen de prescripción (A/B/C)
+router.post('/classify', async (req, res) => {
+  try {
+    const knex = db.knex;
+    
+    // Get total prescriptions per doctor in the last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+    const doctorVolumes = await knex('sales_history as s')
+      .select('s.doctor_id')
+      .sum('s.quantity as total_qty')
+      .where('s.sale_date', '>=', sixMonthsAgoStr)
+      .whereNotNull('s.doctor_id')
+      .groupBy('s.doctor_id')
+      .orderBy('total_qty', 'desc');
+
+    if (doctorVolumes.length === 0) {
+      return res.json({ message: 'No hay datos suficientes para clasificar.', updates: 0 });
+    }
+
+    // Top 20% = A, Next 30% = B, Rest = C
+    const total = doctorVolumes.length;
+    const cutA = Math.max(1, Math.ceil(total * 0.2));
+    const cutB = Math.max(cutA + 1, Math.ceil(total * 0.5));
+
+    let updated = 0;
+    for (let i = 0; i < doctorVolumes.length; i++) {
+      let cat = 'C';
+      if (i < cutA) cat = 'A';
+      else if (i < cutB) cat = 'B';
+
+      await knex('doctors')
+        .where('id', doctorVolumes[i].doctor_id)
+        .update({ category: cat });
+      updated++;
+    }
+
+    // Set remaining doctors (no sales) as "C"
+    await knex('doctors')
+      .whereNotIn('id', doctorVolumes.map(d => d.doctor_id))
+      .update({ category: 'C' });
+
+    res.json({ 
+      message: `Clasificación completada: ${updated} doctores evaluados.`,
+      breakdown: {
+        A: cutA,
+        B: cutB - cutA,
+        C: total - cutB
+      }
+    });
+  } catch (err) {
+    console.error('Error classifying doctors:', err);
+    res.status(500).json({ error: 'Error al clasificar doctores' });
+  }
+});
+
 module.exports = router;
 

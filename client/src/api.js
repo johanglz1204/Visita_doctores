@@ -104,6 +104,10 @@ export const api = {
   updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
   deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
   uploadDoctorsExcel: (formData) => request('/doctors/upload-excel', { method: 'POST', body: formData }),
+  getDoctorVisits: (id) => request(`/doctors/${id}/visits`),
+  createDoctorVisit: (id, data) => request(`/doctors/${id}/visits`, { method: 'POST', body: data }),
+  deleteDoctorVisit: (id, visitId) => request(`/doctors/${id}/visits/${visitId}`, { method: 'DELETE' }),
+  classifyDoctors: () => request('/doctors/classify', { method: 'POST' }),
   exportProductsExcel: () => downloadFile('/products/export-excel', 'Productos.xlsx'),
 
   // Products
