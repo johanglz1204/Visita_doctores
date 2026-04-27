@@ -253,8 +253,6 @@ async function syncMySQLInventory(externalData = null) {
 
         try {
           // Actualización de stock
-          console.log(`📡 [DB Update] Intentando actualizar "${product.name}" (ID: ${product.id}) con stock: ${stockVal}`);
-          
 
           const cleanedName = cleanMySQLName(row.nombre);
           const rankingVal = row.ranking || '';
@@ -294,13 +292,9 @@ async function syncMySQLInventory(externalData = null) {
             [stockVal, minVal, cleanedName, rankingVal, product.id]
           );
           
-          // Ya no actualizamos inventory_stocks (removido por solicitud de simplificación)
-          
-          console.log(`✅ [DB Update] Filas afectadas: Products(${prodUpdate.rowCount})`);
-          
           stats.updated++;
           if (stats.updated <= 5) {
-            console.log(`✅ [Sync Debug] "${row.nombre}" -> "${product.name}" (Stock: ${stockVal})`);
+            console.log(`✅ [Sync] "${row.nombre}" -> "${product.name}" (Stock: ${stockVal})`);
           }
 
           // [DEDUPE SAFETY] Actualizar también cualquier otro producto con el mismo nombre normalizado

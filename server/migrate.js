@@ -52,6 +52,14 @@ async function runMigrations() {
     {
       name: 'Add category to doctors',
       query: "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS category VARCHAR(10) DEFAULT '';"
+    },
+    {
+      name: 'Index doctor_visits by doctor_id',
+      query: "CREATE INDEX IF NOT EXISTS idx_doctor_visits_doctor_id ON doctor_visits(doctor_id, visit_date DESC);"
+    },
+    {
+      name: 'Index stock_out_history by product_id',
+      query: "CREATE INDEX IF NOT EXISTS idx_stock_out_product ON stock_out_history(product_id, end_date);"
     }
   ];
 

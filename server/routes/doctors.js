@@ -322,29 +322,25 @@ router.post('/classify', async (req, res) => {
     const cutA = Math.max(1, Math.ceil(total * 0.2));
     const cutB = Math.max(cutA + 1, Math.ceil(total * 0.5));
 
-    let updated = 0;
-    for (let i = 0; i < doctorVolumes.length; i++) {
-      let cat = 'C';
-      if (i < cutA) cat = 'A';
-      else if (i < cutB) cat = 'B';
+    // Group IDs by category for batch update (3 queries instead of N)
+    const idsA = doctorVolumes.slice(0, cutA).map(d => d.doctor_id);
+    const idsB = doctorVolumes.slice(cutA, cutB).map(d => d.doctor_id);
+    const idsC = doctorVolumes.slice(cutB).map(d => d.doctor_id);
 
-      await knex('doctors')
-        .where('id', doctorVolumes[i].doctor_id)
-        .update({ category: cat });
-      updated++;
-    }
+    if (idsA.length > 0) await knex('doctors').whereIn('id', idsA).update({ category: 'A' });
+    if (idsB.length > 0) await knex('doctors').whereIn('id', idsB).update({ category: 'B' });
+    if (idsC.length > 0) await knex('doctors').whereIn('id', idsC).update({ category: 'C' });
 
-    // Set remaining doctors (no sales) as "C"
-    await knex('doctors')
-      .whereNotIn('id', doctorVolumes.map(d => d.doctor_id))
-      .update({ category: 'C' });
+    // Set remaining doctors (no sales at all) as "C"
+    const allWithSales = doctorVolumes.map(d => d.doctor_id);
+    await knex('doctors').whereNotIn('id', allWithSales).update({ category: 'C' });
 
     res.json({ 
-      message: `Clasificación completada: ${updated} doctores evaluados.`,
+      message: `Clasificación completada: ${total} doctores evaluados.`,
       breakdown: {
-        A: cutA,
-        B: cutB - cutA,
-        C: total - cutB
+        A: idsA.length,
+        B: idsB.length,
+        C: idsC.length
       }
     });
   } catch (err) {

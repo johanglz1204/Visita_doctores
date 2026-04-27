@@ -11,8 +11,8 @@ const getSuggestedOrders = async (req, res, next) => {
     // Usually focused on AA and A rankings
     const suggestions = await knex('products')
       .select('id', 'name', 'ranking', 'stock', 'min_stock', 'target_stock', 'price')
-      .whereRaw('stock < target_stock')
-      .orWhereRaw('stock <= min_stock')
+      .whereRaw('stock < target_stock AND target_stock > 0')
+      .orWhereRaw('stock <= min_stock AND min_stock > 0')
       .orderByRaw("CASE WHEN ranking IN ('AA', 'A') THEN 0 ELSE 1 END")
       .orderBy('ranking', 'asc');
 
@@ -49,11 +49,11 @@ const recalculateDynamicMinStock = async (req, res, next) => {
 
     const salesStats = await knex('sales_history as s')
       .join('products as p', 's.product_id', 'p.id')
-      .select('p.id', 'p.name', 'p.ranking')
+      .select('p.id', 'p.name', 'p.ranking', 'p.min_stock as current_min')
       .select(knex.raw('SUM(s.quantity) as total_qty'))
       .where('s.sale_date', '>=', ninetyDaysAgoStr)
       .whereIn('p.ranking', rankingList)
-      .groupBy('p.id', 'p.name', 'p.ranking');
+      .groupBy('p.id', 'p.name', 'p.ranking', 'p.min_stock');
 
     const updates = [];
     for (const stat of salesStats) {
@@ -72,7 +72,7 @@ const recalculateDynamicMinStock = async (req, res, next) => {
       updates.push({
         id: stat.id,
         name: stat.name,
-        old_min: stat.min_stock, // stat from knex join might not have it unless selected
+        old_min: parseInt(stat.current_min) || 0,
         new_min: newMinStock
       });
     }
