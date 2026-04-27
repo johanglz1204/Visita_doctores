@@ -134,7 +134,7 @@ const generateExecutiveReport = async (req, res, next) => {
     doc.fontSize(22).fillColor(COLORS.white).font('Helvetica-Bold')
       .text('REPORTE EJECUTIVO', 50, 25);
     doc.fontSize(10).fillColor('#c4b5fd').font('Helvetica')
-      .text(`VisitaDoctores — Periodo: ${days} días (${startStr} → ${new Date().toISOString().split('T')[0]})`, 50, 55);
+      .text(`VisitaDoctores — Periodo: ${days} días (${startStr} a ${new Date().toISOString().split('T')[0]})`, 50, 55);
 
     let y = 110;
 
@@ -150,7 +150,7 @@ const generateExecutiveReport = async (req, res, next) => {
     y += 75;
 
     // ── TOP PRODUCTOS ──
-    y = drawSectionTitle(doc, '📊 Top Productos del Periodo', y);
+    y = drawSectionTitle(doc, 'Top Productos del Periodo', y);
     const prodWidths = [200, 70, 80, 80];
     y = drawTableRow(doc, y, ['Producto', 'Ranking', 'Vendido', 'Stock'], true, prodWidths);
     for (const p of topProducts) {
@@ -161,7 +161,7 @@ const generateExecutiveReport = async (req, res, next) => {
     y += 15;
 
     // ── TOP DOCTORES ──
-    y = drawSectionTitle(doc, '👨‍⚕️ Top Doctores Prescriptores', y);
+    y = drawSectionTitle(doc, 'Top Doctores Prescriptores', y);
     const docWidths = [250, 100, 100];
     y = drawTableRow(doc, y, ['Doctor', 'Categoría', 'Recetas'], true, docWidths);
     for (const d of topDoctors) {
@@ -173,7 +173,7 @@ const generateExecutiveReport = async (req, res, next) => {
 
     // ── VENTAS POR SUCURSAL ──
     if (sucursalStats.length > 0) {
-      y = drawSectionTitle(doc, '🏢 Distribución por Sucursal', y);
+      y = drawSectionTitle(doc, 'Distribución por Sucursal', y);
       const sucWidths = [250, 120];
       y = drawTableRow(doc, y, ['Sucursal', 'Piezas'], true, sucWidths);
       for (const s of sucursalStats) {
@@ -186,7 +186,7 @@ const generateExecutiveReport = async (req, res, next) => {
     // ── ALERTAS DE DESABASTO ──
     if (criticalProducts.length > 0) {
       if (y > 580) { doc.addPage(); y = 50; }
-      y = drawSectionTitle(doc, '⚠️ Alertas de Desabasto (Ranking AA/A)', y);
+      y = drawSectionTitle(doc, 'Alertas de Desabasto (Ranking AA/A)', y);
       const critWidths = [200, 70, 80, 80];
       y = drawTableRow(doc, y, ['Producto', 'Ranking', 'Stock', 'Mínimo'], true, critWidths);
       for (const c of criticalProducts) {
