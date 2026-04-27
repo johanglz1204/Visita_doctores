@@ -95,6 +95,7 @@ export const api = {
 
   // Dashboard
   getDashboard: (days) => request(`/dashboard${days ? `?days=${days}` : ''}`),
+  downloadExecutiveReport: (days) => downloadFile(`/reports/executive?days=${days || 30}`, `Reporte_Ejecutivo_${new Date().toISOString().split('T')[0]}.pdf`),
 
   // Doctors
   getDoctors: () => request('/doctors'),

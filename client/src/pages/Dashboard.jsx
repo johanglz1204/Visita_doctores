@@ -90,6 +90,9 @@ export default function Dashboard({ addToast }) {
               ))}
            </div>
           <div className="button-group">
+            <button className="btn btn-primary" onClick={() => api.downloadExecutiveReport(days)}>
+              📄 Reporte Ejecutivo
+            </button>
             <button className="btn btn-secondary" onClick={handleSyncEmail} disabled={syncing}>
               {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '📧 Sync Emails'}
             </button>

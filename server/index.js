@@ -51,6 +51,10 @@ app.use('/api/mysql-sync', require('./routes/mysqlSync'));
 const { getDashboardStats } = require('./controllers/dashboardController');
 app.get('/api/dashboard', authenticate, getDashboardStats);
 
+// Executive Report PDF (Protected)
+const { generateExecutiveReport } = require('./controllers/reportController');
+app.get('/api/reports/executive', authenticate, generateExecutiveReport);
+
 // Endpoint para ver el último log de sincronización (Diagnóstico)
 app.get('/api/sync/last-log', authenticate, async (req, res) => {
   try {
