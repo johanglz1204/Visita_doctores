@@ -16,11 +16,15 @@ export default function InventoryPlanning() {
         api.getSuggestedOrders(),
         api.getStockOutHistory()
       ]);
-      setSuggestions(sugData);
-      setHistory(histData);
+      
+      if (sugData && sugData.error) throw new Error(sugData.error);
+      if (histData && histData.error) throw new Error(histData.error);
+
+      setSuggestions(Array.isArray(sugData) ? sugData : []);
+      setHistory(Array.isArray(histData) ? histData : []);
     } catch (err) {
       console.error(err);
-      toast.error('Error al cargar datos de planificación');
+      toast.error(err.message || 'Error al cargar datos de planificación');
     } finally {
       setLoading(false);
     }
