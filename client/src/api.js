@@ -1,67 +1,72 @@
-const API_BASE = '/api';
+import { 
+  collection, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  query, 
+  where, 
+  orderBy, 
+  limit,
+  serverTimestamp,
+  increment
+} from "firebase/firestore";
+import { 
+  signInWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged 
+} from "firebase/auth";
+import { db, auth } from "./firebaseConfig";
 
-// Helper to refresh the token
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) throw new Error('No refresh token available');
+// Helper to handle Firestore dates
+const formatFirestoreData = (doc) => {
+  const data = doc.data();
+  return { id: doc.id, ...data };
+};
 
-  const res = await fetch(`${API_BASE}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken })
-  });
-
-  if (!res.ok) {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    throw new Error('Refresh token invalid');
-  }
-
-  const data = await res.json();
-  localStorage.setItem('accessToken', data.accessToken);
-  return data.accessToken;
-}
-
-async function request(path, options = {}, isRetry = false) {
-  const url = `${API_BASE}${path}`;
-  const config = {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  };
-
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
-    config.body = JSON.stringify(config.body);
-  }
-
-  if (config.body instanceof FormData) {
-    delete config.headers['Content-Type'];
-  }
-
+async function request(collectionName, operation = 'get', idOrData = null, extra = null) {
   try {
-    const res = await fetch(url, config);
+    const colRef = collection(db, collectionName);
     
-    // Si el token ha expirado (403) o es inválido (401), intentamos refrescar
-    if ((res.status === 401 || res.status === 403) && !isRetry && localStorage.getItem('refreshToken')) {
-      console.log('Access token expired. Attempting refresh...');
-      try {
-        const newToken = await refreshAccessToken();
-        // Reintentar la petición original con el nuevo token
-        return request(path, options, true);
-      } catch (refreshErr) {
-        console.error('Refresh failed. Redirecting to login.');
-        window.location.reload(); // Forzar logout
-        return;
-      }
+    switch (operation) {
+      case 'get':
+        if (idOrData && typeof idOrData === 'string') {
+          const docRef = doc(db, collectionName, idOrData);
+          const docSnap = await getDoc(docRef);
+          return formatFirestoreData(docSnap);
+        } else {
+          let q = query(colRef);
+          if (extra && extra.constraints) {
+            q = query(colRef, ...extra.constraints);
+          }
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(formatFirestoreData);
+        }
+      case 'add':
+        const newDoc = await addDoc(colRef, {
+          ...idOrData,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        return { id: newDoc.id, ...idOrData };
+      case 'update':
+        const updateRef = doc(db, collectionName, idOrData);
+        await updateDoc(updateRef, {
+          ...extra,
+          updatedAt: serverTimestamp()
+        });
+        return { id: idOrData, ...extra };
+      case 'delete':
+        const deleteRef = doc(db, collectionName, idOrData);
+        await deleteDoc(deleteRef);
+        return { id: idOrData, success: true };
+      default:
+        throw new Error('Operación no soportada');
     }
-
-    return res.json();
   } catch (error) {
-    console.error(`Error en API Request (${path}):`, error);
+    console.error(`Error en Firestore (${collectionName} - ${operation}):`, error);
     throw error;
   }
 }
@@ -91,86 +96,52 @@ async function downloadFile(path, filename) {
 
 export const api = {
   // Auth
-  login: (username, password) => request('/auth/login', { method: 'POST', body: { username, password } }),
+  login: (email, password) => signInWithEmailAndPassword(auth, email, password),
+  logout: () => signOut(auth),
+  onAuthStateChanged: (callback) => onAuthStateChanged(auth, callback),
 
   // Dashboard
-  getDashboard: (days) => request(`/dashboard${days ? `?days=${days}` : ''}`),
-  downloadExecutiveReport: (days) => downloadFile(`/reports/executive?days=${days || 30}`, `Reporte_Ejecutivo_${new Date().toISOString().split('T')[0]}.pdf`),
+  getDashboard: async () => {
+    const doctors = await request('doctors');
+    const products = await request('products');
+    const sales = await request('sales', 'get', null, { constraints: [limit(50), orderBy('date', 'desc')] });
+    return { doctors, products, sales };
+  },
 
   // Doctors
-  getDoctors: () => request('/doctors'),
-  getDoctor: (id) => request(`/doctors/${id}`),
-  getDoctorStats: (id) => request(`/doctors/${id}/stats`),
-  createDoctor: (data) => request('/doctors', { method: 'POST', body: data }),
-  updateDoctor: (id, data) => request(`/doctors/${id}`, { method: 'PUT', body: data }),
-  deleteDoctor: (id) => request(`/doctors/${id}`, { method: 'DELETE' }),
-  uploadDoctorsExcel: (formData) => request('/doctors/upload-excel', { method: 'POST', body: formData }),
-  getDoctorVisits: (id) => request(`/doctors/${id}/visits`),
-  createDoctorVisit: (id, data) => request(`/doctors/${id}/visits`, { method: 'POST', body: data }),
-  deleteDoctorVisit: (id, visitId) => request(`/doctors/${id}/visits/${visitId}`, { method: 'DELETE' }),
-  classifyDoctors: () => request('/doctors/classify', { method: 'POST' }),
-  exportProductsExcel: () => downloadFile('/products/export-excel', 'Productos.xlsx'),
+  getDoctors: () => request('doctors'),
+  getDoctor: (id) => request('doctors', 'get', id),
+  createDoctor: (data) => request('doctors', 'add', data),
+  updateDoctor: (id, data) => request('doctors', 'update', id, data),
+  deleteDoctor: (id) => request('doctors', 'delete', id),
+  getDoctorVisits: (id) => request('visits', 'get', null, { constraints: [where('doctor_id', '==', id)] }),
+  createDoctorVisit: (id, data) => request('visits', 'add', { ...data, doctor_id: id }),
+  deleteDoctorVisit: (id, visitId) => request('visits', 'delete', visitId),
 
   // Products
-  getProducts: () => request('/products'),
-  getProduct: (id) => request(`/products/${id}`),
-  createProduct: (data) => request('/products', { method: 'POST', body: data }),
-  updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
-  deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
-  uploadProductsExcel: (formData) => request('/products/upload-excel', { method: 'POST', body: formData }),
-  getDuplicatesPreview: () => request('/mysql-sync/duplicates-preview'),
-  cleanupProducts: () => request('/mysql-sync/cleanup-duplicates', { method: 'POST' }),
-  syncStatus: () => request('/mysql-sync/status'),
-  triggerSync: () => request('/mysql-sync/trigger', { method: 'POST' }),
-  mapProduct: (alias_name, product_id) => request('/mysql-sync/map', { method: 'POST', body: { alias_name, product_id } }),
-  getAliases: () => request('/mysql-sync/aliases'),
-  deleteAlias: (id) => request(`/mysql-sync/aliases/${id}`, { method: 'DELETE' }),
-  searchProductsForMapping: (q) => request(`/mysql-sync/products-search?q=${encodeURIComponent(q)}`),
+  getProducts: () => request('products'),
+  getProduct: (id) => request('products', 'get', id),
+  createProduct: (data) => request('products', 'add', data),
+  updateProduct: (id, data) => request('products', 'update', id, data),
+  deleteProduct: (id) => request('products', 'delete', id),
 
   // Inventory
-  getInventory: () => request('/inventory'),
-  getCriticalStock: (threshold) => request(`/inventory/critical?threshold=${threshold || 2}`),
-  getLastSyncLog: () => request('/sync/last-log'),
-  createInventory: (data) => request('/inventory', { method: 'POST', body: data }),
-  updateInventory: (id, data) => request(`/inventory/${id}`, { method: 'PUT', body: data }),
-  deleteInventory: (id) => request(`/inventory/${id}`, { method: 'DELETE' }),
-  uploadInventoryExcel: (formData) => request('/inventory/upload-excel', { method: 'POST', body: formData }),
-  getSuggestedOrders: () => request('/inventory/planning/suggestions'),
-  recalculateMinStock: (data) => request('/inventory/planning/recalculate-min-stock', { method: 'POST', body: data }),
-  getStockOutHistory: () => request('/inventory/planning/stock-out-history'),
+  getInventory: () => request('inventory'),
+  createInventory: (data) => request('inventory', 'add', data),
+  updateInventory: (id, data) => request('inventory', 'update', id, data),
+  deleteInventory: (id) => request('inventory', 'delete', id),
 
   // Sales
-  getSales: (limit, offset, sucursal, startDate, endDate) => {
-    let url = `/sales?limit=${limit || 100}&offset=${offset || 0}`;
-    if (sucursal) url += `&sucursal=${encodeURIComponent(sucursal)}`;
-    if (startDate) url += `&startDate=${startDate}`;
-    if (endDate) url += `&endDate=${endDate}`;
-    return request(url);
+  getSales: (limitVal = 100, offset = 0, sucursal, startDate, endDate) => {
+    const constraints = [orderBy('date', 'desc'), limit(limitVal)];
+    if (sucursal) constraints.push(where('sucursal', '==', sucursal));
+    // Firebase supports range filters but requires indexes
+    return request('sales', 'get', null, { constraints });
   },
-  uploadFile: (formData) => request('/sales/upload', { method: 'POST', body: formData }),
-  parsePreview: (formData) => request('/sales/parse-preview', { method: 'POST', body: formData }),
-  exportSalesExcel: (sucursal, startDate, endDate) => {
-    let url = `/sales/export-excel`;
-    const params = [];
-    if (sucursal) params.push(`sucursal=${encodeURIComponent(sucursal)}`);
-    if (startDate) params.push(`startDate=${startDate}`);
-    if (endDate) params.push(`endDate=${endDate}`);
-    
-    if (params.length > 0) {
-       url += `?${params.join('&')}`;
-    }
-    return downloadFile(url, 'Reporte_Ventas.xlsx');
-  },
-
-  // Sync
-  syncEmails: () => request('/sync/emails', { method: 'POST' }),
-
-  // Branches
-  getBranches: () => request('/sales/branches'),
-
-  // Backup
-  backupToGithub: () => request('/backup/github', { method: 'POST' }),
-  downloadBackup: () => `${API_BASE}/backup/download`,
+  
+  // Note: These would need special handling with client-side libraries (like xlsx)
+  uploadDoctorsExcel: () => { throw new Error('Carga de Excel no implementada en modo estático aún'); },
+  downloadExecutiveReport: () => { throw new Error('Reportes PDF no implementados en modo estático aún'); },
 };
 
 

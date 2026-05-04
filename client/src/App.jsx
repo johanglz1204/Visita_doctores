@@ -109,16 +109,24 @@ function ToastContainer({ toasts, onDismiss }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState(() => localStorage.getItem('accessToken') || null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogin = (accessToken, refreshToken) => {
-    setToken(accessToken);
-  };
+  useEffect(() => {
+    const unsubscribe = api.onAuthStateChanged((user) => {
+      setUser(user);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setToken(null);
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+      toast.success('Sesión cerrada');
+    } catch (error) {
+      toast.error('Error al cerrar sesión');
+    }
   };
 
 
@@ -130,11 +138,15 @@ export default function App() {
     }
   };
 
+  if (loading) {
+    return <div className="loading-screen">Cargando...</div>;
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        {!token ? (
-          <Login onLogin={handleLogin} />
+        {!user ? (
+          <Login />
         ) : (
           <BrowserRouter>
             <div className="app-layout">

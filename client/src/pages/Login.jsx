@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { api } from '../api';
 import toast from 'react-hot-toast';
 
-export default function Login({ onLogin }) {
-  const [username, setUsername] = useState('');
+export default function Login() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -11,13 +11,10 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.login(username, password);
-      localStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
-      toast.success(res.message || 'Bienvenido');
-      onLogin(res.accessToken, res.refreshToken);
+      await api.login(email, password);
+      toast.success('Bienvenido');
     } catch (err) {
-      toast.error(err.message || 'Error al iniciar sesión');
+      toast.error('Error al iniciar sesión: ' + (err.message || 'Credenciales inválidas'));
     } finally {
       setLoading(false);
     }
@@ -34,15 +31,15 @@ export default function Login({ onLogin }) {
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Usuario</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Correo Electrónico</label>
             <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               className="input"
               required
               autoFocus
-              placeholder="admin"
+              placeholder="admin@ejemplo.com"
             />
           </div>
           <div>
