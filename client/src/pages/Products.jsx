@@ -141,18 +141,17 @@ export default function Products({ addToast }) {
       if (branchStock <= 0) return false;
     }
 
-    const r = p.ranking || '';
-    if (rankingFilter === 'aa') return r === 'AA';
-    if (rankingFilter === 'a') return r === 'A';
+    const r = (p.ranking || '').toLowerCase();
+    if (rankingFilter === 'all') return true;
     if (rankingFilter === 'risk') {
       if (branchFilter !== 'all') {
         const bs = (p.stock_by_branch || {})[branchFilter] || 0;
-        return (r === 'AA' || r === 'A') && bs <= (p.min_stock || 5);
+        return (r === 'aa' || r === 'a') && bs <= (p.min_stock || 5);
       }
-      return (r === 'AA' || r === 'A') && p.stock <= (p.min_stock || 5);
+      return (r === 'aa' || r === 'a') && (p.stock || 0) <= (p.min_stock || 5);
     }
     
-    return true; 
+    return r === rankingFilter;
   });
 
   // Pagination logic
@@ -221,11 +220,19 @@ export default function Products({ addToast }) {
         <div className="card-header" style={{ flexWrap: 'wrap', gap: '10px' }}>
           <h2 className="card-title">💊 Lista de Productos ({filteredProducts.length})</h2>
           
-          <div className="tabs" style={{ display: 'flex', gap: '6px', background: 'var(--bg-glass)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <div className="tabs" style={{ display: 'flex', gap: '6px', background: 'var(--bg-glass)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
             <button className={`btn ${rankingFilter === 'all' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('all')}>Todos</button>
-            <button className={`btn ${rankingFilter === 'aa' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('aa')}>Solo AA</button>
-            <button className={`btn ${rankingFilter === 'a' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px' }} onClick={() => setRankingFilter('a')}>Solo A</button>
-            <button className={`btn ${rankingFilter === 'risk' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px', color: rankingFilter === 'risk' ? 'white' : '#ef4444' }} onClick={() => setRankingFilter('risk')}>🚨 En Riesgo (AA/A)</button>
+            {['AA', 'A', 'B', 'C', 'E', 'Z'].map(rank => (
+              <button 
+                key={rank}
+                className={`btn ${rankingFilter === rank.toLowerCase() ? 'btn-primary' : ''}`} 
+                style={{ padding: '4px 12px', fontSize: '12px' }} 
+                onClick={() => setRankingFilter(rank.toLowerCase())}
+              >
+                {rank}
+              </button>
+            ))}
+            <button className={`btn ${rankingFilter === 'risk' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px', color: rankingFilter === 'risk' ? 'white' : '#ef4444' }} onClick={() => setRankingFilter('risk')}>🚨 En Riesgo</button>
           </div>
 
           <div className="btn-group">
