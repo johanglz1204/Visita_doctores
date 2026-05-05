@@ -276,158 +276,77 @@ export default function Products({ addToast }) {
             <button className={`btn ${rankingFilter === 'risk' ? 'btn-primary' : ''}`} style={{ padding: '4px 12px', fontSize: '12px', color: rankingFilter === 'risk' ? 'white' : '#ef4444' }} onClick={() => setRankingFilter('risk')}>🚨 En Riesgo</button>
           </div>
 
-          <div className="btn-group">
-            <input 
-              type="file" 
-              accept=".xlsx, .xls" 
-              style={{ display: 'none' }} 
-              id="excel-upload-products" 
-              onChange={handleExcelUpload} 
-            />
-            <label htmlFor="excel-upload-products" className="btn btn-secondary">
-              📊 Importar Productos
-            </label>
-            
-            <input 
-              type="file" 
-              accept=".xlsx, .xls" 
-              style={{ display: 'none' }} 
-              id="excel-upload-transit" 
-              onChange={handleTransitExcelUpload} 
-            />
-            <label htmlFor="excel-upload-transit" className="btn btn-secondary" style={{ color: '#3b82f6', borderColor: '#3b82f6' }}>
-              🚚 Importar Tránsito
-            </label>
-            <button className="btn btn-secondary" onClick={() => api.exportProductsExcel()}>📥 Exportar</button>
-            <button 
-              className="btn btn-secondary" 
-              style={{ color: '#d97706', borderColor: '#fbbf24' }} 
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  // Primero ver cuántos duplicados hay
-                  const preview = await api.getDuplicatesPreview();
-                  setLoading(false);
-                  
-                  if (preview.duplicates_to_delete === 0) {
-                    addToast('✅ No hay productos duplicados. El catálogo está limpio.');
-                    return;
-                  }
-                  
-                  if (!confirm(
-                    `Se encontraron ${preview.duplicates_to_delete} producto(s) duplicados en ${preview.duplicate_groups} grupo(s).\n\n` +
-                    `¿Deseas eliminar los duplicados? Los registros de inventario y ventas serán migrados al producto original.`
-                  )) return;
-                  
-                  setLoading(true);
-                  const res = await api.cleanupProducts();
-                  addToast(res.message);
-                  load();
-                } catch (err) {
-                  addToast(err.message, 'error');
-                  setLoading(false);
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              ✨ Limpiar Duplicados
-            </button>
+          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap', gap: '15px' }}>
+            {/* Grupo de Importación/Exportación */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type="file" accept=".xlsx, .xls" style={{ display: 'none' }} id="excel-upload-products" onChange={handleExcelUpload} />
+              <label htmlFor="excel-upload-products" className="btn btn-secondary" style={{ fontSize: '11px', padding: '6px 12px' }}>
+                📊 Importar Catálogo
+              </label>
+              
+              <input type="file" accept=".xlsx, .xls" style={{ display: 'none' }} id="excel-upload-transit" onChange={handleTransitExcelUpload} />
+              <label htmlFor="excel-upload-transit" className="btn btn-secondary" style={{ color: '#3b82f6', borderColor: '#3b82f6', fontSize: '11px', padding: '6px 12px' }}>
+                🚚 Cargar Pedido
+              </label>
 
-            <button className="btn btn-secondary" onClick={() => navigate('/planning')}>🧠 Planeación</button>
-            <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
-            
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '10px', padding: '8px', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>🛒 Pedido para:</span>
-              <select 
-                className="form-input" 
-                style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }}
-                onChange={(e) => {
-                  const days = parseInt(e.target.value);
-                  if (!days) return;
-                  
-                  // Incluir AA, A, B, C
-                  const eligibleProducts = products.filter(p => ['aa', 'a', 'b', 'c'].includes((p.ranking || '').toLowerCase()));
-                  
-                  const headers = ['Producto', 'Barcode', 'Ranking', 'Stock Total', 'Sug. MATRIZ', 'Sug. TAMPICO', 'Sug. CIVIL', 'Sug. EJERCITO', 'Sug. CURVA TEXAS'];
-                  const rows = [];
+              <button className="btn btn-secondary" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => api.exportProductsExcel()}>📥 Exportar</button>
+            </div>
 
-                  eligibleProducts.forEach(p => {
-                    const sm = p.sales_metrics || {};
-                    const sbb = p.stock_by_branch || {};
-                    let hasOrder = false;
+            {/* Grupo de Planeación y Compra */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button className="btn btn-secondary" style={{ fontSize: '11px' }} onClick={() => navigate('/planning')}>🧠 Planeación</button>
+              
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '6px 12px', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold' }}>🛒 Generar Pedido:</span>
+                <select 
+                  className="form-input" 
+                  style={{ width: 'auto', padding: '0px 4px', fontSize: '11px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: 'var(--primary-color)' }}
+                  onChange={(e) => {
+                    const days = parseInt(e.target.value);
+                    if (!days) return;
                     
-                    const calc = (branch) => {
-                      const rate = (sm[branch] || {}).daily_rate || 0;
-                      const stock = sbb[branch] || 0;
-                      const transit = p.transit_stock || 0;
-                      
-                      // El tránsito se resta del sugerido total
-                      // Si el tránsito es global, lo restamos proporcionalmente o del total
-                      // Para simplificar, restamos el tránsito global del primer requerimiento o prorrateado
-                      // Pero el usuario pidió "cuantas pedir para cada sucursal".
-                      // Si el tránsito es para una sucursal específica sería ideal, pero si es global:
-                      const suggested = Math.ceil(rate * days) - stock;
-                      return Math.max(0, suggested);
-                    };
+                    const eligible = products.filter(p => ['aa', 'a', 'b', 'c'].includes((p.ranking || '').toLowerCase()));
+                    const headers = ['Producto', 'Barcode', 'Ranking', 'Stock', 'MATRIZ', 'TAMPICO', 'CIVIL', 'EJERCITO', 'CURVA'];
+                    const rows = [];
 
-                    const branchSuggestions = [
-                      calc('MATRIZ'),
-                      calc('TAMPICO'),
-                      calc('CIVIL'),
-                      calc('EJERCITO'),
-                      calc('CURVA TEXAS')
-                    ];
+                    eligible.forEach(p => {
+                      const sm = p.sales_metrics || {};
+                      const sbb = p.stock_by_branch || {};
+                      let hasOrder = false;
+                      const calc = (b) => {
+                        const r = (sm[b] || {}).daily_rate || 0;
+                        const s = sbb[b] || 0;
+                        const sug = Math.ceil(r * days) - (s + (p.transit_stock || 0));
+                        const res = Math.max(0, sug);
+                        if (res > 0) hasOrder = true;
+                        return res;
+                      };
+                      const sugs = [calc('MATRIZ'), calc('TAMPICO'), calc('CIVIL'), calc('EJERCITO'), calc('CURVA TEXAS')];
+                      if (hasOrder) rows.push([p.name.replace(/,/g, ''), p.barcode, p.ranking, p.stock, ...sugs]);
+                    });
 
-                    // Restar tránsito global del total sugerido de forma inteligente
-                    const totalSuggestedBeforeTransit = branchSuggestions.reduce((a, b) => a + b, 0);
-                    const transitTotal = p.transit_stock || 0;
-                    
-                    if (totalSuggestedBeforeTransit > 0) {
-                      let remainingTransit = transitTotal;
-                      const finalSuggestions = branchSuggestions.map(s => {
-                        if (remainingTransit <= 0) return s;
-                        const deduction = Math.min(s, remainingTransit);
-                        remainingTransit -= deduction;
-                        return s - deduction;
-                      });
+                    if (rows.length === 0) { addToast('Sin productos requeridos'); return; }
+                    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `Pedido_${days}d.csv`;
+                    link.click();
+                    e.target.value = "";
+                  }}
+                >
+                  <option value="">Elegir...</option>
+                  <option value="7">7 Días</option>
+                  <option value="15">15 Días</option>
+                  <option value="30">30 Días</option>
+                </select>
+              </div>
 
-                      if (finalSuggestions.some(s => s > 0)) {
-                        rows.push([
-                          p.name.replace(/,/g, ''),
-                          p.barcode,
-                          p.ranking,
-                          p.stock,
-                          ...finalSuggestions
-                        ]);
-                      }
-                    }
-                  });
-
-                  if (rows.length === 0) {
-                    addToast('No hay productos que requieran pedido para este periodo');
-                    return;
-                  }
-
-                  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                  const link = document.createElement('a');
-                  link.href = URL.createObjectURL(blob);
-                  link.download = `Reporte_Compra_${days}dias_${new Date().toISOString().split('T')[0]}.csv`;
-                  link.click();
-                  e.target.value = ""; // Reset selector
-                }}
-              >
-                <option value="">Descargar Reporte...</option>
-                <option value="7">7 Días</option>
-                <option value="15">15 Días</option>
-                <option value="30">30 Días</option>
-                <option value="45">45 Días</option>
-              </select>
+              <button className="btn btn-primary" style={{ padding: '8px 16px', fontWeight: 'bold' }} onClick={openCreate}>+ Nuevo Producto</button>
             </div>
           </div>
         </div>
-
+          
         {loading ? (
           <div className="loading-container"><div className="spinner"></div><span>Cargando productos...</span></div>
         ) : currentProducts.length > 0 ? (
