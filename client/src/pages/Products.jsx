@@ -293,32 +293,51 @@ export default function Products({ addToast }) {
                 style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }}
                 onChange={(e) => {
                   const days = parseInt(e.target.value);
-                  const riskProducts = products.filter(p => p.ranking === 'AA' || p.ranking === 'A');
+                  if (!days) return;
                   
-                  const headers = ['Producto', 'Barcode', 'Ranking', 'Total Stock', 'Sugerido MATRIZ', 'Sugerido TAMPICO', 'Sugerido CIVIL', 'Sugerido EJERCITO', 'Sugerido CURVA TEXAS'];
-                  const rows = riskProducts.map(p => {
+                  // Incluir AA, A, B, C
+                  const eligibleProducts = products.filter(p => ['aa', 'a', 'b', 'c'].includes((p.ranking || '').toLowerCase()));
+                  
+                  const headers = ['Producto', 'Barcode', 'Ranking', 'Stock Total', 'Sug. MATRIZ', 'Sug. TAMPICO', 'Sug. CIVIL', 'Sug. EJERCITO', 'Sug. CURVA TEXAS'];
+                  const rows = [];
+
+                  eligibleProducts.forEach(p => {
                     const sm = p.sales_metrics || {};
                     const sbb = p.stock_by_branch || {};
+                    let hasOrder = false;
                     
                     const calc = (branch) => {
                       const rate = (sm[branch] || {}).daily_rate || 0;
                       const stock = sbb[branch] || 0;
                       const suggested = Math.ceil(rate * days) - stock;
-                      return Math.max(0, suggested);
+                      const final = Math.max(0, suggested);
+                      if (final > 0) hasOrder = true;
+                      return final;
                     };
 
-                    return [
-                      p.name,
-                      p.barcode,
-                      p.ranking,
-                      p.stock,
+                    const branchSuggestions = [
                       calc('MATRIZ'),
                       calc('TAMPICO'),
                       calc('CIVIL'),
                       calc('EJERCITO'),
                       calc('CURVA TEXAS')
                     ];
+
+                    if (hasOrder) {
+                      rows.push([
+                        p.name.replace(/,/g, ''), // Evitar errores de CSV
+                        p.barcode,
+                        p.ranking,
+                        p.stock,
+                        ...branchSuggestions
+                      ]);
+                    }
                   });
+
+                  if (rows.length === 0) {
+                    addToast('No hay productos que requieran pedido para este periodo');
+                    return;
+                  }
 
                   const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
                   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -326,6 +345,7 @@ export default function Products({ addToast }) {
                   link.href = URL.createObjectURL(blob);
                   link.download = `Reporte_Compra_${days}dias_${new Date().toISOString().split('T')[0]}.csv`;
                   link.click();
+                  e.target.value = ""; // Reset selector
                 }}
               >
                 <option value="">Descargar Reporte...</option>
