@@ -127,13 +127,15 @@ export default function Products({ addToast }) {
   };
 
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 50;
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (!matchesSearch) return false;
 
-    // Filtro de sucursal: solo mostrar productos que tengan stock en esa sucursal
     if (branchFilter !== 'all') {
       const branchStock = (p.stock_by_branch || {})[branchFilter] || 0;
       if (branchStock <= 0) return false;
@@ -150,8 +152,19 @@ export default function Products({ addToast }) {
       return (r === 'AA' || r === 'A') && p.stock <= (p.min_stock || 5);
     }
     
-    return true; // 'all'
+    return true; 
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, rankingFilter, branchFilter]);
 
   return (
     <div className="products-container">
@@ -269,87 +282,110 @@ export default function Products({ addToast }) {
 
         {loading ? (
           <div className="loading-container"><div className="spinner"></div><span>Cargando productos...</span></div>
-        ) : filteredProducts.length > 0 ? (
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Producto</th>
-                  <th>Ranking</th>
-                  {branchFilter === 'all' ? (
-                    BRANCHES.map(b => (
-                      <th key={b} style={{ textAlign: 'center', fontSize: '10px', padding: '10px 6px', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>
-                        {'📦 ' + b}
-                      </th>
-                    ))
-                  ) : (
-                    <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>{'📦 ' + branchFilter}</th>
-                  )}
-                  <th style={{ textAlign: 'center' }}>Total</th>
-                  <th style={{ textAlign: 'right' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map(prod => {
-                  const isHighRanking = prod.ranking === 'AA' || prod.ranking === 'A';
-                  const totalStock = prod.stock || 0;
-                  const sbb = prod.stock_by_branch || {};
-                  const relevantStock = branchFilter !== 'all' ? (sbb[branchFilter] || 0) : totalStock;
-                  const isLowStock = relevantStock <= (prod.min_stock || 5);
-                  const isCritical = isHighRanking && isLowStock;
-                  return (
-                    <tr key={prod.id} style={{ backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.05)' : 'transparent', borderLeft: isCritical ? '4px solid #ef4444' : '4px solid transparent' }}>
-                      <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
-                      <td style={{ fontWeight: 600 }}>
-                        {prod.name}
-                        {isCritical && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#ef4444', fontWeight: 'bold' }}>⚠️ Crítico</span>}
-                      </td>
-                      <td><span className={`badge ${isHighRanking ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
-                      {branchFilter === 'all' ? (
-                        BRANCHES.map(b => {
-                          const bs = sbb[b] || 0;
-                          const bCritical = isHighRanking && bs <= (prod.min_stock || 5) && bs > 0;
-                          const bEmpty = bs === 0;
-                          return (
-                            <td key={b} style={{ textAlign: 'center', padding: '8px 4px' }}>
-                              <span style={{
-                                fontSize: '14px',
-                                fontWeight: '800',
-                                color: bEmpty ? 'var(--text-muted)' : bCritical ? '#ef4444' : '#10b981',
-                                background: bEmpty ? 'transparent' : bCritical ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
-                                padding: '2px 8px',
-                                borderRadius: '6px'
-                              }}>
-                                {bs}
-                              </span>
-                            </td>
-                          );
-                        })
-                      ) : (
-                        <td style={{ textAlign: 'center' }}>
-                          <span style={{
-                            fontSize: '18px',
-                            fontWeight: '800',
-                            color: isCritical ? '#ef4444' : 'var(--primary-color)'
-                          }}>
-                            {sbb[branchFilter] || 0}
-                          </span>
+        ) : currentProducts.length > 0 ? (
+          <>
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Ranking</th>
+                    {branchFilter === 'all' ? (
+                      BRANCHES.map(b => (
+                        <th key={b} style={{ textAlign: 'center', fontSize: '10px', padding: '10px 6px', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>
+                          {'📦 ' + b}
+                        </th>
+                      ))
+                    ) : (
+                      <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>{'📦 ' + branchFilter}</th>
+                    )}
+                    <th style={{ textAlign: 'center' }}>Total</th>
+                    <th style={{ textAlign: 'right' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentProducts.map(prod => {
+                    const isHighRanking = prod.ranking === 'AA' || prod.ranking === 'A';
+                    const totalStock = prod.stock || 0;
+                    const sbb = prod.stock_by_branch || {};
+                    const relevantStock = branchFilter !== 'all' ? (sbb[branchFilter] || 0) : totalStock;
+                    const isLowStock = relevantStock <= (prod.min_stock || 5);
+                    const isCritical = isHighRanking && isLowStock;
+                    return (
+                      <tr key={prod.id} style={{ backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.05)' : 'transparent', borderLeft: isCritical ? '4px solid #ef4444' : '4px solid transparent' }}>
+                        <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
+                        <td style={{ fontWeight: 600 }}>
+                          {prod.name}
+                          {isCritical && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#ef4444', fontWeight: 'bold' }}>⚠️ Crítico</span>}
                         </td>
-                      )}
-                      <td style={{ textAlign: 'center', fontWeight: 700, fontSize: '15px', color: 'var(--primary-color)' }}>{totalStock}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
-                          <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <td><span className={`badge ${isHighRanking ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
+                        {branchFilter === 'all' ? (
+                          BRANCHES.map(b => {
+                            const bs = sbb[b] || 0;
+                            const bCritical = isHighRanking && bs <= (prod.min_stock || 5) && bs > 0;
+                            const bEmpty = bs === 0;
+                            return (
+                              <td key={b} style={{ textAlign: 'center', padding: '8px 4px' }}>
+                                <span style={{
+                                  fontSize: '14px',
+                                  fontWeight: '800',
+                                  color: bEmpty ? 'var(--text-muted)' : bCritical ? '#ef4444' : '#10b981',
+                                  background: bEmpty ? 'transparent' : bCritical ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px'
+                                }}>
+                                  {bs}
+                                </span>
+                              </td>
+                            );
+                          })
+                        ) : (
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              fontSize: '18px',
+                              fontWeight: '800',
+                              color: isCritical ? '#ef4444' : 'var(--primary-color)'
+                            }}>
+                              {sbb[branchFilter] || 0}
+                            </span>
+                          </td>
+                        )}
+                        <td style={{ textAlign: 'center', fontWeight: 700, fontSize: '15px', color: 'var(--primary-color)' }}>{totalStock}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', padding: '20px', borderTop: '1px solid var(--border-color)' }}>
+              <button 
+                className="btn btn-secondary" 
+                disabled={currentPage === 1} 
+                onClick={() => { setCurrentPage(prev => prev - 1); window.scrollTo(0, 0); }}
+              >
+                ◀️ Anterior
+              </button>
+              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                Página {currentPage} de {totalPages}
+              </span>
+              <button 
+                className="btn btn-secondary" 
+                disabled={currentPage === totalPages} 
+                onClick={() => { setCurrentPage(prev => prev + 1); window.scrollTo(0, 0); }}
+              >
+                Siguiente ▶️
+              </button>
+            </div>
+          </>
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">💊</div>
