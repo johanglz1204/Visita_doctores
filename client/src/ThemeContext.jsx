@@ -10,12 +10,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
-    const body = document.body;
-    if (theme === 'light') {
-      body.classList.add('light-theme');
-    } else {
-      body.classList.remove('light-theme');
-    }
+    document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

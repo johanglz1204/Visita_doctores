@@ -13,13 +13,16 @@ export default function Dashboard({ addToast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [branchFilter, setBranchFilter] = useState('all');
   const [syncing, setSyncing] = useState(false);
   const [backing, setBacking] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
-  const loadData = (showLoading = true, range = days) => {
+  const BRANCHES = ['MATRIZ', 'TAMPICO', 'CIVIL', 'EJERCITO', 'CURVA TEXAS'];
+
+  const loadData = (showLoading = true, range = days, branch = branchFilter) => {
     if (showLoading) setLoading(true);
-    api.getDashboard(range)
+    api.getDashboard(range, branch)
       .then(d => {
         setData(d);
         if (d.lastSyncTime) setLastSync(new Date(d.lastSyncTime));
@@ -32,10 +35,10 @@ export default function Dashboard({ addToast }) {
   };
 
   useEffect(() => {
-    loadData(true, days);
-    const interval = setInterval(() => loadData(false, days), 30 * 60 * 1000);
+    loadData(true, days, branchFilter);
+    const interval = setInterval(() => loadData(false, days, branchFilter), 30 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [days]);
+  }, [days, branchFilter]);
 
   const handleSyncEmail = async () => {
     setSyncing(true);
@@ -89,6 +92,17 @@ export default function Dashboard({ addToast }) {
                 </button>
               ))}
            </div>
+           <select 
+             className="form-input" 
+             style={{ width: 'auto', minWidth: '160px', borderRadius: '12px', marginLeft: '12px' }}
+             value={branchFilter}
+             onChange={(e) => setBranchFilter(e.target.value)}
+           >
+             <option value="all">🌍 Todas las Sucursales</option>
+             {BRANCHES.map(b => (
+               <option key={b} value={b}>📍 {b}</option>
+             ))}
+           </select>
           <div className="button-group">
             <button className="btn btn-primary" onClick={() => api.downloadExecutiveReport(days)}>
               📄 Reporte Ejecutivo

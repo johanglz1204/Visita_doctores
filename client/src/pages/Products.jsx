@@ -15,6 +15,8 @@ export default function Products({ addToast }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [diagnosticTab, setDiagnosticTab] = useState('unmatched');
   const [rankingFilter, setRankingFilter] = useState('all'); // 'all', 'aa', 'a', 'risk'
+  const [branchFilter, setBranchFilter] = useState('all'); // 'all', 'MATRIZ', 'TAMPICO', etc.
+  const BRANCHES = ['MATRIZ', 'TAMPICO', 'CIVIL', 'EJERCITO', 'CURVA TEXAS'];
   const [mappingFor, setMappingFor] = useState(null); // nombre MySQL que se está vinculando
   const [mapSearch, setMapSearch] = useState('');
   const [mapResults, setMapResults] = useState([]);
@@ -131,10 +133,22 @@ export default function Products({ addToast }) {
     
     if (!matchesSearch) return false;
 
+    // Filtro de sucursal: solo mostrar productos que tengan stock en esa sucursal
+    if (branchFilter !== 'all') {
+      const branchStock = (p.stock_by_branch || {})[branchFilter] || 0;
+      if (branchStock <= 0) return false;
+    }
+
     const r = p.ranking || '';
     if (rankingFilter === 'aa') return r === 'AA';
     if (rankingFilter === 'a') return r === 'A';
-    if (rankingFilter === 'risk') return (r === 'AA' || r === 'A') && p.stock <= (p.min_stock || 5);
+    if (rankingFilter === 'risk') {
+      if (branchFilter !== 'all') {
+        const bs = (p.stock_by_branch || {})[branchFilter] || 0;
+        return (r === 'AA' || r === 'A') && bs <= (p.min_stock || 5);
+      }
+      return (r === 'AA' || r === 'A') && p.stock <= (p.min_stock || 5);
+    }
     
     return true; // 'all'
   });
@@ -158,6 +172,17 @@ export default function Products({ addToast }) {
             />
           </div>
           <button className="btn btn-secondary" onClick={() => setShowLogModal(true)}>🔍 Diagnóstico</button>
+          <select 
+            className="form-input" 
+            style={{ width: 'auto', minWidth: '160px' }}
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+          >
+            <option value="all">🌍 Todas las Sucursales</option>
+            {BRANCHES.map(b => (
+              <option key={b} value={b}>📍 {b}</option>
+            ))}
+          </select>
         </div>
       </div>
         
@@ -249,53 +274,79 @@ export default function Products({ addToast }) {
             <table>
               <thead>
                 <tr>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Ranking</th>
-                    <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>📦 Existencia Sucursal</th>
-                    <th>Precio</th>
-                    <th style={{ textAlign: 'right' }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map(prod => {
-                    const isHighRanking = prod.ranking === 'AA' || prod.ranking === 'A';
-                    const isLowStock = prod.stock <= (prod.min_stock || 5);
-                    const isCritical = isHighRanking && isLowStock;
-
-                    return (
+                  <th>Código</th>
+                  <th>Producto</th>
+                  <th>Ranking</th>
+                  {branchFilter === 'all' ? (
+                    BRANCHES.map(b => (
+                      <th key={b} style={{ textAlign: 'center', fontSize: '10px', padding: '10px 6px', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>
+                        {'📦 ' + b}
+                      </th>
+                    ))
+                  ) : (
+                    <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>{'📦 ' + branchFilter}</th>
+                  )}
+                  <th style={{ textAlign: 'center' }}>Total</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProducts.map(prod => {
+                  const isHighRanking = prod.ranking === 'AA' || prod.ranking === 'A';
+                  const totalStock = prod.stock || 0;
+                  const sbb = prod.stock_by_branch || {};
+                  const relevantStock = branchFilter !== 'all' ? (sbb[branchFilter] || 0) : totalStock;
+                  const isLowStock = relevantStock <= (prod.min_stock || 5);
+                  const isCritical = isHighRanking && isLowStock;
+                  return (
                     <tr key={prod.id} style={{ backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.05)' : 'transparent', borderLeft: isCritical ? '4px solid #ef4444' : '4px solid transparent' }}>
                       <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>{prod.barcode || '—'}</td>
                       <td style={{ fontWeight: 600 }}>
                         {prod.name}
-                        {isCritical && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#ef4444', fontWeight: 'bold' }}>⚠️ Stock Crítico</span>}
+                        {isCritical && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#ef4444', fontWeight: 'bold' }}>⚠️ Crítico</span>}
                       </td>
                       <td><span className={`badge ${isHighRanking ? 'badge-success' : 'badge-warning'}`}>{prod.ranking || '—'}</span></td>
-                      <td style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.02)' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ 
-                            fontSize: '18px', 
-                            fontWeight: '800', 
-                            color: isCritical ? '#ef4444' : 'var(--primary-color)' 
+                      {branchFilter === 'all' ? (
+                        BRANCHES.map(b => {
+                          const bs = sbb[b] || 0;
+                          const bCritical = isHighRanking && bs <= (prod.min_stock || 5) && bs > 0;
+                          const bEmpty = bs === 0;
+                          return (
+                            <td key={b} style={{ textAlign: 'center', padding: '8px 4px' }}>
+                              <span style={{
+                                fontSize: '14px',
+                                fontWeight: '800',
+                                color: bEmpty ? 'var(--text-muted)' : bCritical ? '#ef4444' : '#10b981',
+                                background: bEmpty ? 'transparent' : bCritical ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                padding: '2px 8px',
+                                borderRadius: '6px'
+                              }}>
+                                {bs}
+                              </span>
+                            </td>
+                          );
+                        })
+                      ) : (
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{
+                            fontSize: '18px',
+                            fontWeight: '800',
+                            color: isCritical ? '#ef4444' : 'var(--primary-color)'
                           }}>
-                            {prod.stock || 0}
+                            {sbb[branchFilter] || 0}
                           </span>
-                          {prod.updated_at && (
-                            <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                              Act: {new Date(prod.updated_at).toLocaleTimeString()}
-                            </span>
-                          )}
+                        </td>
+                      )}
+                      <td style={{ textAlign: 'center', fontWeight: 700, fontSize: '15px', color: 'var(--primary-color)' }}>{totalStock}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
+                          <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
                         </div>
                       </td>
-                    <td style={{ fontWeight: 700 }}>${(parseFloat(prod.price) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
-                      </div>
-                    </td>
-                  </tr>
-                  )})}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -5,12 +5,13 @@ import { getAuth } from "firebase/auth";
 // TODO: Reemplaza esto con tu configuración de Firebase de la consola
 // Puedes encontrar esto en: Project Settings > General > Your apps > Firebase SDK snippet
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO_ID",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyCUHFOiPFkDePN7iOhpRSUqmEpzE1o5xgA",
+  authDomain: "visita-doctores.firebaseapp.com",
+  projectId: "visita-doctores",
+  storageBucket: "visita-doctores.firebasestorage.app",
+  messagingSenderId: "530549613898",
+  appId: "1:530549613898:web:3f7729e7d9a85aea080db3",
+  measurementId: "G-LTXBTBG9P8"
 };
 
 // Initialize Firebase

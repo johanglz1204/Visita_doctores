@@ -22,3 +22,6 @@ Thumbs.db
 # Scratch
 scratch/
 
+# Firebase Secrets
+scripts/serviceAccountKey.json
+*.xlsx

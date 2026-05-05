@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from './ThemeContext';
-import { BrowserRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import { api } from './api';
 import Login from './pages/Login';
@@ -138,6 +138,35 @@ export default function App() {
     }
   };
 
+  // Inactivity timeout logic (30 minutes)
+  useEffect(() => {
+    if (!user) return;
+
+    let timeout;
+    const INACTIVITY_TIME = 30 * 60 * 1000; // 30 minutes
+
+    const resetTimer = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        handleLogout();
+        toast('Sesión cerrada por inactividad', { icon: '⏳' });
+      }, INACTIVITY_TIME);
+    };
+
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    // Add listeners
+    events.forEach(event => document.addEventListener(event, resetTimer));
+    
+    // Start initial timer
+    resetTimer();
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+      events.forEach(event => document.removeEventListener(event, resetTimer));
+    };
+  }, [user]);
+
   if (loading) {
     return <div className="loading-screen">Cargando...</div>;
   }
@@ -145,10 +174,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        {!user ? (
-          <Login />
-        ) : (
-          <BrowserRouter>
+        <HashRouter>
+          {!user ? (
+            <Login />
+          ) : (
             <div className="app-layout">
               <Sidebar onLogout={handleLogout} />
               <main className="main-content">
@@ -164,8 +193,8 @@ export default function App() {
                 </Routes>
               </main>
             </div>
-          </BrowserRouter>
-        )}
+          )}
+        </HashRouter>
         <Toaster 
           position="top-right" 
           toastOptions={{ 

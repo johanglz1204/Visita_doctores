@@ -20,7 +20,7 @@ import {
 } from "firebase/auth";
 import { db, auth } from "./firebaseConfig";
 
-// Helper to handle Firestore dates
+// Helper to handle Firestore dates (v1.0.2)
 const formatFirestoreData = (doc) => {
   const data = doc.data();
   return { id: doc.id, ...data };
@@ -101,11 +101,110 @@ export const api = {
   onAuthStateChanged: (callback) => onAuthStateChanged(auth, callback),
 
   // Dashboard
-  getDashboard: async () => {
+  getDashboard: async (days = 30, branchFilter = 'all') => {
     const doctors = await request('doctors');
     const products = await request('products');
-    const sales = await request('sales', 'get', null, { constraints: [limit(50), orderBy('date', 'desc')] });
-    return { doctors, products, sales };
+    const sales = await request('sales', 'get', null, { 
+      constraints: [orderBy('date', 'desc')] 
+    });
+    let mysqlSales = [];
+    try {
+      mysqlSales = await request('mysql_sales', 'get', null, { 
+        constraints: [orderBy('sale_date', 'desc')] 
+      });
+    } catch (e) {
+      console.warn("No se pudo cargar mysql_sales, tal vez la colección aún no existe o falta índice:", e);
+    }
+
+    // Filtro de fecha para el periodo
+    const now = new Date();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(now.getDate() - days);
+    const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+    const periodSales = sales.filter(s => s.date >= cutoffStr);
+    const periodMysqlSales = mysqlSales.filter(s => {
+      if (s.sale_date < cutoffStr) return false;
+      if (branchFilter !== 'all' && s.sucursal !== branchFilter) return false;
+      return true;
+    });
+
+    // Cálculos para Dashboard.jsx
+    const stats = {
+      totalDoctors: doctors.length,
+      totalProducts: products.length,
+      criticalRankedProducts: products.filter(p => {
+        if (p.ranking !== 'AA' && p.ranking !== 'A') return false;
+        const relevantStock = branchFilter !== 'all' ? ((p.stock_by_branch || {})[branchFilter] || 0) : (p.stock || 0);
+        return relevantStock <= (p.min_stock || 5);
+      }).map(p => ({
+        ...p,
+        stock: branchFilter !== 'all' ? ((p.stock_by_branch || {})[branchFilter] || 0) : (p.stock || 0)
+      })),
+      
+      // Tendencia de ventas reales (desde MySQL)
+      salesTrend: periodMysqlSales.reduce((acc, s) => {
+        const existing = acc.find(item => item.date === s.sale_date);
+        if (existing) existing.total_quantity += s.quantity;
+        else acc.push({ date: s.sale_date, total_quantity: s.quantity });
+        return acc;
+      }, []).sort((a, b) => a.date.localeCompare(b.date)),
+
+      // Estadísticas por sucursal
+      sucursalStats: periodMysqlSales.reduce((acc, s) => {
+        const suc = s.sucursal || 'Desconocida';
+        const existing = acc.find(item => item.name === suc);
+        if (existing) existing.value += s.quantity;
+        else acc.push({ name: suc, value: s.quantity });
+        return acc;
+      }, []),
+
+      // Desempeño por Línea
+      lineStats: periodMysqlSales.reduce((acc, s) => {
+        if (!s.sector) return acc;
+        const existing = acc.find(item => item.line === s.sector);
+        if (existing) existing.value += s.quantity;
+        else acc.push({ line: s.sector, value: s.quantity });
+        return acc;
+      }, []).sort((a, b) => b.value - a.value).slice(0, 10),
+
+      // Top Doctores (se mantiene desde la sync de correos)
+      topDoctors: periodSales.reduce((acc, s) => {
+        if (!s.doctor_id) return acc;
+        const docName = doctors.find(d => String(d.id || d.legacyId) === String(s.doctor_id))?.name || 'Desconocido';
+        const existing = acc.find(item => item.doctor === docName);
+        if (existing) existing.total_prescriptions += s.quantity;
+        else acc.push({ doctor: docName, total_prescriptions: s.quantity });
+        return acc;
+      }, []).sort((a, b) => b.total_prescriptions - a.total_prescriptions).slice(0, 5),
+
+      // Pronóstico de inventario basado en ventas MySQL
+      inventoryForecast: products.filter(p => {
+        const relevantStock = branchFilter !== 'all' ? ((p.stock_by_branch || {})[branchFilter] || 0) : (p.stock || 0);
+        return relevantStock < 100;
+      }).map(p => {
+        const prodSales = periodMysqlSales.filter(s => String(s.barcode) === String(p.barcode));
+        const salesPeriod = prodSales.reduce((acc, s) => acc + s.quantity, 0);
+        const dailyRate = salesPeriod / days;
+        const relevantStock = branchFilter !== 'all' ? ((p.stock_by_branch || {})[branchFilter] || 0) : (p.stock || 0);
+        return {
+          ...p,
+          stock: relevantStock,
+          sales_30d: salesPeriod, // Ventas del periodo seleccionado
+          days_left: dailyRate > 0 ? Math.round(relevantStock / dailyRate) : 999
+        };
+      }).sort((a, b) => a.days_left - b.days_left).slice(0, 10),
+
+      lastSyncTime: new Date().toISOString()
+    };
+
+    console.log('Dashboard stats calculated');
+    return stats;
+  },
+
+  getCriticalStock: async () => {
+    const products = await request('products');
+    return products.filter(p => p.stock <= (p.min_stock || 5));
   },
 
   // Doctors
@@ -132,16 +231,70 @@ export const api = {
   deleteInventory: (id) => request('inventory', 'delete', id),
 
   // Sales
-  getSales: (limitVal = 100, offset = 0, sucursal, startDate, endDate) => {
-    const constraints = [orderBy('date', 'desc'), limit(limitVal)];
-    if (sucursal) constraints.push(where('sucursal', '==', sucursal));
-    // Firebase supports range filters but requires indexes
-    return request('sales', 'get', null, { constraints });
+  getSales: async (limitVal = 100, offset = 0, sucursal, startDate, endDate) => {
+    const doctors = await request('doctors');
+    const products = await request('products');
+    const sales = await request('sales', 'get', null, { 
+      constraints: [orderBy('date', 'desc')] 
+    });
+
+    let filtered = sales;
+    if (sucursal && sucursal !== 'TODAS' && sucursal !== 'todas') {
+      filtered = filtered.filter(s => s.sucursal === sucursal);
+    }
+    if (startDate) {
+      filtered = filtered.filter(s => s.date >= startDate);
+    }
+    if (endDate) {
+      filtered = filtered.filter(s => s.date <= endDate);
+    }
+
+    // Resolver nombres y ajustar campos para Sales.jsx
+    const resolved = filtered.map(s => ({
+      ...s,
+      doctor_name: doctors.find(d => String(d.id || d.legacyId) === String(s.doctor_id))?.name || 'Desconocido',
+      product_name: products.find(p => String(p.id || p.legacyId) === String(s.product_id))?.name || 'Desconocido',
+      sale_date: s.date, // Alias para UI
+      created_at: s.createdAt?.toDate ? s.createdAt.toDate() : new Date(), // Convertir Firestore Timestamp
+    }));
+
+    return resolved;
+  },
+
+  getBranches: async () => {
+    const sales = await request('sales');
+    const branches = [...new Set(sales.map(s => s.sucursal).filter(Boolean))];
+    return branches;
   },
   
+  exportProductsExcel: () => { throw new Error('Exportación a Excel no disponible en modo estático'); },
+  syncStatus: async () => {
+    // Retornar un estado vacío para modo estático
+    return {
+      last_sync: null,
+      matched_list: [],
+      unmatched_list: []
+    };
+  },
+  getAliases: async () => [],
+  triggerSync: async () => { throw new Error('La sincronización requiere un servidor activo'); },
+  getDuplicatesPreview: async () => ({ duplicates_to_delete: 0, duplicate_groups: 0 }),
+  cleanupProducts: async () => { throw new Error('Limpieza de duplicados no disponible en modo estático'); },
+  searchProductsForMapping: async (query) => {
+    const products = await request('products');
+    return products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+  },
+  mapProduct: async () => { throw new Error('Mapeo manual no disponible en modo estático'); },
+  deleteAlias: async () => { throw new Error('Gestión de alias no disponible en modo estático'); },
+
   // Note: These would need special handling with client-side libraries (like xlsx)
-  uploadDoctorsExcel: () => { throw new Error('Carga de Excel no implementada en modo estático aún'); },
-  downloadExecutiveReport: () => { throw new Error('Reportes PDF no implementados en modo estático aún'); },
+  uploadDoctorsExcel: () => { throw new Error('Carga de Excel no disponible en modo estático'); },
+  downloadExecutiveReport: () => { throw new Error('Reportes PDF no disponibles en modo estático aún'); },
+  syncEmails: () => { 
+    return Promise.resolve({ message: 'La sincronización ahora es automática cada hora vía GitHub Actions' });
+  },
+  backupToGithub: () => { throw new Error('El respaldo automático requiere un servidor activo'); },
+  downloadBackup: () => { throw new Error('Descarga de respaldo no disponible'); },
 };
 
 
