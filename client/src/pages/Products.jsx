@@ -285,6 +285,56 @@ export default function Products({ addToast }) {
 
             <button className="btn btn-secondary" onClick={() => navigate('/planning')}>🧠 Planeación</button>
             <button className="btn btn-primary" onClick={openCreate}>+ Nuevo Producto</button>
+            
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '10px', padding: '8px', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>🛒 Pedido para:</span>
+              <select 
+                className="form-input" 
+                style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }}
+                onChange={(e) => {
+                  const days = parseInt(e.target.value);
+                  const riskProducts = products.filter(p => p.ranking === 'AA' || p.ranking === 'A');
+                  
+                  const headers = ['Producto', 'Barcode', 'Ranking', 'Total Stock', 'Sugerido MATRIZ', 'Sugerido TAMPICO', 'Sugerido CIVIL', 'Sugerido EJERCITO', 'Sugerido CURVA TEXAS'];
+                  const rows = riskProducts.map(p => {
+                    const sm = p.sales_metrics || {};
+                    const sbb = p.stock_by_branch || {};
+                    
+                    const calc = (branch) => {
+                      const rate = (sm[branch] || {}).daily_rate || 0;
+                      const stock = sbb[branch] || 0;
+                      const suggested = Math.ceil(rate * days) - stock;
+                      return Math.max(0, suggested);
+                    };
+
+                    return [
+                      p.name,
+                      p.barcode,
+                      p.ranking,
+                      p.stock,
+                      calc('MATRIZ'),
+                      calc('TAMPICO'),
+                      calc('CIVIL'),
+                      calc('EJERCITO'),
+                      calc('CURVA TEXAS')
+                    ];
+                  });
+
+                  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `Reporte_Compra_${days}dias_${new Date().toISOString().split('T')[0]}.csv`;
+                  link.click();
+                }}
+              >
+                <option value="">Descargar Reporte...</option>
+                <option value="7">7 Días</option>
+                <option value="15">15 Días</option>
+                <option value="30">30 Días</option>
+                <option value="45">45 Días</option>
+              </select>
+            </div>
           </div>
         </div>
 
