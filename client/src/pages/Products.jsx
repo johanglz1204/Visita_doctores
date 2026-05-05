@@ -201,17 +201,18 @@ export default function Products({ addToast }) {
         {syncInfo?.last_sync && (
           <div className="card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(var(--primary-rgb), 0.05)', border: '1px solid rgba(var(--primary-rgb), 0.1)' }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>📡 Última Sincronización Local</div>
+              <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>📡 Estatus del Inventario</div>
               <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                Hace {Math.floor((new Date() - new Date(syncInfo.last_sync.synced_at)) / 60000)} min 
+                <span style={{ color: 'var(--primary-color)' }}>🕒 Última actualización: </span>
+                {new Date(syncInfo.last_sync.synced_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                 <span style={{ margin: '0 8px', color: 'var(--border-color)' }}>|</span>
-                <span style={{ color: '#10b981' }}>{syncInfo.last_sync.updated} Actualizados</span>
+                <span style={{ color: '#10b981' }}>{syncInfo.last_sync.updated} Cambios</span>
                 <span style={{ margin: '0 8px', color: 'var(--border-color)' }}>|</span>
                 <span style={{ color: '#ef4444' }}>{syncInfo.last_sync.unmatched} Sin Match</span>
               </div>
             </div>
             <button className="btn btn-secondary" onClick={handleManualSync} disabled={syncing}>
-              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '🔄 Forzar Actualización'}
+              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '🔄 Actualizar Ahora'}
             </button>
           </div>
         )}
