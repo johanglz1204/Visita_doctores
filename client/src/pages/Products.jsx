@@ -113,6 +113,45 @@ export default function Products({ addToast }) {
       e.target.value = '';
     }
   };
+
+  const handleTransitExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setLoading(true);
+    try {
+      const { read, utils } = await import('xlsx');
+      const data = await file.arrayBuffer();
+      const workbook = read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = utils.sheet_to_json(worksheet, { header: 1 });
+      
+      const rows = jsonData.slice(1);
+      let updatedCount = 0;
+      
+      for (const row of rows) {
+        const barcode = String(row[0] || '').trim();
+        const qty = parseInt(row[1]) || 0;
+        
+        if (barcode) {
+          const product = products.find(p => String(p.barcode) === barcode);
+          if (product) {
+            // Actualizamos en Firebase
+            await api.updateProduct(product.id, { transit_stock: qty });
+            updatedCount++;
+          }
+        }
+      }
+      
+      addToast(`✅ Se actualizaron ${updatedCount} productos en tránsito`);
+      load();
+    } catch (err) {
+      addToast('Error al procesar el archivo: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+      e.target.value = '';
+    }
+  };
   
   const handleManualSync = async () => {
     setSyncing(true);
@@ -246,7 +285,18 @@ export default function Products({ addToast }) {
               onChange={handleExcelUpload} 
             />
             <label htmlFor="excel-upload-products" className="btn btn-secondary">
-              📊 Importar
+              📊 Importar Productos
+            </label>
+            
+            <input 
+              type="file" 
+              accept=".xlsx, .xls" 
+              style={{ display: 'none' }} 
+              id="excel-upload-transit" 
+              onChange={handleTransitExcelUpload} 
+            />
+            <label htmlFor="excel-upload-transit" className="btn btn-secondary" style={{ color: '#3b82f6', borderColor: '#3b82f6' }}>
+              🚚 Importar Tránsito
             </label>
             <button className="btn btn-secondary" onClick={() => api.exportProductsExcel()}>📥 Exportar</button>
             <button 
