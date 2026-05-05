@@ -117,7 +117,7 @@ export default function Dashboard({ addToast }) {
       <div className="stats-grid">
         <StatCard title="Doctores" value={data?.totalDoctors} icon="👨‍⚕️" colorClass="purple" />
         <StatCard title="Productos" value={data?.totalProducts} icon="💊" colorClass="cyan" />
-        <StatCard title="Ventas Periodo" value={data?.salesTrend?.reduce((acc, curr) => acc + curr.total_quantity, 0)} icon="📈" colorClass="green" trend={data?.growth} />
+        <StatCard title="Ventas Periodo" value={data?.salesTrend?.reduce((acc, curr) => acc + Number(curr.total_quantity || 0), 0)} icon="📈" colorClass="green" trend={data?.growth} />
         <StatCard title="AA/A en Riesgo" value={data?.criticalRankedProducts?.length ?? 0} icon="🚨" colorClass="red" />
       </div>
 
