@@ -23,8 +23,14 @@ export default function InventoryPlanning() {
           total_prev += (b.prev_90d || 0);
         });
 
-        if (total_prev > 0 && total_last < total_prev) {
-          const dropPercent = Math.round(((total_prev - total_last) / total_prev) * 100);
+        const pRank = p.prev_ranking;
+        const cRank = p.ranking;
+        const isTargetDrop = (pRank === 'A' && cRank === 'B') ||
+                             (pRank === 'B' && cRank === 'C') ||
+                             (pRank === 'C' && cRank === 'E');
+
+        if (isTargetDrop) {
+          const dropPercent = total_prev > 0 ? Math.round(((total_prev - total_last) / total_prev) * 100) : 100;
           declining.push({
             ...p,
             total_last,
