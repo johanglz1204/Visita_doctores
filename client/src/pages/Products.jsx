@@ -8,7 +8,7 @@ export default function Products({ addToast }) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '' });
+  const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '', transit_stock: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [syncInfo, setSyncInfo] = useState(null);
@@ -42,7 +42,7 @@ export default function Products({ addToast }) {
   useEffect(() => { load(); }, []);
 
   const resetForm = () => {
-    setForm({ name: '', barcode: '', ranking: '', price: '' });
+    setForm({ name: '', barcode: '', ranking: '', price: '', transit_stock: 0 });
     setEditing(null);
   };
 
@@ -53,7 +53,8 @@ export default function Products({ addToast }) {
       name: prod.name, 
       barcode: prod.barcode || '',
       ranking: prod.ranking || '',
-      price: prod.price || ''
+      price: prod.price || '',
+      transit_stock: prod.transit_stock || 0
     });
     setEditing(prod.id);
     setShowModal(true);
@@ -309,10 +310,15 @@ export default function Products({ addToast }) {
                     const calc = (branch) => {
                       const rate = (sm[branch] || {}).daily_rate || 0;
                       const stock = sbb[branch] || 0;
+                      const transit = p.transit_stock || 0;
+                      
+                      // El tránsito se resta del sugerido total
+                      // Si el tránsito es global, lo restamos proporcionalmente o del total
+                      // Para simplificar, restamos el tránsito global del primer requerimiento o prorrateado
+                      // Pero el usuario pidió "cuantas pedir para cada sucursal".
+                      // Si el tránsito es para una sucursal específica sería ideal, pero si es global:
                       const suggested = Math.ceil(rate * days) - stock;
-                      const final = Math.max(0, suggested);
-                      if (final > 0) hasOrder = true;
-                      return final;
+                      return Math.max(0, suggested);
                     };
 
                     const branchSuggestions = [
@@ -323,14 +329,28 @@ export default function Products({ addToast }) {
                       calc('CURVA TEXAS')
                     ];
 
-                    if (hasOrder) {
-                      rows.push([
-                        p.name.replace(/,/g, ''), // Evitar errores de CSV
-                        p.barcode,
-                        p.ranking,
-                        p.stock,
-                        ...branchSuggestions
-                      ]);
+                    // Restar tránsito global del total sugerido de forma inteligente
+                    const totalSuggestedBeforeTransit = branchSuggestions.reduce((a, b) => a + b, 0);
+                    const transitTotal = p.transit_stock || 0;
+                    
+                    if (totalSuggestedBeforeTransit > 0) {
+                      let remainingTransit = transitTotal;
+                      const finalSuggestions = branchSuggestions.map(s => {
+                        if (remainingTransit <= 0) return s;
+                        const deduction = Math.min(s, remainingTransit);
+                        remainingTransit -= deduction;
+                        return s - deduction;
+                      });
+
+                      if (finalSuggestions.some(s => s > 0)) {
+                        rows.push([
+                          p.name.replace(/,/g, ''),
+                          p.barcode,
+                          p.ranking,
+                          p.stock,
+                          ...finalSuggestions
+                        ]);
+                      }
                     }
                   });
 
@@ -379,6 +399,7 @@ export default function Products({ addToast }) {
                       <th style={{ textAlign: 'center', backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}>{'📦 ' + branchFilter}</th>
                     )}
                     <th style={{ textAlign: 'center' }}>Total</th>
+                    <th style={{ textAlign: 'center', color: '#3b82f6' }}>🚚 Tránsito</th>
                     <th style={{ textAlign: 'right' }}>Acciones</th>
                   </tr>
                 </thead>
@@ -430,7 +451,19 @@ export default function Products({ addToast }) {
                           </td>
                         )}
                         <td style={{ textAlign: 'center', fontWeight: 700, fontSize: '15px', color: 'var(--primary-color)' }}>{totalStock}</td>
-                        <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'center' }}>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          fontWeight: '700', 
+                          color: prod.transit_stock > 0 ? '#3b82f6' : 'var(--text-muted)',
+                          background: prod.transit_stock > 0 ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                          padding: '2px 8px',
+                          borderRadius: '6px'
+                        }}>
+                          {prod.transit_stock || 0}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
                           <div className="btn-group" style={{ justifyContent: 'flex-end' }}>
                             <button className="btn btn-secondary btn-sm" onClick={() => openEdit(prod)}>✏️</button>
                             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(prod.id, prod.name)}>🗑️</button>
@@ -492,9 +525,15 @@ export default function Products({ addToast }) {
                   <input className="form-input" value={form.ranking} onChange={e => setForm({ ...form, ranking: e.target.value })} placeholder="A, B, C..." />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Precio Vale</label>
-                <input type="number" step="0.01" className="form-input" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
+                <div className="form-group">
+                  <label className="form-label">💰 Precio Vale</label>
+                  <input type="number" step="0.01" className="form-input" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">🚚 Stock en Tránsito (Pedido)</label>
+                  <input type="number" className="form-input" value={form.transit_stock} onChange={e => setForm({ ...form, transit_stock: parseInt(e.target.value) || 0 })} placeholder="0" />
+                  <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Este valor se restará de las sugerencias de compra.</p>
+                </div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
