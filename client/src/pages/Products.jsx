@@ -534,7 +534,6 @@ export default function Products({ addToast }) {
                   <input type="number" className="form-input" value={form.transit_stock} onChange={e => setForm({ ...form, transit_stock: parseInt(e.target.value) || 0 })} placeholder="0" />
                   <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Este valor se restará de las sugerencias de compra.</p>
                 </div>
-              </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
                 <button type="submit" className="btn btn-primary">{editing ? 'Guardar Cambios' : 'Crear Producto'}</button>
