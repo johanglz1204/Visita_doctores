@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 export default function InventoryPlanning() {
   const [decliningProducts, setDecliningProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 50;
 
   const loadData = async () => {
     setLoading(true);
@@ -101,7 +103,15 @@ export default function InventoryPlanning() {
           </div>
           {decliningProducts.length > 0 ? (
             <div className="table-wrapper">
-              <table>
+              {(() => {
+                const totalPages = Math.ceil(decliningProducts.length / productsPerPage);
+                const indexOfLastProduct = currentPage * productsPerPage;
+                const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+                const currentProducts = decliningProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+                
+                return (
+                  <>
+                    <table>
                 <thead>
                   <tr>
                     <th>Ranking</th>
@@ -109,11 +119,10 @@ export default function InventoryPlanning() {
                     <th style={{ textAlign: 'center' }}>Hace 4-6 Meses</th>
                     <th style={{ textAlign: 'center' }}>Últimos 3 Meses</th>
                     <th style={{ textAlign: 'center', color: '#ef4444' }}>Caída</th>
-                    <th style={{ textAlign: 'left' }}>Acción Sugerida</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {decliningProducts.map((p, idx) => {
+                  {currentProducts.map((p, idx) => {
                     const isSevere = p.dropPercent > 50;
                     return (
                       <tr key={idx} style={{ borderLeft: isSevere ? '4px solid #ef4444' : '4px solid transparent', backgroundColor: isSevere ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
@@ -124,20 +133,33 @@ export default function InventoryPlanning() {
                         <td style={{ textAlign: 'center', fontWeight: 800, color: '#ef4444' }}>
                            -{p.dropPercent}%
                         </td>
-                        <td>
-                          <select className="form-input" style={{ width: '100%', fontSize: '11px', padding: '4px' }}>
-                            <option value="">Seleccionar estrategia...</option>
-                            <option value="oferta">🏷️ Poner en Oferta (2x1 o Descuento)</option>
-                            <option value="precio">⬇️ Bajar Precio de Venta</option>
-                            <option value="visita">🩺 Reactivar con Médicos</option>
-                            <option value="exhibicion">🏬 Mejorar Exhibición</option>
-                          </select>
-                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', padding: '10px' }}>
+                <button 
+                  className="btn btn-secondary" 
+                  disabled={currentPage === 1} 
+                  onClick={() => setCurrentPage(p => p - 1)}
+                >
+                  Anterior
+                </button>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
+                  Página {currentPage} de {totalPages || 1}
+                </span>
+                <button 
+                  className="btn btn-secondary" 
+                  disabled={currentPage === totalPages || totalPages === 0} 
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Siguiente
+                </button>
+              </div>
+            </>
+          );
+        })()}
             </div>
           ) : (
             <div className="empty-state">
