@@ -293,6 +293,63 @@ export const api = {
   syncEmails: () => { 
     return Promise.resolve({ message: 'La sincronización ahora es automática cada hora vía GitHub Actions' });
   },
+  // Inventory Planning
+  getSuggestedOrders: async () => {
+    const products = await request('products');
+    return products
+      .filter(p => (p.stock || 0) <= (p.min_stock || 0))
+      .map(p => {
+        const target = Math.ceil((p.min_stock || 5) * 1.5);
+        return {
+          ...p,
+          target_used: target,
+          suggested_qty: Math.max(0, target - (p.stock || 0))
+        };
+      })
+      .sort((a, b) => (b.ranking === 'AA' || b.ranking === 'A' ? 1 : -1));
+  },
+
+  getStockOutHistory: async () => {
+    try {
+      return await request('stock_out_history', 'get', null, {
+        constraints: [orderBy('start_date', 'desc'), limit(50)]
+      });
+    } catch (e) {
+      console.warn("Colección stock_out_history no encontrada:", e);
+      return [];
+    }
+  },
+
+  recalculateMinStock: async ({ safetyDays = 15, ranking = 'AA,A' } = {}) => {
+    const products = await request('products');
+    const mysqlSales = await request('mysql_sales', 'get', null, { 
+      constraints: [orderBy('sale_date', 'desc'), limit(5000)] 
+    });
+
+    const days = 90; // Análisis de 90 días
+    const updatedProducts = [];
+    const rankingArray = ranking.split(',');
+
+    for (const p of products) {
+      if (rankingArray.includes(p.ranking)) {
+        const prodSales = mysqlSales.filter(s => String(s.barcode) === String(p.barcode));
+        const totalQty = prodSales.reduce((acc, s) => acc + s.quantity, 0);
+        const dailyRate = totalQty / days;
+        const newMin = Math.ceil(dailyRate * safetyDays);
+
+        if (newMin !== p.min_stock) {
+          await request('products', 'update', p.id, { min_stock: newMin });
+          updatedProducts.push(p.name);
+        }
+      }
+    }
+
+    return { 
+      success: true, 
+      message: `Se actualizaron los mínimos de ${updatedProducts.length} productos basados en ventas reales.` 
+    };
+  },
+
   backupToGithub: () => { throw new Error('El respaldo automático requiere un servidor activo'); },
   downloadBackup: () => { throw new Error('Descarga de respaldo no disponible'); },
 };
