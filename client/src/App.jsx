@@ -16,15 +16,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 function Sidebar({ onLogout }) {
   const { theme, toggleTheme } = useTheme();
-  const [criticalCount, setCriticalCount] = useState(0);
+  const [criticalCount, setCriticalCount] = useState(0); // Keeping state for now to avoid breaking other components if they depend on it, but effectively hidden
   const location = useLocation();
 
   useEffect(() => {
-    api.getCriticalStock().then(data => setCriticalCount(data.length)).catch(() => {});
-    const interval = setInterval(() => {
-      api.getCriticalStock().then(data => setCriticalCount(data.length)).catch(() => {});
-    }, 30000);
-    return () => clearInterval(interval);
+    // Logic for other background tasks can go here if needed
   }, []);
 
   const links = [
@@ -33,7 +29,6 @@ function Sidebar({ onLogout }) {
     { to: '/products', icon: '💊', label: 'Productos' },
     { to: '/sales', icon: '🧾', label: 'Historial' },
     { to: '/planning', icon: '🧠', label: 'Planeación' },
-    { to: '/alerts', icon: '🚨', label: 'Alertas', badge: criticalCount },
   ];
 
   return (
