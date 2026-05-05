@@ -144,37 +144,41 @@ export const api = {
       
       // Tendencia de ventas reales (desde MySQL)
       salesTrend: periodMysqlSales.reduce((acc, s) => {
+        const qty = Number(s.quantity || 0);
         const existing = acc.find(item => item.date === s.sale_date);
-        if (existing) existing.total_quantity += s.quantity;
-        else acc.push({ date: s.sale_date, total_quantity: s.quantity });
+        if (existing) existing.total_quantity += qty;
+        else acc.push({ date: s.sale_date, total_quantity: qty });
         return acc;
       }, []).sort((a, b) => a.date.localeCompare(b.date)),
 
       // Estadísticas por sucursal
       sucursalStats: periodMysqlSales.reduce((acc, s) => {
+        const qty = Number(s.quantity || 0);
         const suc = s.sucursal || 'Desconocida';
         const existing = acc.find(item => item.name === suc);
-        if (existing) existing.value += s.quantity;
-        else acc.push({ name: suc, value: s.quantity });
+        if (existing) existing.value += qty;
+        else acc.push({ name: suc, value: qty });
         return acc;
       }, []),
 
       // Desempeño por Línea
       lineStats: periodMysqlSales.reduce((acc, s) => {
         if (!s.sector) return acc;
+        const qty = Number(s.quantity || 0);
         const existing = acc.find(item => item.line === s.sector);
-        if (existing) existing.value += s.quantity;
-        else acc.push({ line: s.sector, value: s.quantity });
+        if (existing) existing.value += qty;
+        else acc.push({ line: s.sector, value: qty });
         return acc;
       }, []).sort((a, b) => b.value - a.value).slice(0, 10),
 
       // Top Doctores (se mantiene desde la sync de correos)
       topDoctors: periodSales.reduce((acc, s) => {
         if (!s.doctor_id) return acc;
+        const qty = Number(s.quantity || 0);
         const docName = doctors.find(d => String(d.id || d.legacyId) === String(s.doctor_id))?.name || 'Desconocido';
         const existing = acc.find(item => item.doctor === docName);
-        if (existing) existing.total_prescriptions += s.quantity;
-        else acc.push({ doctor: docName, total_prescriptions: s.quantity });
+        if (existing) existing.total_prescriptions += qty;
+        else acc.push({ doctor: docName, total_prescriptions: qty });
         return acc;
       }, []).sort((a, b) => b.total_prescriptions - a.total_prescriptions).slice(0, 5),
 
@@ -184,7 +188,7 @@ export const api = {
         return relevantStock < 100;
       }).map(p => {
         const prodSales = periodMysqlSales.filter(s => String(s.barcode) === String(p.barcode));
-        const salesPeriod = prodSales.reduce((acc, s) => acc + s.quantity, 0);
+        const salesPeriod = prodSales.reduce((acc, s) => acc + Number(s.quantity || 0), 0);
         const dailyRate = salesPeriod / days;
         const relevantStock = branchFilter !== 'all' ? ((p.stock_by_branch || {})[branchFilter] || 0) : (p.stock || 0);
         return {
