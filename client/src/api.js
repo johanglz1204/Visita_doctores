@@ -105,12 +105,12 @@ export const api = {
     const doctors = await request('doctors');
     const products = await request('products');
     const sales = await request('sales', 'get', null, { 
-      constraints: [orderBy('date', 'desc')] 
+      constraints: [orderBy('date', 'desc'), limit(100)] 
     });
     let mysqlSales = [];
     try {
       mysqlSales = await request('mysql_sales', 'get', null, { 
-        constraints: [orderBy('sale_date', 'desc')] 
+        constraints: [orderBy('sale_date', 'desc'), limit(100)] 
       });
     } catch (e) {
       console.warn("No se pudo cargar mysql_sales, tal vez la colección aún no existe o falta índice:", e);
@@ -239,7 +239,7 @@ export const api = {
     const doctors = await request('doctors');
     const products = await request('products');
     const sales = await request('sales', 'get', null, { 
-      constraints: [orderBy('date', 'desc')] 
+      constraints: [orderBy('date', 'desc'), limit(limitVal)] 
     });
 
     let filtered = sales;

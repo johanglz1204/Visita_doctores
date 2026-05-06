@@ -1,7 +1,7 @@
 const { exec } = require('child_process');
 const path = require('path');
 
-const SYNC_INTERVAL = 60 * 60 * 1000; // 1 Hora en milisegundos
+const SYNC_INTERVAL = 6 * 60 * 60 * 1000; // 6 Horas en milisegundos
 
 function log(msg) {
   const now = new Date().toLocaleString();

@@ -47,6 +47,24 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+// --- SISTEMA DE CACHÉ PARA AHORRAR LECTURAS ---
+const CACHE_FILE = path.join(__dirname, 'barcode_cache.json');
+
+function loadBarcodeCache() {
+  if (fs.existsSync(CACHE_FILE)) {
+    try {
+      return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
+    } catch (e) {
+      return {};
+    }
+  }
+  return {};
+}
+
+function saveBarcodeCache(cache) {
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2), 'utf8');
+}
+
 async function syncSales() {
   // Determinar rango de fechas: ayer (o el argumento que se pase)
   const args = process.argv.slice(2);
@@ -99,13 +117,31 @@ async function syncSales() {
       return;
     }
 
-    // 2. Cargar catálogo de Firebase para mapear
-    const productsSnap = await db.collection('products').get();
-    const firebaseByBarcode = {};
-    productsSnap.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.barcode) firebaseByBarcode[data.barcode] = { id: doc.id, ...data };
-    });
+    // 2. Resolver IDs de productos desde caché o Firebase
+    let barcodeCache = loadBarcodeCache();
+    let firebaseByBarcode = { ...barcodeCache };
+    
+    // Solo descargar si el caché está vacío o faltan códigos de las ventas de hoy
+    const missingBarcodes = rows.filter(r => !barcodeCache[r.barcode]);
+    if (missingBarcodes.length > 0) {
+      console.log(`🔍 Faltan ${missingBarcodes.length} productos en el caché. Actualizando catálogo...`);
+      const productsSnap = await db.collection('products').get();
+      const fbProducts = {};
+      productsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.barcode) fbProducts[data.barcode] = { id: doc.id, ...data };
+      });
+
+      // Guardar códigos encontrados y no encontrados
+      rows.forEach(r => {
+        if (fbProducts[r.barcode]) {
+          firebaseByBarcode[r.barcode] = fbProducts[r.barcode];
+        } else {
+          firebaseByBarcode[r.barcode] = { id: null };
+        }
+      });
+      saveBarcodeCache(firebaseByBarcode);
+    }
 
     // 3. Subir ventas y actualizar stock
     let salesCount = 0;
