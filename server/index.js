@@ -1,7 +1,7 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env') });
 
 // Environment Validation
-const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'EMAIL_USER', 'EMAIL_PASSWORD'];
+const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET'];
 const missingEnv = REQUIRED_ENV.filter(key => !process.env[key]);
 if (missingEnv.length > 0) {
   console.error(`\n❌ FATAL ERROR: Missing environment variables: ${missingEnv.join(', ')}`);
@@ -37,11 +37,6 @@ app.use('/api/inventory', authenticate, require('./routes/inventory'));
 app.use('/api/sales', authenticate, require('./routes/sales'));
 app.use('/api/backup', authenticate, require('./routes/backup'));
 
-const syncRouter = require('./routes/sync');
-syncRouter.setLastSyncSetter((t) => { 
-  app.set('lastSyncTime', t);
-});
-app.use('/api/sync', authenticate, syncRouter);
 
 // MySQL Inventory Sync routes
 app.use('/api/mysql-sync', require('./routes/mysqlSync'));
@@ -92,24 +87,6 @@ initializeDatabase().then(() => {
   // --- Configuración de tareas de fondo (Cron) ---
   const cron = require('node-cron');
   
-  // --- Auto Email Sync cada 30 minutos ---
-  const { syncEmails } = require('./emailService');
-
-  const runAutoSync = async () => {
-    const now = new Date().toLocaleTimeString('es-MX');
-    console.log(`\n🔄 [${now}] Iniciando sincronización automática de correos...`);
-    try {
-      await syncEmails();
-      app.set('lastSyncTime', new Date().toISOString());
-      console.log(`✅ [${now}] Sincronización automática completada.`);
-    } catch (err) {
-      console.error(`❌ [${now}] Error en sincronización automática:`, err.message);
-    }
-  };
-
-  // Ejecutar a los minutos 00 y 30 de dada hora
-  cron.schedule('0,30 * * * *', runAutoSync);
-  console.log(`⏱️  Sincronización automática programada con Cron (*/30).`);
 
   // --- Auto MySQL Inventory Sync cada 5 minutos ---
   const { syncMySQLInventory } = require('./services/inventorySyncService');

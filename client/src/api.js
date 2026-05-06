@@ -294,9 +294,6 @@ export const api = {
   // Note: These would need special handling with client-side libraries (like xlsx)
   uploadDoctorsExcel: () => { throw new Error('Carga de Excel no disponible en modo estático'); },
   downloadExecutiveReport: () => { throw new Error('Reportes PDF no disponibles en modo estático aún'); },
-  syncEmails: () => { 
-    return Promise.resolve({ message: 'La sincronización ahora es automática cada hora vía GitHub Actions' });
-  },
   // Inventory Planning
   getSuggestedOrders: async () => {
     const products = await request('products');

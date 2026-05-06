@@ -33,10 +33,6 @@ services:
       PORT: ${PORT:-3000}
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET}
-      EMAIL_USER: ${EMAIL_USER}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_PORT: ${EMAIL_PORT}
       # MySQL Tampico (Solo Lectura)
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PORT: ${MYSQL_PORT:-3306}

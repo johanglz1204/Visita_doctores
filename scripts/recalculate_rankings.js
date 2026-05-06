@@ -112,7 +112,7 @@ async function run() {
     for (const p of products) {
       if (!p.barcode) continue;
       
-      const s = salesMap.get(String(p.barcode)) || { m1: 0, m2: 0, m3: 0 };
+      const s = salesMap.get(String(p.barcode)) || { m1: 0, m2: 0, m3: 0, m4: 0, m5: 0, m6: 0 };
       const stock = p.stock || 0;
       
       let newRanking = 'Z';
@@ -127,17 +127,32 @@ async function run() {
       } else if (monthsWithSales === 1) {
         newRanking = 'C';
       } else {
-        // No hay ventas en 3 meses
         newRanking = stock > 0 ? 'E' : 'Z';
       }
 
-      // Solo actualizar si el ranking cambió o para refrescar métricas
+      let prevRanking = 'Z';
+      const prevMonthsWithSales = (s.m4 > 0 ? 1 : 0) + (s.m5 > 0 ? 1 : 0) + (s.m6 > 0 ? 1 : 0);
+
+      if (s.m4 > 10 && s.m5 > 10 && s.m6 > 10) {
+        prevRanking = 'AA';
+      } else if (s.m4 >= 1 && s.m5 >= 1 && s.m6 >= 1) {
+        prevRanking = 'A';
+      } else if (prevMonthsWithSales === 2) {
+        prevRanking = 'B';
+      } else if (prevMonthsWithSales === 1) {
+        prevRanking = 'C';
+      } else {
+        prevRanking = stock > 0 ? 'E' : 'Z';
+      }
+
       batch.update(db.collection('products').doc(p.id), { 
         ranking: newRanking,
+        prev_ranking: prevRanking,
         sales_metrics: s.by_branch || {},
         ranking_updated_at: admin.firestore.FieldValue.serverTimestamp()
       });
       opCount++;
+
       stats[newRanking]++;
 
       if (opCount >= 450) {

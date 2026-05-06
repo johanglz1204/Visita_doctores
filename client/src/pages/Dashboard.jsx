@@ -14,7 +14,6 @@ export default function Dashboard({ addToast }) {
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
   const [branchFilter, setBranchFilter] = useState('all');
-  const [syncing, setSyncing] = useState(false);
   const [backing, setBacking] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
@@ -40,19 +39,6 @@ export default function Dashboard({ addToast }) {
     return () => clearInterval(interval);
   }, [days, branchFilter]);
 
-  const handleSyncEmail = async () => {
-    setSyncing(true);
-    try {
-      const res = await api.syncEmails();
-      addToast(res.message);
-      if (res.lastSyncTime) setLastSync(new Date(res.lastSyncTime));
-      loadData(false);
-    } catch (err) {
-      addToast(err.message, 'error');
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   const handleBackup = async () => {
     setBacking(true);
@@ -106,9 +92,6 @@ export default function Dashboard({ addToast }) {
           <div className="button-group">
             <button className="btn btn-primary" onClick={() => api.downloadExecutiveReport(days)}>
               📄 Reporte Ejecutivo
-            </button>
-            <button className="btn btn-secondary" onClick={handleSyncEmail} disabled={syncing}>
-              {syncing ? <div className="spinner" style={{width: 14, height: 14}}></div> : '📧 Sync Emails'}
             </button>
           </div>
         </div>
