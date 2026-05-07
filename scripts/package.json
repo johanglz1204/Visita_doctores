@@ -5,15 +5,17 @@
   "scripts": {
     "migrate": "node migrate_to_firebase.js",
     "sync-emails": "node sync_emails_firebase.js",
-    "sync-inventory": "node sync_inventory_mysql.js",
+    "sync-inventory": "node --max-old-space-size=4096 sync_inventory_mysql.js",
     "sync-sales": "node sync_sales_mysql.js",
     "sync-all": "node sync_inventory_mysql.js && node sync_sales_mysql.js"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "firebase-admin": "^12.0.0",
     "imapflow": "^1.3.3",
     "mailparser": "^3.9.8",
     "mysql2": "^3.22.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-populate": "^1.21.0"
   }
 }

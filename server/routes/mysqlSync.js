@@ -13,6 +13,9 @@ const router = express.Router();
 const { syncMySQLInventory } = require('../services/inventorySyncService');
 const { cleanForDisplay } = require('../utils/stringUtils');
 const { testConnection } = require('../mysqlDb');
+const { exec } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 const db = require('../db');
 const authenticate = require('../middlewares/authMiddleware');
 
@@ -320,5 +323,64 @@ router.get('/products-search', authenticate, async (req, res) => {
   }
 });
 
+
+// ══════════════════════════════════════════════
+// GENERACIÓN DE EXCEL DE PEDIDO
+// ══════════════════════════════════════════════
+
+// POST /api/mysql-sync/generate-order
+router.post('/generate-order', authenticate, async (req, res) => {
+  if (syncInProgress) {
+    return res.status(409).json({ error: 'Ya hay una sincronización en progreso. Espera a que termine.' });
+  }
+
+  syncInProgress = true;
+  const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'sync_inventory_mysql.js');
+  
+  console.log(`🚀 [Excel Gen] Ejecutando script: ${scriptPath}`);
+
+  // Ejecutamos el script con aumento de memoria para xlsx-populate
+  exec(`node --max-old-space-size=4096 "${scriptPath}"`, (error, stdout, stderr) => {
+    syncInProgress = false;
+    
+    if (error) {
+      console.error(`❌ [Excel Gen Error]:`, error.message);
+      return res.status(500).json({ error: 'Error al generar el pedido', detail: error.message });
+    }
+
+    // Buscamos el nombre del archivo generado en el stdout (✅ Pedido generado exitosamente: Pedido_Estetico_Final_YYYYMMDD.xlsx)
+    const match = stdout.match(/Pedido_Estetico_Final_\d+\.xlsx/);
+    const fileName = match ? match[0] : null;
+
+    if (!fileName) {
+      console.error('❌ [Excel Gen]: No se encontró el nombre del archivo en el output');
+      return res.status(500).json({ error: 'No se pudo identificar el archivo generado', output: stdout });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Pedido generado correctamente.', 
+      fileName: fileName,
+      downloadUrl: `/api/mysql-sync/download-order/${fileName}`
+    });
+  });
+});
+
+// GET /api/mysql-sync/download-order/:filename
+router.get('/download-order/:filename', authenticate, (req, res) => {
+  const fileName = req.params.filename;
+  // El archivo se genera en el root del proyecto
+  const filePath = path.join(__dirname, '..', '..', fileName);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'El archivo ya no existe en el servidor.' });
+  }
+
+  res.download(filePath, fileName, (err) => {
+    if (err) {
+      console.error('Error al descargar archivo:', err);
+    }
+  });
+});
 
 module.exports = router;

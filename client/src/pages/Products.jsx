@@ -11,6 +11,7 @@ export default function Products({ addToast }) {
   const [form, setForm] = useState({ name: '', barcode: '', ranking: '', price: '', transit_stock: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [generatingOrder, setGeneratingOrder] = useState(false);
   const [syncInfo, setSyncInfo] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const [diagnosticTab, setDiagnosticTab] = useState('unmatched');
@@ -166,6 +167,26 @@ export default function Products({ addToast }) {
     }
   };
 
+  const handleGenerateOrder = async () => {
+    if (generatingOrder) return;
+    setGeneratingOrder(true);
+    addToast('⏳ Generando pedido... esto puede tardar 1-2 minutos.', 'info');
+    try {
+      const res = await api.generateOrder();
+      if (res.success && res.fileName) {
+        addToast('✅ Pedido generado con éxito. Iniciando descarga...');
+        await api.downloadOrder(res.fileName);
+      } else {
+        throw new Error(res.error || 'No se pudo generar el archivo');
+      }
+    } catch (err) {
+      console.error('Error generando pedido:', err);
+      addToast(err.message || 'Error al conectar con el servidor', 'error');
+    } finally {
+      setGeneratingOrder(false);
+    }
+  };
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 50;
@@ -296,50 +317,33 @@ export default function Products({ addToast }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button className="btn btn-secondary" style={{ fontSize: '11px' }} onClick={() => navigate('/planning')}>🧠 Planeación</button>
               
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '6px 12px', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '11px', fontWeight: 'bold' }}>🛒 Generar Pedido:</span>
-                <select 
-                  className="form-input" 
-                  style={{ width: 'auto', padding: '0px 4px', fontSize: '11px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: 'var(--primary-color)' }}
-                  onChange={(e) => {
-                    const days = parseInt(e.target.value);
-                    if (!days) return;
-                    
-                    const eligible = products.filter(p => ['aa', 'a', 'b', 'c'].includes((p.ranking || '').toLowerCase()));
-                    const headers = ['Producto', 'Barcode', 'Ranking', 'Stock', 'MATRIZ', 'TAMPICO', 'CIVIL', 'EJERCITO', 'CURVA'];
-                    const rows = [];
-
-                    eligible.forEach(p => {
-                      const sm = p.sales_metrics || {};
-                      const sbb = p.stock_by_branch || {};
-                      let hasOrder = false;
-                      const calc = (b) => {
-                        const r = (sm[b] || {}).daily_rate || 0;
-                        const s = sbb[b] || 0;
-                        const sug = Math.ceil(r * days) - (s + (p.transit_stock || 0));
-                        const res = Math.max(0, sug);
-                        if (res > 0) hasOrder = true;
-                        return res;
-                      };
-                      const sugs = [calc('MATRIZ'), calc('TAMPICO'), calc('CIVIL'), calc('EJERCITO'), calc('CURVA TEXAS')];
-                      if (hasOrder) rows.push([p.name.replace(/,/g, ''), p.barcode, p.ranking, p.stock, ...sugs]);
-                    });
-
-                    if (rows.length === 0) { addToast('Sin productos requeridos'); return; }
-                    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = `Pedido_${days}d.csv`;
-                    link.click();
-                    e.target.value = "";
-                  }}
-                >
-                  <option value="">Elegir...</option>
-                  <option value="7">7 Días</option>
-                  <option value="15">15 Días</option>
-                  <option value="30">30 Días</option>
-                </select>
+              <div 
+                className="btn-group" 
+                style={{ 
+                  gap: '0px', 
+                  alignItems: 'center', 
+                  padding: '4px 12px', 
+                  background: 'rgba(var(--primary-rgb), 0.05)', 
+                  borderRadius: '10px', 
+                  border: '1px solid var(--border-color)',
+                  cursor: generatingOrder ? 'wait' : 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onClick={handleGenerateOrder}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--primary-rgb), 0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(var(--primary-rgb), 0.05)'}
+              >
+                <span style={{ fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {generatingOrder ? (
+                    <div className="spinner" style={{ width: '12px', height: '12px', borderWidth: '2px' }}></div>
+                  ) : (
+                    '🛒'
+                  )}
+                  {generatingOrder ? 'Generando...' : 'Generar Pedido (Auto)'}
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--primary-color)', marginLeft: '8px', opacity: 0.7 }}>
+                   (15 días)
+                </span>
               </div>
 
               <button className="btn btn-primary" style={{ padding: '8px 16px', fontWeight: 'bold' }} onClick={openCreate}>+ Nuevo Producto</button>

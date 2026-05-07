@@ -49,12 +49,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 35,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 35,
       "CURVA TEXAS": 0
     }
   },
@@ -97,12 +97,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 12,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 12,
       "CURVA TEXAS": 0
     }
   },
@@ -120,12 +120,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 11,
       "CURVA TEXAS": 0
     }
   },
@@ -134,12 +134,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 13,
       "CURVA TEXAS": 0
     }
   },
@@ -174,12 +174,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 7,
       "CURVA TEXAS": 0
     }
   },
@@ -230,12 +230,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 14,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 14,
       "CURVA TEXAS": 0
     }
   },
@@ -258,12 +258,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 8,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 8,
       "CURVA TEXAS": 0
     }
   },
@@ -895,13 +895,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "1004": {
@@ -1105,13 +1105,13 @@
     "ranking": "A",
     "sector": "82",
     "min_stock": 2,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "1020": {
@@ -1175,9 +1175,9 @@
     "ranking": "B",
     "sector": "70",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -1273,9 +1273,9 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 1,
-    "stock": 13,
+    "stock": 12,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 3,
@@ -1315,11 +1315,11 @@
     "ranking": "E",
     "sector": "98",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
-      "CIVIL": 5,
+      "CIVIL": 4,
       "EJERCITO": 2,
       "CURVA TEXAS": 0
     }
@@ -1895,10 +1895,10 @@
     "ranking": "Z",
     "sector": "70",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -1982,13 +1982,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
-      "TAMPICO": 1,
+      "MATRIZ": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
-      "CURVA TEXAS": 0
+      "EJERCITO": 0,
+      "CURVA TEXAS": 1
     }
   },
   "1087": {
@@ -2097,13 +2097,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 5,
-    "stock": 26,
+    "stock": 24,
     "stock_by_branch": {
-      "MATRIZ": 14,
+      "MATRIZ": 13,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 2,
-      "CURVA TEXAS": 8
+      "CURVA TEXAS": 7
     }
   },
   "1096": {
@@ -2128,11 +2128,11 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 1,
-    "stock": 14,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
-      "CIVIL": 2,
+      "CIVIL": 1,
       "EJERCITO": 3,
       "CURVA TEXAS": 2
     }
@@ -2142,12 +2142,12 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
   },
@@ -2170,13 +2170,13 @@
     "ranking": "E",
     "sector": "90",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 3,
       "EJERCITO": 2,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "1102": {
@@ -2688,10 +2688,10 @@
     "min_stock": 1,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 2
     }
   },
@@ -2832,9 +2832,9 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -2981,9 +2981,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 7,
-    "stock": 18,
+    "stock": 16,
     "stock_by_branch": {
-      "MATRIZ": 13,
+      "MATRIZ": 11,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -3289,11 +3289,11 @@
     "min_stock": 0,
     "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "1201": {
@@ -3712,11 +3712,11 @@
     "min_stock": 1,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "1234": {
@@ -3817,13 +3817,13 @@
     "ranking": "A",
     "sector": "98",
     "min_stock": 3,
-    "stock": 6,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "EJERCITO": 0,
+      "CURVA TEXAS": 2
     }
   },
   "1244": {
@@ -3929,12 +3929,12 @@
     "ranking": "A",
     "sector": "82",
     "min_stock": 2,
-    "stock": 14,
+    "stock": 12,
     "stock_by_branch": {
-      "MATRIZ": 8,
+      "MATRIZ": 3,
       "TAMPICO": 3,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 4,
       "CURVA TEXAS": 2
     }
   },
@@ -4143,8 +4143,8 @@
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 0,
-      "CIVIL": 0,
-      "EJERCITO": 2,
+      "CIVIL": 1,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -4181,13 +4181,13 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 0,
-    "stock": 31,
+    "stock": 61,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": 6,
-      "EJERCITO": 17,
-      "CURVA TEXAS": 6
+      "CIVIL": 16,
+      "EJERCITO": 41,
+      "CURVA TEXAS": 2
     }
   },
   "1271": {
@@ -4380,9 +4380,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -4579,13 +4579,13 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 6,
-    "stock": 14,
+    "stock": 11,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 3,
       "CIVIL": 0,
       "EJERCITO": 3,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 3
     }
   },
   "1302": {
@@ -4635,9 +4635,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 2,
@@ -4778,13 +4778,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 17,
+    "stock": 21,
     "stock_by_branch": {
       "MATRIZ": 11,
       "TAMPICO": 2,
-      "CIVIL": 1,
+      "CIVIL": 3,
       "EJERCITO": 3,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 2
     }
   },
   "1318": {
@@ -4851,12 +4851,12 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 2,
-    "stock": 65,
+    "stock": 62,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 4,
-      "CIVIL": 40,
-      "EJERCITO": 17,
+      "CIVIL": 38,
+      "EJERCITO": 16,
       "CURVA TEXAS": 0
     }
   },
@@ -5025,9 +5025,9 @@
     "ranking": "C",
     "sector": "98",
     "min_stock": 2,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -5151,12 +5151,12 @@
     "ranking": "Z",
     "sector": "90",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 1,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 1,
-      "EJERCITO": 1,
+      "CIVIL": 0,
+      "EJERCITO": 0,
       "CURVA TEXAS": 1
     }
   },
@@ -5457,13 +5457,13 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 5,
-    "stock": 15,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 2,
       "CIVIL": 4,
-      "EJERCITO": 3,
-      "CURVA TEXAS": 6
+      "EJERCITO": 2,
+      "CURVA TEXAS": 5
     }
   },
   "1375": {
@@ -5726,13 +5726,13 @@
     "ranking": "E",
     "sector": "90",
     "min_stock": 0,
-    "stock": 1,
+    "stock": -1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": -1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "1396": {
@@ -5875,9 +5875,9 @@
     "ranking": "A",
     "sector": "98",
     "min_stock": 6,
-    "stock": 10,
+    "stock": 9,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 1,
@@ -6024,13 +6024,13 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "1423": {
@@ -6111,12 +6111,12 @@
     "ranking": "C",
     "sector": "90",
     "min_stock": 1,
-    "stock": 47,
+    "stock": 46,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 2,
       "CIVIL": 20,
-      "EJERCITO": 19,
+      "EJERCITO": 18,
       "CURVA TEXAS": 6
     }
   },
@@ -6209,9 +6209,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 2,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -6352,13 +6352,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 10,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 1,
       "CIVIL": 2,
       "EJERCITO": 2,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 2
     }
   },
   "1448": {
@@ -6408,9 +6408,9 @@
     "ranking": "E",
     "sector": "90",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -6708,11 +6708,11 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 57,
+    "stock": 55,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 0,
-      "CIVIL": 35,
+      "CIVIL": 33,
       "EJERCITO": 11,
       "CURVA TEXAS": 6
     }
@@ -6750,12 +6750,12 @@
     "ranking": "A",
     "sector": "98",
     "min_stock": 1,
-    "stock": 40,
+    "stock": 38,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 0,
-      "CIVIL": 15,
-      "EJERCITO": 17,
+      "CIVIL": 14,
+      "EJERCITO": 16,
       "CURVA TEXAS": 2
     }
   },
@@ -6764,9 +6764,9 @@
     "ranking": "A",
     "sector": "98",
     "min_stock": 2,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 1,
@@ -6848,9 +6848,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 3,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -6938,13 +6938,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 4,
-    "stock": 15,
+    "stock": 18,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 3,
-      "CIVIL": 1,
+      "CIVIL": 3,
       "EJERCITO": 4,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 3
     }
   },
   "1498": {
@@ -7031,9 +7031,9 @@
     "ranking": "B",
     "sector": "98",
     "min_stock": 3,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -7045,9 +7045,9 @@
     "ranking": "A",
     "sector": "98",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -7283,9 +7283,9 @@
     "ranking": "C",
     "sector": "10",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -7429,9 +7429,9 @@
     "ranking": "B",
     "sector": "70",
     "min_stock": 1,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -7496,9 +7496,9 @@
     "min_stock": 1,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": -1,
+      "CIVIL": 0,
       "EJERCITO": 1,
       "CURVA TEXAS": 2
     }
@@ -7665,9 +7665,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -7693,9 +7693,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 3,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 0,
@@ -7735,9 +7735,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 9,
+    "stock": 8,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 1,
       "EJERCITO": 2,
@@ -7805,13 +7805,13 @@
     "ranking": "C",
     "sector": "90",
     "min_stock": 1,
-    "stock": 12,
+    "stock": 9,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 3,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 1
     }
   },
   "1568": {
@@ -8133,9 +8133,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 6,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 5,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -8192,12 +8192,12 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 1,
-    "stock": 30,
+    "stock": 28,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 4,
       "CIVIL": 0,
-      "EJERCITO": 6,
+      "EJERCITO": 4,
       "CURVA TEXAS": 16
     }
   },
@@ -8545,10 +8545,10 @@
     "min_stock": 2,
     "stock": 43,
     "stock_by_branch": {
-      "MATRIZ": -3,
+      "MATRIZ": 4,
       "TAMPICO": 2,
       "CIVIL": 2,
-      "EJERCITO": 39,
+      "EJERCITO": 32,
       "CURVA TEXAS": 3
     }
   },
@@ -8613,12 +8613,12 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 25,
+    "stock": 23,
     "stock_by_branch": {
-      "MATRIZ": 14,
+      "MATRIZ": 13,
       "TAMPICO": 4,
       "CIVIL": 3,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 2
     }
   },
@@ -9125,13 +9125,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 7,
-    "stock": 25,
+    "stock": 32,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 6,
       "CIVIL": 0,
       "EJERCITO": 15,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 7
     }
   },
   "1908": {
@@ -9257,9 +9257,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 4,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -9302,9 +9302,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 2,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -9679,9 +9679,9 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -9735,9 +9735,9 @@
     "ranking": "A",
     "sector": "96",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 2,
@@ -9901,9 +9901,9 @@
     "ranking": "C",
     "sector": "10",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -9915,13 +9915,13 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 1,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "2055": {
@@ -9977,13 +9977,13 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "2062": {
@@ -10227,9 +10227,9 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -10258,12 +10258,12 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 0,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 1,
       "CIVIL": 0,
-      "EJERCITO": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 1
     }
   },
@@ -10300,12 +10300,12 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 0,
-    "stock": 47,
+    "stock": 44,
     "stock_by_branch": {
-      "MATRIZ": 22,
+      "MATRIZ": 20,
       "TAMPICO": 7,
       "CIVIL": 4,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 12
     }
   },
@@ -10314,9 +10314,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 9,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 5,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 0,
@@ -10398,11 +10398,11 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 0,
-    "stock": 53,
+    "stock": 45,
     "stock_by_branch": {
       "MATRIZ": -298,
-      "TAMPICO": 113,
-      "CIVIL": 184,
+      "TAMPICO": 108,
+      "CIVIL": 181,
       "EJERCITO": 50,
       "CURVA TEXAS": 4
     }
@@ -10429,12 +10429,12 @@
     "ranking": "A",
     "sector": "78",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 5,
-      "EJERCITO": 0,
+      "EJERCITO": -3,
       "CURVA TEXAS": 5
     }
   },
@@ -10634,9 +10634,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -11094,10 +11094,10 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 0,
-    "stock": 28,
+    "stock": 26,
     "stock_by_branch": {
       "MATRIZ": 17,
-      "TAMPICO": 8,
+      "TAMPICO": 6,
       "CIVIL": 0,
       "EJERCITO": 2,
       "CURVA TEXAS": 1
@@ -11248,13 +11248,13 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 0,
-    "stock": 20,
+    "stock": 19,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 1,
       "CIVIL": 7,
       "EJERCITO": 5,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "2163": {
@@ -11332,9 +11332,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -11731,9 +11731,9 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 1,
@@ -12081,9 +12081,9 @@
     "ranking": "B",
     "sector": "70",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -12165,9 +12165,9 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 0,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -12356,6 +12356,9 @@
       "CURVA TEXAS": 0
     }
   },
+  "2305": {
+    "id": null
+  },
   "4988": {
     "id": "ZImx27jBiJgihXUhuaLz",
     "ranking": "C",
@@ -12403,10 +12406,10 @@
     "ranking": "A",
     "sector": "82",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 1,
-      "TAMPICO": 0,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 2
@@ -12417,13 +12420,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": -1,
       "TAMPICO": 4,
       "CIVIL": 1,
       "EJERCITO": 2,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "9003": {
@@ -12814,10 +12817,10 @@
     "ranking": "B",
     "sector": "89",
     "min_stock": 2,
-    "stock": 25,
+    "stock": 24,
     "stock_by_branch": {
       "MATRIZ": 7,
-      "TAMPICO": 6,
+      "TAMPICO": 5,
       "CIVIL": 0,
       "EJERCITO": 8,
       "CURVA TEXAS": 4
@@ -12828,11 +12831,11 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 5,
-    "stock": 25,
+    "stock": 23,
     "stock_by_branch": {
       "MATRIZ": 8,
       "TAMPICO": 0,
-      "CIVIL": 12,
+      "CIVIL": 10,
       "EJERCITO": 5,
       "CURVA TEXAS": 0
     }
@@ -13103,9 +13106,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 6,
-    "stock": 24,
+    "stock": 22,
     "stock_by_branch": {
-      "MATRIZ": 13,
+      "MATRIZ": 11,
       "TAMPICO": 5,
       "CIVIL": 2,
       "EJERCITO": 4,
@@ -13117,12 +13120,12 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 3,
-    "stock": 35,
+    "stock": 28,
     "stock_by_branch": {
-      "MATRIZ": 12,
+      "MATRIZ": 7,
       "TAMPICO": 2,
       "CIVIL": 1,
-      "EJERCITO": 13,
+      "EJERCITO": 11,
       "CURVA TEXAS": 7
     }
   },
@@ -13191,8 +13194,8 @@
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
-      "CIVIL": 1,
-      "EJERCITO": 0,
+      "CIVIL": 0,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -13553,12 +13556,12 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 3,
-    "stock": 105,
+    "stock": 103,
     "stock_by_branch": {
       "MATRIZ": 13,
       "TAMPICO": 25,
       "CIVIL": 3,
-      "EJERCITO": 64,
+      "EJERCITO": 62,
       "CURVA TEXAS": 0
     }
   },
@@ -13597,11 +13600,11 @@
     "min_stock": 1,
     "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "10110": {
@@ -13724,9 +13727,9 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -14094,13 +14097,13 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 9,
-    "stock": 8,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 0,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "10211": {
@@ -14122,13 +14125,13 @@
     "ranking": "E",
     "sector": "10",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 2,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "10214": {
@@ -14172,10 +14175,10 @@
     "min_stock": 11,
     "stock": 31,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 4,
       "TAMPICO": 5,
       "CIVIL": 0,
-      "EJERCITO": 26,
+      "EJERCITO": 21,
       "CURVA TEXAS": 1
     }
   },
@@ -14224,9 +14227,9 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 0,
-    "stock": 13,
+    "stock": 12,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 5,
       "TAMPICO": 1,
       "CIVIL": 2,
       "EJERCITO": 3,
@@ -14280,11 +14283,11 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 2,
+      "CIVIL": 1,
       "EJERCITO": 2,
       "CURVA TEXAS": 1
     }
@@ -14536,8 +14539,8 @@
     "min_stock": 0,
     "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 2,
-      "TAMPICO": 0,
+      "MATRIZ": 1,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
       "CURVA TEXAS": 0
@@ -14576,12 +14579,12 @@
     "ranking": "B",
     "sector": "87",
     "min_stock": 1,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 2,
       "CIVIL": 2,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 3
     }
   },
@@ -14621,12 +14624,12 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 2,
-    "stock": 15,
+    "stock": 14,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 3,
       "CIVIL": 3,
-      "EJERCITO": 4,
+      "EJERCITO": 3,
       "CURVA TEXAS": 3
     }
   },
@@ -14733,12 +14736,12 @@
     "ranking": "Z",
     "sector": "97",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 30,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 30,
       "CURVA TEXAS": 0
     }
   },
@@ -15132,9 +15135,9 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 0,
-    "stock": 12,
+    "stock": 10,
     "stock_by_branch": {
-      "MATRIZ": 9,
+      "MATRIZ": 7,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -15169,8 +15172,8 @@
     "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 1,
-      "TAMPICO": 0,
-      "CIVIL": 1,
+      "TAMPICO": 1,
+      "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 1
     }
@@ -15264,13 +15267,13 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 0,
-    "stock": 9,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 5,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 0
     }
   },
   "10864": {
@@ -15340,11 +15343,11 @@
     "min_stock": 3,
     "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "10883": {
@@ -15406,11 +15409,11 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 1,
-    "stock": 44,
+    "stock": 42,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 6,
-      "CIVIL": 8,
+      "CIVIL": 6,
       "EJERCITO": 8,
       "CURVA TEXAS": 19
     }
@@ -15630,11 +15633,11 @@
     "ranking": "A",
     "sector": "86",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 1,
+      "CIVIL": 0,
       "EJERCITO": 1,
       "CURVA TEXAS": 2
     }
@@ -15790,9 +15793,9 @@
     "ranking": "E",
     "sector": "10",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 3,
       "EJERCITO": 1,
@@ -15875,9 +15878,9 @@
     "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 1,
-      "TAMPICO": 0,
+      "TAMPICO": 1,
       "CIVIL": 1,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -15889,10 +15892,10 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 0,
-    "stock": 25,
+    "stock": 23,
     "stock_by_branch": {
       "MATRIZ": 1,
-      "TAMPICO": 3,
+      "TAMPICO": 1,
       "CIVIL": 7,
       "EJERCITO": 7,
       "CURVA TEXAS": 7
@@ -15917,9 +15920,9 @@
     "ranking": "B",
     "sector": "89",
     "min_stock": 0,
-    "stock": -1,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -15949,9 +15952,9 @@
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 2,
-      "CIVIL": 3,
+      "CIVIL": 5,
       "EJERCITO": 5,
-      "CURVA TEXAS": 3
+      "CURVA TEXAS": 1
     }
   },
   "11100": {
@@ -16008,13 +16011,13 @@
     "ranking": "A",
     "sector": "70",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "11137": {
@@ -16062,13 +16065,13 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 6,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 4,
       "CIVIL": 0,
       "EJERCITO": 1,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 0
     }
   },
   "11156": {
@@ -16128,13 +16131,13 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 1,
-    "stock": 14,
+    "stock": 12,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 8,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 3
     }
   },
   "11197": {
@@ -16256,8 +16259,8 @@
     "min_stock": 1,
     "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 1,
-      "TAMPICO": 0,
+      "MATRIZ": 0,
+      "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 1,
       "CURVA TEXAS": 1
@@ -16484,13 +16487,13 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 372,
-    "stock": 172,
+    "stock": 124,
     "stock_by_branch": {
-      "MATRIZ": 49,
-      "TAMPICO": 20,
+      "MATRIZ": 20,
+      "TAMPICO": 19,
       "CIVIL": 10,
-      "EJERCITO": 88,
-      "CURVA TEXAS": 5
+      "EJERCITO": 75,
+      "CURVA TEXAS": 0
     }
   },
   "11384": {
@@ -16920,9 +16923,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 3,
-    "stock": 12,
+    "stock": 11,
     "stock_by_branch": {
-      "MATRIZ": 7,
+      "MATRIZ": 6,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 2,
@@ -17099,13 +17102,13 @@
     "ranking": "A",
     "sector": "99",
     "min_stock": 225,
-    "stock": -1332,
+    "stock": -1338,
     "stock_by_branch": {
-      "MATRIZ": -467,
+      "MATRIZ": -469,
       "TAMPICO": -2,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": -863
+      "CURVA TEXAS": -867
     }
   },
   "11537": {
@@ -17173,13 +17176,13 @@
     "ranking": "E",
     "sector": "98",
     "min_stock": 6,
-    "stock": 21,
+    "stock": 17,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 3,
-      "EJERCITO": 8,
-      "CURVA TEXAS": 10
+      "CIVIL": 0,
+      "EJERCITO": 0,
+      "CURVA TEXAS": 17
     }
   },
   "11547": {
@@ -17224,13 +17227,13 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 30,
-    "stock": 85,
+    "stock": 82,
     "stock_by_branch": {
       "MATRIZ": 36,
-      "TAMPICO": 5,
+      "TAMPICO": 3,
       "CIVIL": 9,
       "EJERCITO": 17,
-      "CURVA TEXAS": 18
+      "CURVA TEXAS": 17
     }
   },
   "11553": {
@@ -17346,11 +17349,11 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 9,
-    "stock": 17,
+    "stock": 16,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 3,
-      "CIVIL": 6,
+      "CIVIL": 5,
       "EJERCITO": 2,
       "CURVA TEXAS": 3
     }
@@ -17419,13 +17422,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 3,
-    "stock": 20,
+    "stock": 19,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 3,
       "TAMPICO": 4,
       "CIVIL": 6,
       "EJERCITO": 4,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 2
     }
   },
   "11574": {
@@ -17450,12 +17453,12 @@
     "ranking": "E",
     "sector": "98",
     "min_stock": 0,
-    "stock": 14,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 4,
-      "EJERCITO": 8,
+      "EJERCITO": 5,
       "CURVA TEXAS": 0
     }
   },
@@ -17636,11 +17639,11 @@
     "ranking": "A",
     "sector": "86",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 9,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 0,
       "TAMPICO": 2,
-      "CIVIL": 2,
+      "CIVIL": 3,
       "EJERCITO": 2,
       "CURVA TEXAS": 2
     }
@@ -17954,10 +17957,10 @@
     "ranking": "A",
     "sector": "78",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
       "MATRIZ": 2,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
       "CURVA TEXAS": 2
@@ -18046,8 +18049,8 @@
     "min_stock": 0,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
-      "TAMPICO": 0,
+      "MATRIZ": 0,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
       "CURVA TEXAS": 0
@@ -18111,9 +18114,9 @@
     "min_stock": 0,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 1,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
@@ -18740,11 +18743,11 @@
     "ranking": "A",
     "sector": "87",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 1,
       "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
@@ -29053,11 +29056,11 @@
     "min_stock": 0,
     "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": 1,
-      "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CIVIL": 0,
+      "EJERCITO": 1,
+      "CURVA TEXAS": 1
     }
   },
   "100062": {
@@ -29206,9 +29209,9 @@
     "min_stock": 0,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 1,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
@@ -29340,13 +29343,13 @@
     "ranking": "C",
     "sector": "87",
     "min_stock": 2,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 3,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "100156": {
@@ -29357,13 +29360,13 @@
     "ranking": "A",
     "sector": "87",
     "min_stock": 2,
-    "stock": 9,
+    "stock": 8,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 3,
       "TAMPICO": 2,
-      "CIVIL": 0,
-      "EJERCITO": 2,
-      "CURVA TEXAS": 0
+      "CIVIL": 1,
+      "EJERCITO": 1,
+      "CURVA TEXAS": 1
     }
   },
   "100171": {
@@ -29436,11 +29439,11 @@
     "min_stock": 1,
     "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "100246": {
@@ -29646,10 +29649,10 @@
     "min_stock": 0,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 1,
-      "EJERCITO": 0,
+      "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
   },
@@ -29707,12 +29710,12 @@
     "ranking": "A",
     "sector": "87",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 3,
       "CIVIL": 0,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
   },
@@ -29774,9 +29777,9 @@
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": 1,
+      "CIVIL": 0,
       "EJERCITO": 1,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "100675": {
@@ -30045,10 +30048,10 @@
     "ranking": "Z",
     "sector": "78",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -30467,10 +30470,10 @@
     "min_stock": 1,
     "stock": 9,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 1,
-      "EJERCITO": 1,
+      "EJERCITO": 2,
       "CURVA TEXAS": 2
     }
   },
@@ -30649,12 +30652,12 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 1,
-    "stock": 16,
+    "stock": 15,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 2,
       "CIVIL": 7,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
   },
@@ -30779,9 +30782,9 @@
     "ranking": "E",
     "sector": "90",
     "min_stock": 2,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -31341,12 +31344,12 @@
     "ranking": "A",
     "sector": "87",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -31391,8 +31394,8 @@
     "min_stock": 1,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
-      "TAMPICO": 0,
+      "MATRIZ": 1,
+      "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 1,
       "CURVA TEXAS": 1
@@ -31618,11 +31621,11 @@
     "ranking": "A",
     "sector": "78",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": 1,
+      "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
@@ -31675,9 +31678,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 1,
-    "stock": 93,
+    "stock": 83,
     "stock_by_branch": {
-      "MATRIZ": 48,
+      "MATRIZ": 38,
       "TAMPICO": 5,
       "CIVIL": 5,
       "EJERCITO": 20,
@@ -31772,12 +31775,12 @@
     "ranking": "B",
     "sector": "87",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -31819,10 +31822,10 @@
     "min_stock": 0,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -31875,10 +31878,10 @@
     "min_stock": 0,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -31921,9 +31924,9 @@
     "ranking": "A",
     "sector": "78",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": -1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -32051,12 +32054,12 @@
     "ranking": "B",
     "sector": "87",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -32642,8 +32645,8 @@
     "min_stock": 1,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
-      "TAMPICO": 1,
+      "MATRIZ": 1,
+      "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 1,
       "CURVA TEXAS": 1
@@ -33029,13 +33032,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 30,
-    "stock": 137,
+    "stock": 127,
     "stock_by_branch": {
-      "MATRIZ": 49,
-      "TAMPICO": 23,
+      "MATRIZ": 47,
+      "TAMPICO": 22,
       "CIVIL": 28,
-      "EJERCITO": 19,
-      "CURVA TEXAS": 18
+      "EJERCITO": 15,
+      "CURVA TEXAS": 15
     }
   },
   "75004705": {
@@ -33200,13 +33203,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 34,
-    "stock": 103,
+    "stock": 93,
     "stock_by_branch": {
-      "MATRIZ": 34,
-      "TAMPICO": 21,
-      "CIVIL": 21,
+      "MATRIZ": 31,
+      "TAMPICO": 19,
+      "CIVIL": 19,
       "EJERCITO": 1,
-      "CURVA TEXAS": 26
+      "CURVA TEXAS": 23
     }
   },
   "75009328": {
@@ -34057,11 +34060,11 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 5,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 2,
-      "CIVIL": 2,
+      "CIVIL": 1,
       "EJERCITO": 3,
       "CURVA TEXAS": 0
     }
@@ -34427,9 +34430,9 @@
     "ranking": "E",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -35139,11 +35142,11 @@
     "ranking": "B",
     "sector": "10",
     "min_stock": 2,
-    "stock": 16,
+    "stock": 15,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 2,
-      "CIVIL": 2,
+      "CIVIL": 1,
       "EJERCITO": 0,
       "CURVA TEXAS": 3
     }
@@ -35410,11 +35413,11 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 19,
-    "stock": 42,
+    "stock": 40,
     "stock_by_branch": {
-      "MATRIZ": 10,
+      "MATRIZ": 9,
       "TAMPICO": 2,
-      "CIVIL": 15,
+      "CIVIL": 14,
       "EJERCITO": 4,
       "CURVA TEXAS": 11
     }
@@ -36074,12 +36077,12 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 1,
-    "stock": 15,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 1,
-      "CIVIL": 4,
-      "EJERCITO": 3,
+      "CIVIL": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 3
     }
   },
@@ -37426,9 +37429,9 @@
     "ranking": "C",
     "sector": "97",
     "min_stock": 2,
-    "stock": -1,
+    "stock": -2,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": -2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -38296,9 +38299,9 @@
     "ranking": "B",
     "sector": "83",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -39909,10 +39912,10 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": -1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": -1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -39979,9 +39982,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -41333,9 +41336,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -41427,13 +41430,13 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "4015630067145": {
@@ -42819,9 +42822,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -44498,9 +44501,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -44966,13 +44969,13 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "650240025563": {
@@ -45258,13 +45261,13 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 2,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 3
+      "CURVA TEXAS": 2
     }
   },
   "650240032264": {
@@ -45272,13 +45275,13 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 3,
-    "stock": 19,
+    "stock": 22,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 0,
-      "CIVIL": 2,
-      "EJERCITO": 7,
-      "CURVA TEXAS": 1
+      "CIVIL": 4,
+      "EJERCITO": 6,
+      "CURVA TEXAS": 3
     }
   },
   "650240032271": {
@@ -45300,13 +45303,13 @@
     "ranking": "E",
     "sector": "81",
     "min_stock": 2,
-    "stock": 12,
+    "stock": 16,
     "stock_by_branch": {
       "MATRIZ": 8,
       "TAMPICO": 2,
-      "CIVIL": 0,
+      "CIVIL": 2,
       "EJERCITO": 2,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 2
     }
   },
   "650240032301": {
@@ -45314,13 +45317,13 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 2,
-    "stock": 17,
+    "stock": 20,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 2,
       "CIVIL": 3,
       "EJERCITO": 5,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 4
     }
   },
   "650240032325": {
@@ -45328,13 +45331,13 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 1,
-    "stock": 10,
+    "stock": 15,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 2,
-      "CIVIL": 0,
+      "CIVIL": 2,
       "EJERCITO": 2,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 3
     }
   },
   "650240032332": {
@@ -45530,13 +45533,13 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 2,
-    "stock": 14,
+    "stock": 23,
     "stock_by_branch": {
       "MATRIZ": 8,
       "TAMPICO": 3,
-      "CIVIL": 1,
+      "CIVIL": 4,
       "EJERCITO": 2,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 6
     }
   },
   "650240035586": {
@@ -46283,11 +46286,11 @@
     "ranking": "Z",
     "sector": "81",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 1,
       "EJERCITO": 0,
       "CURVA TEXAS": 1
     }
@@ -47431,9 +47434,9 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -47560,9 +47563,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -48573,9 +48576,9 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 0,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 2,
       "EJERCITO": 1,
@@ -48718,13 +48721,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 3,
-    "stock": 25,
+    "stock": 22,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 9,
-      "EJERCITO": 2,
-      "CURVA TEXAS": 7
+      "EJERCITO": 1,
+      "CURVA TEXAS": 5
     }
   },
   "7500478005635": {
@@ -48825,12 +48828,12 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 1,
-    "stock": 23,
+    "stock": 21,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 7,
-      "EJERCITO": 5,
+      "EJERCITO": 4,
       "CURVA TEXAS": 3
     }
   },
@@ -48867,13 +48870,13 @@
     "ranking": "C",
     "sector": "91",
     "min_stock": 2,
-    "stock": 26,
+    "stock": 24,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 2,
       "CIVIL": 6,
-      "EJERCITO": 4,
-      "CURVA TEXAS": 5
+      "EJERCITO": 3,
+      "CURVA TEXAS": 4
     }
   },
   "7500478016587": {
@@ -48918,11 +48921,11 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 2,
-    "stock": 6,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 2,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
@@ -48949,13 +48952,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 2,
-    "stock": 25,
+    "stock": 23,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 3,
       "CIVIL": 10,
       "EJERCITO": 6,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 3
     }
   },
   "7500478021895": {
@@ -48994,13 +48997,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 1,
-    "stock": 34,
+    "stock": 33,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 3,
       "CIVIL": 11,
       "EJERCITO": 5,
-      "CURVA TEXAS": 9
+      "CURVA TEXAS": 8
     }
   },
   "7500478022519": {
@@ -49123,12 +49126,12 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 5,
+      "EJERCITO": 4,
       "CURVA TEXAS": 0
     }
   },
@@ -49280,13 +49283,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 0,
-    "stock": 27,
+    "stock": 25,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 4,
       "CIVIL": 8,
-      "EJERCITO": 5,
-      "CURVA TEXAS": 5
+      "EJERCITO": 4,
+      "CURVA TEXAS": 4
     }
   },
   "7500478042128": {
@@ -49294,9 +49297,9 @@
     "ranking": "C",
     "sector": "91",
     "min_stock": 0,
-    "stock": 24,
+    "stock": 23,
     "stock_by_branch": {
-      "MATRIZ": 7,
+      "MATRIZ": 6,
       "TAMPICO": 2,
       "CIVIL": 3,
       "EJERCITO": 6,
@@ -49322,12 +49325,12 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 0,
-    "stock": 20,
+    "stock": 19,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 0,
       "CIVIL": 5,
-      "EJERCITO": 4,
+      "EJERCITO": 3,
       "CURVA TEXAS": 5
     }
   },
@@ -49364,13 +49367,13 @@
     "ranking": "C",
     "sector": "91",
     "min_stock": 0,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 3
+      "CURVA TEXAS": 2
     }
   },
   "7500478043958": {
@@ -49392,12 +49395,12 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 0,
-    "stock": 12,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 4,
-      "TAMPICO": 2,
-      "CIVIL": 1,
-      "EJERCITO": 3,
+      "TAMPICO": 1,
+      "CIVIL": 4,
+      "EJERCITO": 2,
       "CURVA TEXAS": 2
     }
   },
@@ -49420,13 +49423,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
-      "CIVIL": 0,
-      "EJERCITO": 2,
-      "CURVA TEXAS": 1
+      "CIVIL": 3,
+      "EJERCITO": 1,
+      "CURVA TEXAS": 0
     }
   },
   "7500478044115": {
@@ -49448,11 +49451,11 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 3,
       "EJERCITO": 2,
       "CURVA TEXAS": 3
     }
@@ -49490,13 +49493,13 @@
     "ranking": "C",
     "sector": "91",
     "min_stock": 0,
-    "stock": 14,
+    "stock": 15,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 4,
       "TAMPICO": 3,
-      "CIVIL": 0,
+      "CIVIL": 3,
       "EJERCITO": 3,
-      "CURVA TEXAS": 3
+      "CURVA TEXAS": 2
     }
   },
   "7500478046676": {
@@ -49864,13 +49867,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 1,
-    "stock": 18,
+    "stock": 17,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 0,
       "CIVIL": 4,
       "EJERCITO": 5,
-      "CURVA TEXAS": 3
+      "CURVA TEXAS": 2
     }
   },
   "7501000612147": {
@@ -50023,9 +50026,9 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 3,
-    "stock": 56,
+    "stock": 54,
     "stock_by_branch": {
-      "MATRIZ": 15,
+      "MATRIZ": 13,
       "TAMPICO": 2,
       "CIVIL": 12,
       "EJERCITO": 9,
@@ -50500,9 +50503,9 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -51082,13 +51085,13 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 1,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7501007465777": {
@@ -51224,9 +51227,9 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -51238,9 +51241,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -52151,9 +52154,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -52627,11 +52630,11 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 3,
-    "stock": 13,
+    "stock": 16,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 1,
-      "CIVIL": 0,
+      "CIVIL": 3,
       "EJERCITO": 3,
       "CURVA TEXAS": 3
     }
@@ -52720,11 +52723,11 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 2,
-    "stock": 8,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 1,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 5,
       "CURVA TEXAS": 0
     }
@@ -52734,13 +52737,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 3,
-    "stock": 19,
+    "stock": 23,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 3,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 5,
-      "CURVA TEXAS": 9
+      "CURVA TEXAS": 8
     }
   },
   "7501011123878": {
@@ -52748,13 +52751,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 1,
-    "stock": 13,
+    "stock": 17,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 5,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501011126398": {
@@ -52779,11 +52782,11 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 1,
-    "stock": 22,
+    "stock": 27,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 4,
-      "CIVIL": 1,
+      "CIVIL": 6,
       "EJERCITO": 5,
       "CURVA TEXAS": 6
     }
@@ -52796,11 +52799,11 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 0,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 5,
       "CURVA TEXAS": 0
     }
@@ -52961,11 +52964,11 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 1,
-    "stock": 16,
+    "stock": 21,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 3,
-      "CIVIL": 0,
+      "CIVIL": 5,
       "EJERCITO": 5,
       "CURVA TEXAS": 4
     }
@@ -53121,13 +53124,13 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 0,
-    "stock": 17,
+    "stock": 16,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 3,
       "EJERCITO": 6,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501011189485": {
@@ -53324,12 +53327,12 @@
     "ranking": "Z",
     "sector": "84",
     "min_stock": 0,
-    "stock": 9,
+    "stock": 8,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 4,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 3
     }
   },
@@ -53352,9 +53355,9 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 0,
-    "stock": 16,
+    "stock": 15,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 3,
       "EJERCITO": 1,
@@ -53366,11 +53369,11 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
-      "CIVIL": 3,
+      "CIVIL": 2,
       "EJERCITO": 0,
       "CURVA TEXAS": 1
     }
@@ -53380,9 +53383,9 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 21,
+    "stock": 20,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 2,
       "CIVIL": 8,
       "EJERCITO": 4,
@@ -53450,13 +53453,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 26,
+    "stock": 24,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 4,
       "TAMPICO": 2,
       "CIVIL": 8,
       "EJERCITO": 6,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 4
     }
   },
   "7501013107319": {
@@ -53464,13 +53467,13 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 0,
-    "stock": 23,
+    "stock": 22,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 3,
       "CIVIL": 6,
       "EJERCITO": 5,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501013107326": {
@@ -54337,9 +54340,9 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 1,
-    "stock": 7,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -54534,10 +54537,10 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 2,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -54728,9 +54731,9 @@
     "ranking": "B",
     "sector": "72",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -54804,13 +54807,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 6,
-    "stock": 29,
+    "stock": 26,
     "stock_by_branch": {
       "MATRIZ": 4,
-      "TAMPICO": 4,
+      "TAMPICO": 2,
       "CIVIL": 11,
       "EJERCITO": 4,
-      "CURVA TEXAS": 6
+      "CURVA TEXAS": 5
     }
   },
   "7501020565911": {
@@ -55221,13 +55224,13 @@
     "ranking": "B",
     "sector": "86",
     "min_stock": 2,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 2,
       "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7501022105207": {
@@ -55961,7 +55964,7 @@
   "7501025440305": {
     "id": "PstMT42cjJOhbxiVyO4J",
     "ranking": "Z",
-    "sector": "84",
+    "sector": "39",
     "min_stock": 0,
     "stock": 0,
     "stock_by_branch": {
@@ -56040,9 +56043,9 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 0,
-    "stock": 16,
+    "stock": 11,
     "stock_by_branch": {
-      "MATRIZ": 7,
+      "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 4,
       "EJERCITO": 0,
@@ -56656,13 +56659,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 0,
-    "stock": 9,
+    "stock": 8,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501030419099": {
@@ -56883,9 +56886,9 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 8,
     "stock_by_branch": {
-      "MATRIZ": 7,
+      "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -56900,13 +56903,13 @@
     "ranking": "C",
     "sector": "91",
     "min_stock": 0,
-    "stock": 22,
+    "stock": 20,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 7,
       "EJERCITO": 3,
-      "CURVA TEXAS": 9
+      "CURVA TEXAS": 8
     }
   },
   "7501031311309": {
@@ -56970,13 +56973,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 1,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "7501032901851": {
@@ -57671,9 +57674,9 @@
     "ranking": "E",
     "sector": "72",
     "min_stock": 8,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 2,
@@ -57685,9 +57688,9 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 66,
-    "stock": 15,
+    "stock": 20,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 6,
       "TAMPICO": 3,
       "CIVIL": 1,
       "EJERCITO": 5,
@@ -57722,10 +57725,10 @@
     "ranking": "C",
     "sector": "88",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -57883,9 +57886,9 @@
     "ranking": "B",
     "sector": "72",
     "min_stock": 6,
-    "stock": 28,
+    "stock": 27,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 5,
       "TAMPICO": 0,
       "CIVIL": 18,
       "EJERCITO": 3,
@@ -57897,13 +57900,13 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 57,
-    "stock": 20,
+    "stock": 19,
     "stock_by_branch": {
-      "MATRIZ": 10,
+      "MATRIZ": 11,
       "TAMPICO": 3,
       "CIVIL": 2,
       "EJERCITO": 0,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 3
     }
   },
   "7501033956157": {
@@ -58681,9 +58684,9 @@
     "ranking": "A",
     "sector": "72",
     "min_stock": 52,
-    "stock": 29,
+    "stock": 28,
     "stock_by_branch": {
-      "MATRIZ": 13,
+      "MATRIZ": 12,
       "TAMPICO": 1,
       "CIVIL": 4,
       "EJERCITO": 8,
@@ -58932,9 +58935,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 3,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -59152,9 +59155,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -59448,9 +59451,9 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 1,
-    "stock": 14,
+    "stock": 13,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 2,
       "CIVIL": 4,
       "EJERCITO": 0,
@@ -59681,9 +59684,9 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 3,
-    "stock": 32,
+    "stock": 30,
     "stock_by_branch": {
-      "MATRIZ": 15,
+      "MATRIZ": 13,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 3,
@@ -59710,9 +59713,9 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 14,
+    "stock": 11,
     "stock_by_branch": {
-      "MATRIZ": 8,
+      "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 0,
@@ -59766,10 +59769,10 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 37,
+    "stock": 35,
     "stock_by_branch": {
-      "MATRIZ": 19,
-      "TAMPICO": 1,
+      "MATRIZ": 18,
+      "TAMPICO": 0,
       "CIVIL": 6,
       "EJERCITO": 7,
       "CURVA TEXAS": 4
@@ -60088,13 +60091,13 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 5,
-    "stock": 12,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 8,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 2
     }
   },
   "7501037935165": {
@@ -60505,9 +60508,9 @@
     "ranking": "Z",
     "sector": "84",
     "min_stock": 3,
-    "stock": 12,
+    "stock": 10,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -60649,13 +60652,13 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 0,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 0,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501042301757": {
@@ -60663,13 +60666,13 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 0,
-    "stock": 17,
+    "stock": 16,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 3,
       "CIVIL": 4,
       "EJERCITO": 0,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501042305403": {
@@ -60860,9 +60863,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -61354,8 +61357,8 @@
     "min_stock": 0,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
-      "TAMPICO": 1,
+      "MATRIZ": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -62171,13 +62174,13 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 1,
-    "stock": 12,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 3,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 3,
-      "CURVA TEXAS": 4
+      "CURVA TEXAS": 3
     }
   },
   "7501050410397": {
@@ -62216,9 +62219,9 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 1,
-    "stock": 22,
+    "stock": 21,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 4,
       "TAMPICO": 2,
       "CIVIL": 8,
       "EJERCITO": 3,
@@ -63882,13 +63885,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 3,
-    "stock": 19,
+    "stock": 24,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 11,
       "TAMPICO": 0,
       "CIVIL": 2,
-      "EJERCITO": 9,
-      "CURVA TEXAS": 6
+      "EJERCITO": 8,
+      "CURVA TEXAS": 3
     }
   },
   "7501055303540": {
@@ -63933,13 +63936,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 6,
-    "stock": 31,
+    "stock": 30,
     "stock_by_branch": {
       "MATRIZ": 8,
       "TAMPICO": 2,
       "CIVIL": 10,
       "EJERCITO": 1,
-      "CURVA TEXAS": 10
+      "CURVA TEXAS": 9
     }
   },
   "7501055304721": {
@@ -63947,12 +63950,12 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 1,
-    "stock": 52,
+    "stock": 49,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 14,
-      "CIVIL": 6,
-      "EJERCITO": 9,
+      "CIVIL": 4,
+      "EJERCITO": 8,
       "CURVA TEXAS": 14
     }
   },
@@ -63961,12 +63964,12 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 2,
-    "stock": 17,
+    "stock": 24,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 9,
       "TAMPICO": 0,
       "CIVIL": 6,
-      "EJERCITO": 10,
+      "EJERCITO": 9,
       "CURVA TEXAS": 0
     }
   },
@@ -63995,11 +63998,11 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 4,
-    "stock": 49,
+    "stock": 47,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 4,
-      "CIVIL": 4,
+      "CIVIL": 2,
       "EJERCITO": 21,
       "CURVA TEXAS": 11
     }
@@ -64046,13 +64049,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 0,
-    "stock": 40,
+    "stock": 49,
     "stock_by_branch": {
-      "MATRIZ": 4,
-      "TAMPICO": 13,
+      "MATRIZ": 15,
+      "TAMPICO": 12,
       "CIVIL": 0,
       "EJERCITO": 6,
-      "CURVA TEXAS": 17
+      "CURVA TEXAS": 16
     }
   },
   "7501055308675": {
@@ -64081,13 +64084,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 1,
-    "stock": 53,
+    "stock": 50,
     "stock_by_branch": {
       "MATRIZ": 10,
       "TAMPICO": 14,
       "CIVIL": 12,
-      "EJERCITO": 11,
-      "CURVA TEXAS": 6
+      "EJERCITO": 10,
+      "CURVA TEXAS": 4
     }
   },
   "7501055313525": {
@@ -64147,13 +64150,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 0,
-    "stock": 37,
+    "stock": 47,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 18,
       "TAMPICO": 0,
       "CIVIL": 10,
       "EJERCITO": 8,
-      "CURVA TEXAS": 13
+      "CURVA TEXAS": 11
     }
   },
   "7501055325467": {
@@ -64164,13 +64167,13 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 4,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
-      "CURVA TEXAS": 6
+      "CURVA TEXAS": 5
     }
   },
   "7501055327973": {
@@ -64204,13 +64207,13 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 1,
-    "stock": 16,
+    "stock": 15,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 8,
       "EJERCITO": 3,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 4
     }
   },
   "7501055328154": {
@@ -64218,12 +64221,12 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 5,
-    "stock": 47,
+    "stock": 45,
     "stock_by_branch": {
       "MATRIZ": 8,
-      "TAMPICO": 10,
+      "TAMPICO": 9,
       "CIVIL": 19,
-      "EJERCITO": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 7
     }
   },
@@ -64302,9 +64305,9 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 0,
-    "stock": 23,
+    "stock": 22,
     "stock_by_branch": {
-      "MATRIZ": 22,
+      "MATRIZ": 21,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -64446,12 +64449,12 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 5,
-    "stock": 68,
+    "stock": 66,
     "stock_by_branch": {
       "MATRIZ": 20,
       "TAMPICO": 17,
       "CIVIL": 2,
-      "EJERCITO": 16,
+      "EJERCITO": 14,
       "CURVA TEXAS": 13
     }
   },
@@ -64489,13 +64492,13 @@
     "ranking": "A",
     "sector": "91",
     "min_stock": 3,
-    "stock": 40,
+    "stock": 35,
     "stock_by_branch": {
       "MATRIZ": 14,
       "TAMPICO": 0,
-      "CIVIL": 10,
-      "EJERCITO": 8,
-      "CURVA TEXAS": 8
+      "CIVIL": 9,
+      "EJERCITO": 5,
+      "CURVA TEXAS": 7
     }
   },
   "7501055363520": {
@@ -65371,11 +65374,11 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 5,
-    "stock": 10,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 0,
       "TAMPICO": 0,
-      "CIVIL": 4,
+      "CIVIL": 3,
       "EJERCITO": 2,
       "CURVA TEXAS": 0
     }
@@ -65952,11 +65955,11 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 3,
-    "stock": 70,
+    "stock": 67,
     "stock_by_branch": {
       "MATRIZ": 17,
-      "TAMPICO": 9,
-      "CIVIL": 23,
+      "TAMPICO": 8,
+      "CIVIL": 21,
       "EJERCITO": 14,
       "CURVA TEXAS": 7
     }
@@ -66589,9 +66592,9 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -66637,9 +66640,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -67097,9 +67100,9 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -67523,9 +67526,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -67680,8 +67683,8 @@
     "min_stock": 1,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
-      "TAMPICO": 1,
+      "MATRIZ": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -70231,13 +70234,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 22,
+    "stock": 21,
     "stock_by_branch": {
       "MATRIZ": 7,
       "TAMPICO": 2,
       "CIVIL": 5,
       "EJERCITO": 3,
-      "CURVA TEXAS": 5
+      "CURVA TEXAS": 4
     }
   },
   "7501075724721": {
@@ -71280,13 +71283,13 @@
     "ranking": "A",
     "sector": "86",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 3,
       "EJERCITO": 1,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7501086300129": {
@@ -71785,13 +71788,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 77,
+    "stock": 73,
     "stock_by_branch": {
-      "MATRIZ": 14,
+      "MATRIZ": 12,
       "TAMPICO": 8,
       "CIVIL": 27,
-      "EJERCITO": 11,
-      "CURVA TEXAS": 17
+      "EJERCITO": 10,
+      "CURVA TEXAS": 16
     }
   },
   "7501086801046": {
@@ -71799,13 +71802,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 110,
+    "stock": 97,
     "stock_by_branch": {
-      "MATRIZ": 29,
-      "TAMPICO": 20,
-      "CIVIL": 22,
-      "EJERCITO": 12,
-      "CURVA TEXAS": 27
+      "MATRIZ": 27,
+      "TAMPICO": 19,
+      "CIVIL": 15,
+      "EJERCITO": 11,
+      "CURVA TEXAS": 25
     }
   },
   "7501086801121": {
@@ -71875,9 +71878,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 5,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -74486,11 +74489,11 @@
     "min_stock": 2,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 1
     }
   },
   "7501089804136": {
@@ -74512,9 +74515,9 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -74526,9 +74529,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -75819,9 +75822,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -76231,9 +76234,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 5,
-    "stock": 2,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 5,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -76248,9 +76251,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 7,
-    "stock": 3,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 7,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -76355,9 +76358,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 5,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -76465,9 +76468,9 @@
     "min_stock": 1,
     "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
-      "CIVIL": 0,
+      "CIVIL": 1,
       "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
@@ -76721,9 +76724,9 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -77104,11 +77107,11 @@
     "min_stock": 1,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7501098623223": {
@@ -77606,9 +77609,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -77648,9 +77651,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -80029,9 +80032,9 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -80581,10 +80584,10 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 5,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 2,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 3
@@ -81364,9 +81367,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 6,
+    "stock": 8,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 5,
       "TAMPICO": 3,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -81521,13 +81524,13 @@
     "ranking": "E",
     "sector": "88",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7501124184117": {
@@ -82776,13 +82779,13 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 4,
-    "stock": 33,
+    "stock": 30,
     "stock_by_branch": {
-      "MATRIZ": 7,
+      "MATRIZ": 6,
       "TAMPICO": 2,
       "CIVIL": 12,
       "EJERCITO": 5,
-      "CURVA TEXAS": 7
+      "CURVA TEXAS": 5
     }
   },
   "7501125100185": {
@@ -82804,13 +82807,13 @@
     "ranking": "B",
     "sector": "89",
     "min_stock": 1,
-    "stock": 11,
+    "stock": 9,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 5,
       "EJERCITO": 2,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "7501125100239": {
@@ -83133,9 +83136,9 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 12,
-    "stock": 21,
+    "stock": 20,
     "stock_by_branch": {
-      "MATRIZ": 17,
+      "MATRIZ": 16,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -83147,9 +83150,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 11,
-    "stock": 9,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 0,
       "TAMPICO": 5,
       "CIVIL": 2,
       "EJERCITO": 0,
@@ -83238,9 +83241,9 @@
     "ranking": "A",
     "sector": "71",
     "min_stock": 3,
-    "stock": 21,
+    "stock": 27,
     "stock_by_branch": {
-      "MATRIZ": 11,
+      "MATRIZ": 17,
       "TAMPICO": 9,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -83365,13 +83368,13 @@
     "ranking": "A",
     "sector": "89",
     "min_stock": 2,
-    "stock": 12,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 3,
       "CIVIL": 1,
       "EJERCITO": 6,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "7501125110924": {
@@ -83852,9 +83855,9 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -83882,8 +83885,8 @@
     "min_stock": 0,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
-      "TAMPICO": 2,
+      "MATRIZ": 1,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -83957,13 +83960,13 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 18,
-    "stock": 14,
+    "stock": 12,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 2,
       "CIVIL": 1,
       "EJERCITO": 2,
-      "CURVA TEXAS": 6
+      "CURVA TEXAS": 5
     }
   },
   "7501125145001": {
@@ -84095,9 +84098,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -84154,9 +84157,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -84255,9 +84258,9 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -84289,9 +84292,9 @@
     "ranking": "B",
     "sector": "71",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -84439,9 +84442,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 2,
-    "stock": 1,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -84797,9 +84800,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": -1,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -85442,9 +85445,9 @@
     "ranking": "A",
     "sector": "71",
     "min_stock": 0,
-    "stock": 27,
+    "stock": 42,
     "stock_by_branch": {
-      "MATRIZ": 10,
+      "MATRIZ": 25,
       "TAMPICO": 3,
       "CIVIL": 3,
       "EJERCITO": 3,
@@ -86242,9 +86245,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -86917,9 +86920,9 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -87074,9 +87077,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -87119,9 +87122,9 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -87250,9 +87253,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -87515,9 +87518,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -88955,9 +88958,9 @@
     "ranking": "A",
     "sector": "93",
     "min_stock": 6,
-    "stock": 9,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 8,
+      "MATRIZ": 6,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -89174,12 +89177,12 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 5,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
       "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 1,
-      "EJERCITO": 2,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -91076,9 +91079,9 @@
     "ranking": "C",
     "sector": "88",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -91243,9 +91246,9 @@
     "ranking": "C",
     "sector": "92",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -93184,9 +93187,9 @@
     "ranking": "C",
     "sector": "88",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -93381,9 +93384,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 3,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -93697,9 +93700,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 3,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -93896,9 +93899,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 2,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -93910,9 +93913,9 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -94023,13 +94026,13 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": -1
     }
   },
   "7501298269009": {
@@ -95167,9 +95170,9 @@
     "ranking": "A",
     "sector": "92",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -95492,9 +95495,9 @@
     "ranking": "Z",
     "sector": "81",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -95562,9 +95565,9 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -96277,9 +96280,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 2,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -97699,9 +97702,9 @@
     "ranking": "Z",
     "sector": "80",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -97727,10 +97730,10 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 3,
+      "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -98044,9 +98047,9 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -98612,8 +98615,8 @@
     "min_stock": 0,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
-      "TAMPICO": 0,
+      "MATRIZ": 0,
+      "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -99361,10 +99364,10 @@
     "ranking": "A",
     "sector": "92",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -99406,9 +99409,9 @@
     "ranking": "A",
     "sector": "92",
     "min_stock": 4,
-    "stock": 0,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -100401,9 +100404,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -100822,9 +100825,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 2,
-    "stock": 4,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 5,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -101055,9 +101058,9 @@
     "ranking": "B",
     "sector": "81",
     "min_stock": 2,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -101210,9 +101213,9 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -101343,9 +101346,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": -1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -102224,9 +102227,9 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -102731,13 +102734,13 @@
     "ranking": "C",
     "sector": "96",
     "min_stock": 0,
-    "stock": 10,
+    "stock": 9,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 1,
       "EJERCITO": 2,
-      "CURVA TEXAS": 6
+      "CURVA TEXAS": 5
     }
   },
   "7501349020023": {
@@ -103017,12 +103020,12 @@
     "ranking": "C",
     "sector": "96",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 6,
     "stock_by_branch": {
       "MATRIZ": 2,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 2
     }
   },
@@ -103331,9 +103334,9 @@
     "ranking": "E",
     "sector": "86",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -104310,10 +104313,10 @@
     "min_stock": 0,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -105001,10 +105004,10 @@
     "min_stock": 0,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -105171,12 +105174,12 @@
     "ranking": "B",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -106221,10 +106224,10 @@
     "min_stock": 2,
     "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 1,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -107197,9 +107200,9 @@
     "ranking": "B",
     "sector": "96",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 2,
@@ -107316,13 +107319,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 2,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "7501573904786": {
@@ -107797,9 +107800,9 @@
     "ranking": "A",
     "sector": "10",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -108317,12 +108320,12 @@
     "ranking": "Z",
     "sector": "91",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
       "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 1
     }
   },
@@ -108611,9 +108614,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 6,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -108645,13 +108648,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 41,
+    "stock": 35,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 2,
       "CIVIL": 0,
       "EJERCITO": 3,
-      "CURVA TEXAS": 30
+      "CURVA TEXAS": 24
     }
   },
   "7501825305200": {
@@ -109098,9 +109101,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 3,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 1,
@@ -110122,13 +110125,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 23,
-    "stock": 115,
+    "stock": 113,
     "stock_by_branch": {
       "MATRIZ": 23,
       "TAMPICO": 10,
-      "CIVIL": 28,
+      "CIVIL": 27,
       "EJERCITO": 14,
-      "CURVA TEXAS": 40
+      "CURVA TEXAS": 39
     }
   },
   "7501943458574": {
@@ -110282,11 +110285,11 @@
     "ranking": "A",
     "sector": "86",
     "min_stock": 0,
-    "stock": 15,
+    "stock": 14,
     "stock_by_branch": {
       "MATRIZ": 4,
       "TAMPICO": 2,
-      "CIVIL": 7,
+      "CIVIL": 6,
       "EJERCITO": 1,
       "CURVA TEXAS": 1
     }
@@ -110345,11 +110348,11 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 3,
-    "stock": 68,
+    "stock": 66,
     "stock_by_branch": {
-      "MATRIZ": 36,
+      "MATRIZ": 35,
       "TAMPICO": 4,
-      "CIVIL": 17,
+      "CIVIL": 16,
       "EJERCITO": 8,
       "CURVA TEXAS": 3
     }
@@ -111617,9 +111620,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 2,
-    "stock": 12,
+    "stock": 11,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 3,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 2,
@@ -113295,9 +113298,9 @@
     "ranking": "C",
     "sector": "88",
     "min_stock": 1,
-    "stock": -1,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": -1,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -114072,11 +114075,11 @@
     "min_stock": 1,
     "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 0
     }
   },
   "7502216931824": {
@@ -114098,9 +114101,9 @@
     "ranking": "Z",
     "sector": "88",
     "min_stock": 1,
-    "stock": 0,
+    "stock": -1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": -1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -114185,10 +114188,10 @@
     "ranking": "E",
     "sector": "71",
     "min_stock": 0,
-    "stock": 19,
+    "stock": 18,
     "stock_by_branch": {
       "MATRIZ": 6,
-      "TAMPICO": 5,
+      "TAMPICO": 4,
       "CIVIL": 0,
       "EJERCITO": 3,
       "CURVA TEXAS": 5
@@ -114745,9 +114748,9 @@
     "ranking": "C",
     "sector": "84",
     "min_stock": 0,
-    "stock": 8,
+    "stock": 7,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 3,
@@ -115519,9 +115522,9 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 5,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -116152,9 +116155,9 @@
     "ranking": "E",
     "sector": "80",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -116624,10 +116627,10 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 2,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -118252,12 +118255,12 @@
     "ranking": "A",
     "sector": "81",
     "min_stock": 0,
-    "stock": 6,
+    "stock": 5,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 0,
-      "EJERCITO": 3,
+      "EJERCITO": 2,
       "CURVA TEXAS": 1
     }
   },
@@ -119281,13 +119284,13 @@
     "ranking": "A",
     "sector": "90",
     "min_stock": 1,
-    "stock": 19,
+    "stock": 22,
     "stock_by_branch": {
       "MATRIZ": 12,
       "TAMPICO": 3,
       "CIVIL": 2,
       "EJERCITO": 2,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 3
     }
   },
   "7503003738671": {
@@ -119625,13 +119628,13 @@
     "ranking": "B",
     "sector": "91",
     "min_stock": 0,
-    "stock": 15,
+    "stock": 13,
     "stock_by_branch": {
       "MATRIZ": 9,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 5,
-      "CURVA TEXAS": 1
+      "EJERCITO": 4,
+      "CURVA TEXAS": 0
     }
   },
   "7503003851158": {
@@ -120154,9 +120157,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 2,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 1,
       "CIVIL": 1,
       "EJERCITO": 0,
@@ -120168,10 +120171,10 @@
     "ranking": "C",
     "sector": "88",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 0,
     "stock_by_branch": {
       "MATRIZ": 0,
-      "TAMPICO": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -120283,13 +120286,13 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 4,
-    "stock": 2,
+    "stock": 12,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 10,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
-      "CURVA TEXAS": 0
+      "CURVA TEXAS": 2
     }
   },
   "7503007704665": {
@@ -121469,13 +121472,13 @@
     "ranking": "C",
     "sector": "81",
     "min_stock": 0,
-    "stock": 11,
+    "stock": 10,
     "stock_by_branch": {
       "MATRIZ": 5,
       "TAMPICO": 2,
       "CIVIL": 2,
       "EJERCITO": 0,
-      "CURVA TEXAS": 2
+      "CURVA TEXAS": 1
     }
   },
   "7503041640301": {
@@ -121681,12 +121684,12 @@
     "ranking": "B",
     "sector": "86",
     "min_stock": 1,
-    "stock": 3,
+    "stock": 2,
     "stock_by_branch": {
       "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 1,
-      "EJERCITO": 1,
+      "EJERCITO": 0,
       "CURVA TEXAS": 0
     }
   },
@@ -124744,9 +124747,9 @@
     "ranking": "A",
     "sector": "86",
     "min_stock": 1,
-    "stock": 8,
+    "stock": 6,
     "stock_by_branch": {
-      "MATRIZ": 6,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 2,
       "EJERCITO": 0,
@@ -124758,11 +124761,11 @@
     "ranking": "C",
     "sector": "86",
     "min_stock": 0,
-    "stock": 12,
+    "stock": 11,
     "stock_by_branch": {
       "MATRIZ": 6,
       "TAMPICO": 1,
-      "CIVIL": 2,
+      "CIVIL": 1,
       "EJERCITO": 2,
       "CURVA TEXAS": 1
     }
@@ -124925,11 +124928,11 @@
     "ranking": "B",
     "sector": "84",
     "min_stock": 0,
-    "stock": 29,
+    "stock": 27,
     "stock_by_branch": {
       "MATRIZ": 11,
       "TAMPICO": 3,
-      "CIVIL": 10,
+      "CIVIL": 8,
       "EJERCITO": 3,
       "CURVA TEXAS": 2
     }
@@ -124953,13 +124956,13 @@
     "ranking": "A",
     "sector": "84",
     "min_stock": 0,
-    "stock": 32,
+    "stock": 49,
     "stock_by_branch": {
-      "MATRIZ": 3,
-      "TAMPICO": 5,
+      "MATRIZ": 14,
+      "TAMPICO": 4,
       "CIVIL": 13,
-      "EJERCITO": 7,
-      "CURVA TEXAS": 4
+      "EJERCITO": 6,
+      "CURVA TEXAS": 12
     }
   },
   "7506425648634": {
@@ -125299,9 +125302,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 0,
-    "stock": 1,
+    "stock": -1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": -1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -125704,11 +125707,11 @@
     "ranking": "C",
     "sector": "86",
     "min_stock": 0,
-    "stock": 30,
+    "stock": 29,
     "stock_by_branch": {
       "MATRIZ": 12,
       "TAMPICO": 3,
-      "CIVIL": 4,
+      "CIVIL": 3,
       "EJERCITO": 7,
       "CURVA TEXAS": 4
     }
@@ -128944,9 +128947,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -129938,9 +129941,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -129986,9 +129989,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -130065,9 +130068,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -130194,9 +130197,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 1,
-    "stock": 1,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 4,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -130208,10 +130211,10 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 0,
-    "stock": 3,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
-      "TAMPICO": 1,
+      "MATRIZ": 1,
+      "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
       "CURVA TEXAS": 0
@@ -131084,9 +131087,9 @@
     "ranking": "B",
     "sector": "90",
     "min_stock": 1,
-    "stock": 5,
+    "stock": 4,
     "stock_by_branch": {
-      "MATRIZ": 3,
+      "MATRIZ": 2,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -131375,9 +131378,9 @@
     "ranking": "A",
     "sector": "88",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 2,
+      "MATRIZ": 1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -131403,9 +131406,9 @@
     "ranking": "B",
     "sector": "88",
     "min_stock": 0,
-    "stock": 0,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -131417,9 +131420,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 0,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -131983,9 +131986,9 @@
     "ranking": "Z",
     "sector": "88",
     "min_stock": 0,
-    "stock": 0,
+    "stock": -1,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": -1,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -132579,12 +132582,12 @@
     "ranking": "A",
     "sector": "92",
     "min_stock": 1,
-    "stock": 4,
+    "stock": 3,
     "stock_by_branch": {
-      "MATRIZ": 4,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
-      "EJERCITO": 0,
+      "EJERCITO": 1,
       "CURVA TEXAS": 0
     }
   },
@@ -132593,13 +132596,13 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 2,
-    "stock": 7,
+    "stock": 17,
     "stock_by_branch": {
-      "MATRIZ": 0,
+      "MATRIZ": 6,
       "TAMPICO": 3,
       "CIVIL": 0,
       "EJERCITO": 3,
-      "CURVA TEXAS": 1
+      "CURVA TEXAS": 5
     }
   },
   "8020030091351": {
@@ -133812,9 +133815,9 @@
     "ranking": "C",
     "sector": "80",
     "min_stock": 1,
-    "stock": 2,
+    "stock": 1,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 0,
       "TAMPICO": 1,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -133910,9 +133913,9 @@
     "ranking": "A",
     "sector": "80",
     "min_stock": 0,
-    "stock": 1,
+    "stock": 2,
     "stock_by_branch": {
-      "MATRIZ": 1,
+      "MATRIZ": 2,
       "TAMPICO": 0,
       "CIVIL": 0,
       "EJERCITO": 0,
@@ -135374,6 +135377,18 @@
     "id": null
   },
   "99176316732": {
+    "id": null
+  },
+  "5702191029314": {
+    "id": null
+  },
+  "7501300422903": {
+    "id": null
+  },
+  "7501025415013": {
+    "id": null
+  },
+  "7501025429409": {
     "id": null
   }
 }

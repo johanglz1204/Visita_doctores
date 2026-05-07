@@ -20,6 +20,9 @@ import {
 } from "firebase/auth";
 import { db, auth } from "./firebaseConfig";
 
+// Configuración de API (v1.1.0)
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+
 // Helper to handle Firestore dates (v1.0.2)
 const formatFirestoreData = (doc) => {
   const data = doc.data();
@@ -271,25 +274,88 @@ export const api = {
     return branches;
   },
   
-  exportProductsExcel: () => { throw new Error('Exportación a Excel no disponible en modo estático'); },
   syncStatus: async () => {
-    // Retornar un estado vacío para modo estático
-    return {
-      last_sync: null,
-      matched_list: [],
-      unmatched_list: []
-    };
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/status`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
   },
-  getAliases: async () => [],
-  triggerSync: async () => { throw new Error('La sincronización requiere un servidor activo'); },
-  getDuplicatesPreview: async () => ({ duplicates_to_delete: 0, duplicate_groups: 0 }),
-  cleanupProducts: async () => { throw new Error('Limpieza de duplicados no disponible en modo estático'); },
-  searchProductsForMapping: async (query) => {
-    const products = await request('products');
-    return products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+  getAliases: async () => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/aliases`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
   },
-  mapProduct: async () => { throw new Error('Mapeo manual no disponible en modo estático'); },
-  deleteAlias: async () => { throw new Error('Gestión de alias no disponible en modo estático'); },
+  triggerSync: async () => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/trigger`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Error en la sincronización');
+    }
+    return res.json();
+  },
+  generateOrder: async () => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/generate-order`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Error al generar el pedido');
+    }
+    return res.json();
+  },
+  downloadOrder: (filename) => downloadFile(`/api/mysql-sync/download-order/${filename}`, filename),
+  
+  getDuplicatesPreview: async () => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/duplicates-preview`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+  },
+  cleanupProducts: async () => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/cleanup-duplicates`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+  },
+  searchProductsForMapping: async (q) => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/products-search?q=${q}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+  },
+  mapProduct: async (alias_name, product_id) => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/map`, {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ alias_name, product_id })
+    });
+    return res.json();
+  },
+  deleteAlias: async (id) => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/mysql-sync/aliases/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+  },
 
   // Note: These would need special handling with client-side libraries (like xlsx)
   uploadDoctorsExcel: () => { throw new Error('Carga de Excel no disponible en modo estático'); },
