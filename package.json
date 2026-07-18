@@ -1,0 +1,45 @@
+{
+  "name": "sicoin-root",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "cd server && npm install && cd ../client && npm install",
+    "build:client": "cd client && npm run build",
+    "copy:build": "powershell -Command \"Remove-Item -Recurse -Force server/public -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Path server/public -Force; Copy-Item -Recurse -Path client/dist/* -Destination server/public/\"",
+    "build": "npm run build:client && npm run copy:build",
+    "start": "node main.js",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build && electron-builder build --win --publish never",
+    "electron:package": "npm run build && electron-packager . SICOIN --platform=win32 --arch=x64 --out=dist-exe --overwrite --icon=client/public/favicon.ico",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+  },
+  "build": {
+    "appId": "com.sicoin.app",
+    "productName": "SICOIN",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "main.js",
+      "server/**/*",
+      "client/dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "client/public/icon.png"
+    }
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2",
+    "mysql2": "^3.22.3"
+  },
+  "devDependencies": {
+    "electron": "^42.0.0",
+    "electron-builder": "^26.8.1",
+    "electron-packager": "^17.1.2"
+  }
+}
