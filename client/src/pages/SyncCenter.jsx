@@ -9,19 +9,43 @@ export default function SyncCenter() {
   const [syncing, setSyncing] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Sincronización de VENTAS por doctor (independiente de la de existencias)
+  const [salesDays, setSalesDays] = useState('60');
+  const [salesSyncing, setSalesSyncing] = useState(false);
+  const [salesLog, setSalesLog] = useState(null);
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statusRes, settingsRes] = await Promise.all([
+      const [statusRes, settingsRes, salesRes] = await Promise.all([
         api.syncStatus(),
-        api.getSettings()
+        api.getSettings(),
+        api.salesSyncStatus()
       ]);
       setStatus(statusRes);
       setSettings(settingsRes);
+      setSalesLog(salesRes?.history?.[0] || null);
     } catch (err) {
       toast.error('Error al cargar datos de sincronización');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSalesSync = async () => {
+    setSalesSyncing(true);
+    const toastId = toast.loading(`Recuperando ventas de los últimos ${salesDays} días...`);
+    try {
+      const res = await api.triggerSalesSync(salesDays);
+      toast.success(
+        `Ventas sincronizadas: ${res.new_records ?? 0} nuevas, ${res.skipped_duplicates ?? 0} ya existían.`,
+        { id: toastId }
+      );
+      loadData();
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+    } finally {
+      setSalesSyncing(false);
     }
   };
 
@@ -150,6 +174,56 @@ export default function SyncCenter() {
               {saving ? 'Guardando...' : '💾 Guardar Configuración'}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Sincronización de Ventas por Doctor */}
+      <div className="card" style={{ marginTop: '24px' }}>
+        <div className="card-header">
+          <h2 className="card-title">🧾 Ventas por Doctor</h2>
+          {salesLog && (
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+              Última: {new Date(salesLog.synced_at).toLocaleString()} — {salesLog.new_records} nuevas
+            </span>
+          )}
+        </div>
+        <div style={{ padding: '16px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            Las ventas se sincronizan solas cada hora, pero solo mirando <strong>60 días hacia atrás</strong>.
+            Si necesitas recuperar meses anteriores (por ejemplo, para comparar contra SICOFA), amplía el
+            rango aquí. Las ventas ya registradas se detectan por folio y no se duplican.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div className="form-group" style={{ margin: 0, flex: '0 0 auto' }}>
+              <label className="form-label">Rango a recuperar</label>
+              <select
+                className="form-input"
+                style={{ width: 'auto', minWidth: '220px' }}
+                value={salesDays}
+                onChange={(e) => setSalesDays(e.target.value)}
+                disabled={salesSyncing}
+              >
+                <option value="60">Últimos 60 días (rutina)</option>
+                <option value="90">Últimos 3 meses</option>
+                <option value="180">Últimos 6 meses</option>
+                <option value="365">Último año</option>
+                <option value="730">Últimos 2 años (completo)</option>
+              </select>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleSalesSync}
+              disabled={salesSyncing}
+            >
+              {salesSyncing ? (
+                <><div className="spinner" style={{ width: 14, height: 14, marginRight: 8 }}></div> Recuperando...</>
+              ) : '🧾 Recuperar Ventas'}
+            </button>
+          </div>
+          <p className="input-hint" style={{ marginTop: '12px' }}>
+            ⚠️ Con rangos amplios la consulta a SICOFA puede tardar varios minutos. Conviene correrla
+            fuera del horario de mayor movimiento.
+          </p>
         </div>
       </div>
 

@@ -359,6 +359,35 @@ export const api = {
     return res.json();
   },
 
+  // Sincroniza VENTAS por doctor desde MySQL. El cron automático solo mira
+  // 60 días atrás; este disparador permite recuperar histórico más antiguo.
+  // Los duplicados se descartan por folio (mysql_ref), así que es seguro repetirlo.
+  triggerSalesSync: async (days = 60) => {
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_BASE}/api/sales-sync/trigger?days=${encodeURIComponent(days)}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Error al sincronizar ventas' }));
+      throw new Error(err.error || 'Error al sincronizar ventas');
+    }
+    return res.json();
+  },
+
+  salesSyncStatus: async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`${API_BASE}/api/sales-sync/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return { history: [] };
+      return res.json();
+    } catch (e) {
+      return { history: [] };
+    }
+  },
+
   generateOrder: async () => {
     const token = localStorage.getItem('accessToken');
     const res = await fetch(`${API_BASE}/api/mysql-sync/generate-order`, {
