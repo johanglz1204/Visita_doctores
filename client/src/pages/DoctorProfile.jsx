@@ -27,6 +27,21 @@ export default function DoctorProfile({ addToast }) {
   const [loadingMovements, setLoadingMovements] = useState(false);
   const [productSearch, setProductSearch] = useState('');
 
+  // Mes seleccionado para el desglose de piezas por producto.
+  // Arranca en el mes en curso; "all" muestra el acumulado histórico.
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+
+  const formatMonthLabel = (m) => {
+    if (m === 'all') return '📚 Histórico total';
+    const [year, month] = String(m).split('-').map(Number);
+    if (!year || !month) return m;
+    const label = new Date(year, month - 1, 1).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  };
+
   const loadVisits = () => {
     api.getDoctorVisits(id).then(d => setVisits(Array.isArray(d) ? d : [])).catch(() => {});
   };
@@ -40,13 +55,11 @@ export default function DoctorProfile({ addToast }) {
   useEffect(() => {
     Promise.all([
       api.getDoctor(id),
-      api.getDoctorStats(id),
       api.getInventory({ doctor_id: id }),
       api.getProducts()
     ])
-    .then(([docData, statData, invData, prodsData]) => {
+    .then(([docData, invData, prodsData]) => {
       setDoctor(docData);
-      setStats(statData);
       setAssignedInventory(Array.isArray(invData) ? invData : []);
       setProductsCatalogue(Array.isArray(prodsData) ? prodsData : []);
     })
@@ -58,6 +71,11 @@ export default function DoctorProfile({ addToast }) {
 
     loadVisits();
   }, [id]);
+
+  // Las estadísticas se recargan también al cambiar el mes del selector
+  useEffect(() => {
+    api.getDoctorStats(id, selectedMonth).then(setStats).catch(() => {});
+  }, [id, selectedMonth]);
 
   const handleVisitSubmit = async (e) => {
     e.preventDefault();
@@ -90,7 +108,7 @@ export default function DoctorProfile({ addToast }) {
       setAssignForm({ product_id: '', target_stock: '', current_stock: '' });
       setProductSearch('');
       loadInventory();
-      api.getDoctorStats(id).then(setStats).catch(() => {});
+      api.getDoctorStats(id, selectedMonth).then(setStats).catch(() => {});
     } catch (err) {
       addToast(err.message, 'error');
     }
@@ -106,7 +124,7 @@ export default function DoctorProfile({ addToast }) {
       addToast('✅ Inventario actualizado');
       setShowEditModal(false);
       loadInventory();
-      api.getDoctorStats(id).then(setStats).catch(() => {});
+      api.getDoctorStats(id, selectedMonth).then(setStats).catch(() => {});
     } catch (err) {
       addToast(err.message, 'error');
     }
@@ -118,7 +136,7 @@ export default function DoctorProfile({ addToast }) {
       await api.deleteInventory(inventoryId);
       addToast('✅ Asignación eliminada');
       loadInventory();
-      api.getDoctorStats(id).then(setStats).catch(() => {});
+      api.getDoctorStats(id, selectedMonth).then(setStats).catch(() => {});
     } catch (err) {
       addToast(err.message, 'error');
     }
@@ -381,15 +399,26 @@ export default function DoctorProfile({ addToast }) {
       {/* Estadísticas de recetas e histórico */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '24px' }}>
         <div className="card">
-          <div className="card-header">
+          <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
             <h2 className="card-title">💊 Top Productos</h2>
+            <select
+              className="form-input"
+              style={{ width: 'auto', minWidth: '170px', borderRadius: '12px' }}
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              {(stats?.availableMonths || [selectedMonth]).map(m => (
+                <option key={m} value={m}>🗓️ {formatMonthLabel(m)}</option>
+              ))}
+              <option value="all">📚 Histórico total</option>
+            </select>
           </div>
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Producto</th>
-                  <th style={{ textAlign: 'right' }}>Cantidad</th>
+                  <th style={{ textAlign: 'right' }}>Piezas</th>
                 </tr>
               </thead>
               <tbody>
@@ -401,7 +430,11 @@ export default function DoctorProfile({ addToast }) {
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan="2" style={{ textAlign: 'center' }}>Sin registros</td></tr>
+                  <tr>
+                    <td colSpan="2" style={{ textAlign: 'center' }}>
+                      {selectedMonth === 'all' ? 'Sin registros' : `Sin ventas en ${formatMonthLabel(selectedMonth)}`}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

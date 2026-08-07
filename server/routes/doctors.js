@@ -77,7 +77,30 @@ router.get('/:id/stats', async (req, res) => {
 
     // Get the start of the current month for filtering
     const now = new Date();
-    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthStart = `${currentMonth}-01`;
+
+    // Mes seleccionado para el desglose de piezas por producto.
+    // Acepta "YYYY-MM", o "all" para ver el acumulado histórico.
+    // Si no se manda nada (o viene basura), se usa el mes en curso.
+    const monthParam = String(req.query.month || '').trim();
+    const showAllMonths = monthParam.toLowerCase() === 'all';
+    const selectedMonth = /^\d{4}-\d{2}$/.test(monthParam) ? monthParam : currentMonth;
+
+    // Piezas vendidas por producto (para control de vales/promociones).
+    // Se suman cantidades, NO se cuentan ventas: aquí sí interesa el volumen.
+    const preferredProductsQuery = knex('sales_history as s')
+      .join('products as p', 's.product_id', 'p.id')
+      .select('p.name')
+      .sum('s.quantity as quantity')
+      .where('s.doctor_id', doctorId)
+      .groupBy('p.name')
+      .orderBy('quantity', 'desc')
+      .limit(5);
+
+    if (!showAllMonths) {
+      preferredProductsQuery.whereRaw("strftime('%Y-%m', s.sale_date) = ?", [selectedMonth]);
+    }
 
     // Contamos VENTAS ÚNICAS (recetas/tickets), no renglones de producto.
     //
@@ -95,7 +118,7 @@ router.get('/:id/stats', async (req, res) => {
     };
     const countUniqueSales = (rows) => new Set(rows.map(saleKeyOf)).size;
 
-    const [allRows, monthRows, preferredProducts, historyRows] = await Promise.all([
+    const [allRows, monthRows, preferredProducts, historyRows, monthRowsList] = await Promise.all([
       // Todos los renglones históricos del doctor (para deduplicar en JS)
       knex('sales_history as s')
         .select('s.sale_date', 's.sucursal', 's.mysql_ref')
@@ -107,22 +130,22 @@ router.get('/:id/stats', async (req, res) => {
         .where('s.doctor_id', doctorId)
         .whereRaw('s.sale_date >= ?', [monthStart]),
 
-      // Top 3 productos preferidos por PIEZAS vendidas (para control de vales/promociones)
-      knex('sales_history as s')
-        .join('products as p', 's.product_id', 'p.id')
-        .select('p.name')
-        .sum('s.quantity as quantity')
-        .where('s.doctor_id', doctorId)
-        .groupBy('p.name')
-        .orderBy('quantity', 'desc')
-        .limit(3),
+      // Piezas por producto del mes seleccionado (query armada arriba)
+      preferredProductsQuery,
 
       // Renglones de los últimos 6 meses (para la línea de tiempo, deduplicado en JS)
       knex('sales_history as s')
         .select('s.sale_date', 's.sucursal', 's.mysql_ref')
         .select(knex.raw("strftime('%Y-%m', s.sale_date) as month"))
         .where('s.doctor_id', doctorId)
-        .whereRaw("s.sale_date >= date('now', '-6 months')")
+        .whereRaw("s.sale_date >= date('now', '-6 months')"),
+
+      // Meses con ventas registradas, para poblar el selector del frontend
+      knex('sales_history as s')
+        .select(knex.raw("strftime('%Y-%m', s.sale_date) as month"))
+        .where('s.doctor_id', doctorId)
+        .groupByRaw("strftime('%Y-%m', s.sale_date)")
+        .orderBy('month', 'desc')
     ]);
 
     // Agrupar la línea de tiempo por mes y contar ventas únicas dentro de cada mes
@@ -135,11 +158,22 @@ router.get('/:id/stats', async (req, res) => {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, rows]) => ({ month, quantity: countUniqueSales(rows) }));
 
+    // Meses disponibles para el selector. Se descartan los nulos, que salen
+    // de registros viejos con sale_date en formato inválido (timestamps sueltos).
+    // El mes en curso se incluye siempre, aunque todavía no tenga ventas.
+    const availableMonths = [...new Set(
+      monthRowsList.map(r => r.month).filter(m => /^\d{4}-\d{2}$/.test(m || ''))
+    )];
+    if (!availableMonths.includes(currentMonth)) availableMonths.push(currentMonth);
+    availableMonths.sort((a, b) => b.localeCompare(a));
+
     res.json({
       totalPrescriptions: countUniqueSales(allRows),
       thisMonthPrescriptions: countUniqueSales(monthRows),
       preferredProducts,
-      recentHistory
+      recentHistory,
+      selectedMonth: showAllMonths ? 'all' : selectedMonth,
+      availableMonths
     });
 
   } catch (err) {

@@ -221,7 +221,9 @@ export const api = {
   getDoctorVisits: (id) => request(`doctors/${id}/visits`),
   createDoctorVisit: (id, data) => request(`doctors/${id}/visits`, 'add', data),
   deleteDoctorVisit: (doctorId, visitId) => request(`doctors/${doctorId}/visits`, 'delete', String(visitId)),
-  getDoctorStats: (id) => request(`doctors/${id}/stats`),
+  // month: "YYYY-MM" para un mes concreto, "all" para el acumulado histórico.
+  // Si se omite, el servidor responde con el mes en curso.
+  getDoctorStats: (id, month) => request(`doctors/${id}/stats`, 'get', null, { params: { month } }),
   classifyDoctors: () => request('doctors/classify', 'add'),
 
   // =====================================================================
