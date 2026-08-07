@@ -24,6 +24,8 @@ async function runMigrations() {
     { name: 'Add category to doctors',           query: "ALTER TABLE doctors ADD COLUMN category TEXT DEFAULT ''" },
     { name: 'Add matched_list to sync_logs',     query: "ALTER TABLE mysql_sync_logs ADD COLUMN matched_list TEXT DEFAULT '[]'" },
     { name: 'Add unmatched_list to sync_logs',   query: "ALTER TABLE mysql_sync_logs ADD COLUMN unmatched_list TEXT DEFAULT '[]'" },
+    { name: 'Add source to sales_history',       query: "ALTER TABLE sales_history ADD COLUMN source TEXT DEFAULT 'manual'" },
+    { name: 'Add mysql_ref to sales_history',    query: "ALTER TABLE sales_history ADD COLUMN mysql_ref TEXT DEFAULT ''" },
   ];
 
   for (const m of columnMigrations) {
@@ -79,6 +81,24 @@ async function runMigrations() {
         )
       `
     },
+    {
+      name: 'Create sales_sync_logs table',
+      query: `
+        CREATE TABLE IF NOT EXISTS sales_sync_logs (
+          id                INTEGER PRIMARY KEY AUTOINCREMENT,
+          synced_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+          total_mysql       INTEGER DEFAULT 0,
+          new_records       INTEGER DEFAULT 0,
+          skipped_duplicates INTEGER DEFAULT 0,
+          doctors_created   INTEGER DEFAULT 0,
+          doctors_matched   INTEGER DEFAULT 0,
+          products_unmatched INTEGER DEFAULT 0,
+          errors            INTEGER DEFAULT 0,
+          duration_ms       INTEGER DEFAULT 0,
+          days_back         INTEGER DEFAULT 60
+        )
+      `
+    },
   ];
 
   for (const m of tableMigrations) {
@@ -97,6 +117,7 @@ async function runMigrations() {
     { name: 'Index stock_out_history by product_id', query: 'CREATE INDEX IF NOT EXISTS idx_stock_out_product ON stock_out_history(product_id, end_date)' },
     { name: 'Index doctor_visits by doctor_id',      query: 'CREATE INDEX IF NOT EXISTS idx_doctor_visits_doctor_id ON doctor_visits(doctor_id, visit_date)' },
     { name: 'Index product_aliases unique',          query: 'CREATE INDEX IF NOT EXISTS idx_aliases_name ON product_aliases(alias_name)' },
+    { name: 'Unique index mysql_ref on sales',       query: "CREATE UNIQUE INDEX IF NOT EXISTS idx_sales_mysql_ref ON sales_history(mysql_ref) WHERE mysql_ref != ''" },
   ];
 
   for (const m of indexMigrations) {

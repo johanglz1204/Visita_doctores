@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import * as XLSX from 'xlsx';
 
 export default function Doctors({ addToast }) {
   const [doctors, setDoctors] = useState([]);
@@ -92,6 +93,25 @@ export default function Doctors({ addToast }) {
     }
   };
   
+  const handleExport = () => {
+    if (!doctors.length) return addToast('No hay datos para exportar', 'error');
+    const ws = XLSX.utils.json_to_sheet(
+      filteredDoctors.map(d => ({
+        ID: d.id,
+        Nombre: d.name,
+        Especialidad: d.specialty || 'N/A',
+        Teléfono: d.phone || 'N/A',
+        Dirección: d.address || 'N/A',
+        Categoría: d.category || 'N/A',
+        Notas: d.notes || 'N/A'
+      }))
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Doctores");
+    XLSX.writeFile(wb, "Reporte_Doctores.xlsx");
+    addToast('Reporte de doctores exportado exitosamente');
+  };
+
   const filteredDoctors = doctors.filter(doc => 
     doc.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -103,14 +123,21 @@ export default function Doctors({ addToast }) {
           <h1 className="page-title">Doctores</h1>
           <p className="page-subtitle">Gestión de médicos registrados en el sistema</p>
         </div>
-        <div className="search-container" style={{ width: '300px' }}>
+        <div 
+          className="search-container" 
+          style={{ width: '300px', cursor: 'text' }}
+          onClick={(e) => {
+            const inputEl = e.currentTarget.querySelector('input');
+            if (inputEl) inputEl.focus();
+          }}
+        >
           <span>🔍</span>
           <input 
             type="text" 
             placeholder="Buscar doctor..." 
-            value={searchTerm}
+            value={searchTerm || ''}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+            style={{ border: 'none', background: 'none', width: '100%', flex: 1, color: 'var(--text-primary)', outline: 'none', cursor: 'text' }}
           />
         </div>
       </div>
@@ -127,8 +154,11 @@ export default function Doctors({ addToast }) {
               onChange={handleExcelUpload} 
             />
             <label htmlFor="excel-upload-docs" className="btn btn-secondary">
-              📊 Importar
+              📥 Importar
             </label>
+            <button className="btn btn-secondary" onClick={handleExport}>
+              📤 Exportar Excel
+            </button>
             <button className="btn btn-secondary" onClick={async () => {
               try {
                 const res = await api.classifyDoctors();
@@ -158,7 +188,9 @@ export default function Doctors({ addToast }) {
               <tbody>
                 {filteredDoctors.map(doc => (
                   <tr key={doc.id}>
-                    <td style={{ fontWeight: 600 }}>{doc.name}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      <Link to={`/doctors/${doc.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{doc.name}</Link>
+                    </td>
                     <td>
                       {doc.category ? (
                         <span className={`badge ${doc.category === 'A' ? 'badge-success' : doc.category === 'B' ? 'badge-warning' : 'badge-secondary'}`}>
@@ -186,7 +218,7 @@ export default function Doctors({ addToast }) {
                             💬
                           </button>
                         )}
-                        <button className="btn btn-secondary btn-sm" onClick={() => window.location.href=`/doctors/${doc.id}`}>👁️</button>
+                        <Link className="btn btn-secondary btn-sm" to={`/doctors/${doc.id}`}>👁️</Link>
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(doc)}>✏️</button>
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(doc.id, doc.name)}>🗑️</button>
                       </div>

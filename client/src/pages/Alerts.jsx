@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api';
 
 export default function Alerts() {
@@ -76,7 +77,7 @@ export default function Alerts() {
                   </div>
                   
                   <div className="btn-group">
-                     <button className="btn btn-primary btn-sm" onClick={() => window.location.href=`/doctors/${alert.doctor_id}`}>Ver Doctor</button>
+                     <Link className="btn btn-primary btn-sm" to={`/doctors/${alert.doctor_id}`}>Ver Doctor</Link>
                   </div>
                 </div>
               </div>

@@ -57,10 +57,12 @@ const getDashboardStats = async (req, res, next) => {
         .orderBy('sale_date', 'asc'),
       
       // Top 5 doctors dynamically calculated (últimos 30 días)
+      // Contamos VENTAS ÚNICAS (recetas/tickets), no productos individuales.
+      // Una venta única = misma fecha + misma sucursal para el mismo doctor.
       knex('sales_history as s')
         .leftJoin('doctors as d', 's.doctor_id', 'd.id')
         .select('d.name as doctor')
-        .select(knex.raw("CAST(SUM(s.quantity) AS INTEGER) as total_prescriptions"))
+        .select(knex.raw("COUNT(DISTINCT s.sale_date || '-' || COALESCE(s.sucursal, '')) as total_prescriptions"))
         .whereNotNull('d.name')
         .where('s.sale_date', '>=', thirtyDaysAgoStr)
         .groupBy('d.name')

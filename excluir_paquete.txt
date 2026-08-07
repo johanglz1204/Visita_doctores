@@ -1,0 +1,9 @@
+node_modules
+.git
+dist-exe
+client\node_modules
+client\dist
+paquete_actualizacion
+database.sqlite
+database.sqlite-journal
+database.sqlite-wal

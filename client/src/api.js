@@ -221,6 +221,8 @@ export const api = {
   getDoctorVisits: (id) => request(`doctors/${id}/visits`),
   createDoctorVisit: (id, data) => request(`doctors/${id}/visits`, 'add', data),
   deleteDoctorVisit: (doctorId, visitId) => request(`doctors/${doctorId}/visits`, 'delete', String(visitId)),
+  getDoctorStats: (id) => request(`doctors/${id}/stats`),
+  classifyDoctors: () => request('doctors/classify', 'add'),
 
   // =====================================================================
   // Products
@@ -234,7 +236,7 @@ export const api = {
   // =====================================================================
   // Inventory
   // =====================================================================
-  getInventory: () => request('inventory'),
+  getInventory: (params) => request('inventory', 'get', null, { params }),
   createInventory: (data) => request('inventory', 'add', data),
   updateInventory: (id, data) => request('inventory', 'update', String(id), data),
   deleteInventory: (id) => request('inventory', 'delete', String(id)),
@@ -242,9 +244,9 @@ export const api = {
   // =====================================================================
   // Sales
   // =====================================================================
-  getSales: async (limitVal = 50, offset = 0, sucursal, startDate, endDate) => {
+  getSales: async (limitVal = 50, offset = 0, sucursal, startDate, endDate, doctorId, productId) => {
     const salesRes = await request('sales', 'get', null, {
-      params: { limit: limitVal, offset, sucursal, startDate, endDate }
+      params: { limit: limitVal, offset, sucursal, startDate, endDate, doctor_id: doctorId, product_id: productId }
     });
     // Server returns { data: [...], total: N }
     // But resolve doctor_name and product_name from inline join (server already does this)

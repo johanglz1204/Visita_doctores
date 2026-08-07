@@ -39,6 +39,8 @@ router.get('/', async (req, res) => {
     const sucursal = req.query.sucursal;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
+    const doctorId = req.query.doctor_id;
+    const productId = req.query.product_id;
 
     const knex = db.knex;
     
@@ -66,6 +68,15 @@ router.get('/', async (req, res) => {
     if (endDate) {
       baseQuery.where('s.sale_date', '<=', endDate);
       countQ.where('s.sale_date', '<=', endDate);
+    }
+
+    if (doctorId) {
+      baseQuery.where('s.doctor_id', doctorId);
+      countQ.where('s.doctor_id', doctorId);
+    }
+    if (productId) {
+      baseQuery.where('s.product_id', productId);
+      countQ.where('s.product_id', productId);
     }
 
     baseQuery.orderBy('s.sale_date', 'desc').orderBy('s.created_at', 'desc').limit(limit).offset(offset);
@@ -104,23 +115,34 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     }
 
     const results = [];
+    const { rows: allDoctors } = await db.query('SELECT id, name FROM doctors');
+    
+    const cleanName = (str) => {
+      if (!str) return '';
+      return str
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/^(DR|DRA)\.?\s+/i, '')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .toLowerCase();
+    };
 
     for (const record of parsed) {
       // Find or create doctor
       let doctorId = null;
       if (record.doctor) {
-        let { rows: existingDocs } = await db.query(
-          'SELECT id FROM doctors WHERE UPPER(name) = $1',
-          [record.doctor.toUpperCase()]
-        );
-        if (existingDocs.length > 0) {
-          doctorId = existingDocs[0].id;
+        const targetClean = cleanName(record.doctor);
+        let match = allDoctors.find(d => cleanName(d.name) === targetClean);
+        if (match) {
+          doctorId = match.id;
         } else {
           const { rows: newDoc } = await db.query(
             'INSERT INTO doctors (name) VALUES ($1) RETURNING id',
             [record.doctor]
           );
           doctorId = newDoc[0].id;
+          allDoctors.push({ id: doctorId, name: record.doctor });
         }
       }
 

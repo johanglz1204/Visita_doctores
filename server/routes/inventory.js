@@ -44,7 +44,8 @@ const upload = multer({
 // GET /api/inventory - List all stock assignments with doctor and product names
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await db.query(`
+    const doctorId = req.query.doctor_id;
+    let queryText = `
       SELECT 
         i.id,
         i.doctor_id,
@@ -58,8 +59,15 @@ router.get('/', async (req, res) => {
       FROM inventory_stocks i
       JOIN doctors d ON i.doctor_id = d.id
       JOIN products p ON i.product_id = p.id
-      ORDER BY d.name ASC, p.name ASC
-    `);
+    `;
+    const params = [];
+    if (doctorId) {
+      queryText += ` WHERE i.doctor_id = $1`;
+      params.push(doctorId);
+    }
+    queryText += ` ORDER BY d.name ASC, p.name ASC`;
+
+    const { rows } = await db.query(queryText, params);
     res.json(rows);
   } catch (err) {
     console.error('Error fetching inventory:', err);

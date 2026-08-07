@@ -234,14 +234,21 @@ export default function Products({ addToast }) {
           <p className="page-subtitle">Catálogo de medicamentos y muestras médicas</p>
         </div>
         <div className="btn-group">
-          <div className="search-container" style={{ width: '250px' }}>
+          <div 
+            className="search-container" 
+            style={{ width: '250px', cursor: 'text' }}
+            onClick={(e) => {
+              const inputEl = e.currentTarget.querySelector('input');
+              if (inputEl) inputEl.focus();
+            }}
+          >
             <span>🔍</span>
             <input 
               type="text" 
               placeholder="Buscar..." 
-              value={searchTerm}
+              value={searchTerm || ''}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', background: 'none', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+              style={{ border: 'none', background: 'none', width: '100%', flex: 1, color: 'var(--text-primary)', outline: 'none', cursor: 'text' }}
             />
           </div>
           <button className="btn btn-secondary" onClick={() => setShowLogModal(true)}>🔍 Diagnóstico</button>

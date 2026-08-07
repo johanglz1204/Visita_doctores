@@ -36,9 +36,16 @@ client/dist/
 *.sqlite
 *.sqlite3
 
-# Backups locales
+# Backups locales (contienen datos de doctores/ventas)
 backup_auto.sql
 respaldo_completo.sql
+backups/
+*.sql
+
+# Paquete de actualizacion (incluye .env, no debe subirse)
+paquete_actualizacion/
+paquete_actualizacion.zip
+*.zip
 
 # Cache
 scripts/barcode_cache.json

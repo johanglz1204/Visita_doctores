@@ -75,11 +75,39 @@ router.get('/:id/stats', async (req, res) => {
     const knex = db.knex;
     const doctorId = req.params.id;
 
-    const [totalPrescriptionsRow, preferredProducts, recentHistory] = await Promise.all([
-      // Total Life-time prescriptions
-      knex('sales_history').sum('quantity as total').where('doctor_id', doctorId),
-      
-      // Top 3 preferred products
+    // Get the start of the current month for filtering
+    const now = new Date();
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+
+    // Contamos VENTAS ÚNICAS (recetas/tickets), no renglones de producto.
+    //
+    // Identidad de una venta única:
+    //  - Si el renglón viene sincronizado de MySQL (mysql_ref = "sucursal_id-venta_id-codigo_producto"),
+    //    usamos "sucursal_id-venta_id" (el folio de venta REAL del POS) — máxima precisión.
+    //  - Si viene de un TXT viejo sin mysql_ref, hacemos fallback a fecha + sucursal
+    //    (mismo criterio ya usado en dashboardController.js para el ranking de doctores).
+    const saleKeyOf = (row) => {
+      if (row.mysql_ref) {
+        const parts = row.mysql_ref.split('-');
+        if (parts.length >= 2) return `${parts[0]}-${parts[1]}`; // sucursal_id-venta_id
+      }
+      return `${row.sale_date}-${row.sucursal || ''}`;
+    };
+    const countUniqueSales = (rows) => new Set(rows.map(saleKeyOf)).size;
+
+    const [allRows, monthRows, preferredProducts, historyRows] = await Promise.all([
+      // Todos los renglones históricos del doctor (para deduplicar en JS)
+      knex('sales_history as s')
+        .select('s.sale_date', 's.sucursal', 's.mysql_ref')
+        .where('s.doctor_id', doctorId),
+
+      // Renglones de este mes
+      knex('sales_history as s')
+        .select('s.sale_date', 's.sucursal', 's.mysql_ref')
+        .where('s.doctor_id', doctorId)
+        .whereRaw('s.sale_date >= ?', [monthStart]),
+
+      // Top 3 productos preferidos por PIEZAS vendidas (para control de vales/promociones)
       knex('sales_history as s')
         .join('products as p', 's.product_id', 'p.id')
         .select('p.name')
@@ -88,19 +116,28 @@ router.get('/:id/stats', async (req, res) => {
         .groupBy('p.name')
         .orderBy('quantity', 'desc')
         .limit(3),
-        
-      // Recent prescription timeline (last 6 months grouped by month-year)
+
+      // Renglones de los últimos 6 meses (para la línea de tiempo, deduplicado en JS)
       knex('sales_history as s')
+        .select('s.sale_date', 's.sucursal', 's.mysql_ref')
         .select(knex.raw("strftime('%Y-%m', s.sale_date) as month"))
-        .sum('s.quantity as quantity')
         .where('s.doctor_id', doctorId)
         .whereRaw("s.sale_date >= date('now', '-6 months')")
-        .groupByRaw("strftime('%Y-%m', s.sale_date)")
-        .orderBy('month', 'asc')
     ]);
 
+    // Agrupar la línea de tiempo por mes y contar ventas únicas dentro de cada mes
+    const byMonth = new Map();
+    for (const row of historyRows) {
+      if (!byMonth.has(row.month)) byMonth.set(row.month, []);
+      byMonth.get(row.month).push(row);
+    }
+    const recentHistory = [...byMonth.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, rows]) => ({ month, quantity: countUniqueSales(rows) }));
+
     res.json({
-      totalPrescriptions: parseInt(totalPrescriptionsRow[0]?.total || 0),
+      totalPrescriptions: countUniqueSales(allRows),
+      thisMonthPrescriptions: countUniqueSales(monthRows),
       preferredProducts,
       recentHistory
     });

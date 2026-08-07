@@ -6,6 +6,7 @@
 :root {
   --bg-main: #f8fafc;
   --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card-solid: #ffffff;
   --bg-glass: rgba(255, 255, 255, 0.4);
   --text-primary: #1e293b;
   --text-secondary: #475569;
@@ -24,6 +25,7 @@
 [data-theme='dark'] {
   --bg-main: #0f172a;
   --bg-card: rgba(30, 41, 59, 0.7);
+  --bg-card-solid: #1e293b;
   --bg-glass: rgba(15, 23, 42, 0.4);
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
@@ -461,3 +463,53 @@ tr:last-child td {
 .empty-state-icon { font-size: 48px; margin-bottom: 20px; }
 .empty-state-text { font-size: 16px; font-weight: 600; color: var(--text-primary); }
 .empty-state-hint { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard Grids */
+.charts-main-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.charts-main-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.splits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1200px) {
+  .charts-main-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .charts-main-grid, .splits-grid {
+    grid-template-columns: 1fr;
+  }
+}
